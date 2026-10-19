@@ -1,0 +1,172 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{mathtools,amssymb}
+\usepackage{lipsum}
+\usepackage{hyperref}
+\usepackage{layout}
+\usepackage{geometry}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{amsthm}
+\newcommand*{\vertbar}[1][10ex]{\rule[-1ex]{0.5pt}{#1}}
+\newcommand*{\horzbar}{\rule[.5ex]{2.5ex}{0.5pt}}
+\newcommand{\norm}[2]{\left\lVert#1\right\rVert_#2}
+\newcommand{\abs}[1]{\lvert#1\rvert}
+
+\title{6.2202 class notes}
+\author{Erich Trieschman}
+\date{2026 Fall semester}
+
+% compact spacing
+\usepackage{setspace}\setstretch{0.95}
+\usepackage{parskip}\setlength{\parskip}{4pt}
+\setlength{\parindent}{0pt}
+\usepackage{enumitem}
+\setlist[itemize]{topsep=2pt, itemsep=2pt, parsep=0pt, partopsep=0pt}
+\setlist[enumerate]{topsep=2pt, itemsep=2pt, parsep=0pt, partopsep=0pt}
+\usepackage{titlesec}
+\titlespacing*{\section}{0pt}{3.5ex plus 0.3ex minus 0.3ex}{0.5ex}
+\titlespacing*{\subsection}{0pt}{2.5ex plus 0.2ex minus 0.2ex}{0.3ex}
+\titlespacing*{\subsubsection}{0pt}{1.5ex plus 0.2ex minus 0.2ex}{0.2ex}
+
+\newcommand{\userMarginInMm}{15}
+\geometry{
+%  legal,
+ left=\userMarginInMm mm,
+ right=\userMarginInMm mm,
+ top=\userMarginInMm mm,
+ bottom=\userMarginInMm mm,
+ footskip=5mm}
+
+
+ \hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+    pdfpagemode=FullScreen,
+}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+    
+\lstset{frame=tb, language=Python,
+    aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=none,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=3}
+
+\begin{document}
+\maketitle
+\tableofcontents
+
+\section{Circuit review}
+\textbf{Laws.}
+KCL: at every node, $\sum(\text{currents in}) = \sum(\text{currents out})$.
+KVL: around every closed loop, $\sum V = 0$.
+
+\textbf{Phasors.}
+Sinusoid $v(t) = V_{max}\cos(\omega t + \phi)$.
+Positive $\phi$ shifts the curve left, so the waveform occurs earlier.
+RMS value: $\tilde V = V_{rms} = V_{max}/\sqrt2$.
+Power engineering reports $V_{rms}$, not $V_{max}$; state which you use.
+The phasor of $v(t) = \text{Re}\{\tilde V\cos(\omega t + \phi) + j\tilde V\sin(\omega t + \phi)\} = \text{Re}\{\tilde Ve^{\omega t + \phi}\}$. 
+Write as phasor: $V = \tilde V\angle\phi$, a complex number with RMS magnitude and angle $\phi$.
+$j = \sqrt{-1} = 1\angle90^\circ$, and $1/j = -j$.
+Rectangular $\iff$ polar: $a + jb = \sqrt{a^2 + b^2}\,\angle\operatorname{atan2}(b,a)$, and $r\angle\theta = r\cos\theta + jr\sin\theta = re^{j\theta}$.
+Add and subtract in rectangular.
+Multiply and divide in polar: $(r_1\angle\theta_1)(r_2\angle\theta_2) = r_1 r_2\angle(\theta_1 + \theta_2)$, $(r_1\angle\theta_1)/(r_2\angle\theta_2) = (r_1/r_2)\angle(\theta_1 - \theta_2)$.
+Conjugate: $(r\angle\theta)^* = r\angle(-\theta)$.
+
+\textbf{Elements.}
+Sign convention: $I$ is defined entering the $+$ terminal of $V$.
+Impedance $Z = R + jX$ [$\Omega$], with resistance $R$ and reactance $X$.
+Polar: $Z = \abs Z\angle\theta$, $\abs Z = \sqrt{R^2 + X^2}$, $\tan\theta = X/R$.
+Admittance $Y = 1/Z = G + jB$ [S], with conductance $G$ and susceptance $B$; in polar $Y = (1/\abs Z)\angle(-\theta)$.
+Ohm's law: $V = IZ$, or $I = VY$.
+With $V = \tilde V\angle\phi_V$ and $I = \tilde I\angle\phi_I$, $\theta = \phi_V - \phi_I$.
+Inductor $L$: $v = L\,di/dt$, so $X_L = \omega L$.
+Capacitor $C$: $i = C\,dv/dt$, so $X_C = -1/(\omega C)$.
+Inductive (``lag''): $\theta > 0$, $\phi_I < \phi_V$, current occurs after voltage.
+Capacitive (``lead''): $\theta < 0$, $\phi_I > \phi_V$, current occurs before voltage.
+
+\textbf{Solving.}
+Series: $Z_{eq} = Z_1 + Z_2 + \dots$; same current through each.
+Parallel: $Y_{eq} = Y_1 + Y_2 + \dots$, or $Z_{eq} = Z_1 Z_2/(Z_1 + Z_2)$ for two; same voltage across each.
+Voltage divider (series): $V_2 = V\cdot Z_2/(Z_1 + Z_2)$.
+Current divider (parallel): $I_2 = I\cdot Z_1/(Z_1 + Z_2)$.
+Thevenin: a source $V_{Th}$ in series with $Z_{Th}$.
+$V_{Th}$ is the open-circuit voltage at the terminals.
+$Z_{Th}$ is the impedance seen at the terminals with independent sources zeroed (voltage source $\to$ short, current source $\to$ open), or $Z_{Th} = V_{oc}/I_{sc}$.
+Norton: a current source $I_N = V_{Th}/Z_{Th}$ in parallel with $Z_N = Z_{Th}$.
+
+\textbf{Transients.}
+First-order RC or RL circuit with a DC source: $x(t\geq 0) = x(\infty) + [x(0^+) - x(\infty)]\,e^{-t/\tau}$ for any voltage or current $x$.
+Time constant $\tau = R_{Th}C$ (RC) or $L/R_{Th}$ (RL), with $R_{Th}$ the Thevenin resistance seen by $v_C$ or $i_L$.
+$v_C$ and $i_L$ cannot jump: $x(0^+) = x(0^-)$.
+$x(\infty)$: capacitor open, inductor short.
+Any other variable at $0^+$: redraw with $C$ as a voltage source $v_C(0^+)$ (or $L$ as a current source $i_L(0^+)$) and solve.
+Origin: particular solution (steady state) plus homogeneous $Ae^{-t/\tau}$, with $A$ set by $x(0^+)$.
+Power absorbed by any element: $p(t) = v(t)\,i(t)$.
+Stored energy is $w(t) = \int_0^t p(t)\,dt = \int v(t)\,i(t)\,dt$.
+Capacitor: $i(t)\,dt = C\,dv$, so $w(t) = \int v(t)\,C\,dv = \tfrac12 C v(t)^2$.
+Inductor: $v(t)\,dt = L\,di$, so $w(t) = \int L\,i(t)\,di = \tfrac12 L i(t)^2$.
+
+
+
+\section{Power}
+\textbf{Definitions.}
+Complex power $S = VI^*$ [VA]; $S$ is power absorbed by the element.
+$S = P + jQ$, with real power $P$ [W] and reactive power $Q$ [VAr].
+Polar: $S = \tilde V\tilde I\angle\theta$, where $\theta = \phi_V - \phi_I$.
+So $P = \tilde V\tilde I\cos\theta$, $Q = \tilde V\tilde I\sin\theta$, $\abs S = \tilde V\tilde I$, and $Q = P\tan\theta$.
+Power factor $\mathrm{pf} = \cos\theta = P/\abs S$.
+$\cos\theta$ loses the sign of $\theta$, so a pf is stated lagging or leading.
+Lagging: $\theta > 0$, inductive, $Q > 0$, absorbs $Q$.
+Leading: $\theta < 0$, capacitive, $Q < 0$, supplies $Q$.
+Single element: $S = \tilde I^2 Z = \tilde V^2Y^*$.
+
+\textbf{Derivation of $P$.}
+$p(t) = v(t)\,i(t) = V_{max}I_{max}\cos(\omega t + \phi_V)\cos(\omega t + \phi_I)$.
+By $\cos\alpha\cos\beta = \tfrac12[\cos(\alpha - \beta) + \cos(\alpha + \beta)]$, $p(t) = \tfrac12 V_{max}I_{max}[\cos(\phi_V - \phi_I) + \cos(2\omega t + \phi_V + \phi_I)]$.
+The first term is constant; the second averages to zero.
+So $P = \tfrac12 V_{max}I_{max}\cos\theta = \tilde V\tilde I\cos\theta$.
+
+\textbf{Load to element.}
+A problem states a load as $\abs S$ (or $P$) and a pf, lagging or leading.
+$\theta = \pm\arccos(\mathrm{pf})$, positive if lagging.
+As a current: $I = (S/V)^*$, so $\tilde I = \abs S/\tilde V$ and $\phi_I = \phi_V - \theta$.
+As an impedance: $Z = \tilde V^2/S^*$.
+
+\textbf{Conservation.}
+$\sum S = 0$ at a node and $P$ and $Q$ balance separately.
+Power-factor correction: given $P$, pf $\theta_1$, bus $V = \tilde V\angle0$, target $\theta_2$; find $C$ in parallel with the load.
+$S_L = P + jP\tan\theta_1$; $S_C = \abs V^2 Y^* = -j\omega C\tilde V^2$; $S_{src} = S_L + S_C = P + j(P\tan\theta_1 - \omega C\tilde V^2)$.
+Target: $Q_{src} = P\tan\theta_2$, since $Q = P\tan\theta$ and $P$ is unchanged.
+
+
+
+
+\section{Three-phase and per unit}
+\section{Power flow and admittance matrices}
+\section{Power line models}
+\section{Magnetism and magnetic circuits}
+\section{Transformers}
+\section{Machines}
+
+
+
+
+
+
+\end{document}
