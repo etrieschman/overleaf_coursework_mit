@@ -17,24 +17,6 @@ _template/hw.tex  copy this to start a new writeup
 6_S974/
 ```
 
-## Starting a new class
-
-```bash
-mkdir 6_7900 && cp _template/hw.tex 6_7900/hw1.tex
-```
-
-Then `git add -A && git commit` and `git sync`. No new Overleaf project, no new
-GitHub repo, no new submodule.
-
-## Compiling locally
-
-Always from **this directory**, so `\input{preamble}` resolves the way it does
-on Overleaf:
-
-```bash
-latexmk -pdf 15_081/hw7.tex
-```
-
 ## Notes
 
 - In Overleaf, right-click the `.tex` you're working on → **Set as Main
