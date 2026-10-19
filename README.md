@@ -15,33 +15,10 @@ _template/hw.tex  copy this to start a new writeup
 6_S974/
 ```
 
-Every `.tex` is self-contained — it carries its own preamble, so you can edit
-one file's packages and macros without touching any other class.
-
-## Starting a new class
-
-```bash
-mkdir 6_7900 && cp _template/hw.tex 6_7900/hw1.tex
-git add -A && git commit -m "start 6_7900" && git sync
-```
-
-No new Overleaf project, no new GitHub repo, no new submodule.
-
-## Compiling locally
-
-```bash
-latexmk -pdf 15_081/hw7.tex
-```
-
-Files using `minted` (e.g. `15_081/hw2.tex`) need `-shell-escape`; Overleaf
-enables it automatically:
-
-```bash
-latexmk -pdf -shell-escape 15_081/hw2.tex
-```
-
 ## Notes
 
+- Every `.tex` is self-contained — it carries its own preamble, so editing one
+  file's packages and macros touches no other class.
 - In Overleaf, right-click the `.tex` you're working on → **Set as Main
   Document** when switching between classes.
 - Compiled PDFs are tracked on purpose — they're the submitted artifacts.
