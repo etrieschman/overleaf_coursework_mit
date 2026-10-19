@@ -1,0 +1,46 @@
+% ---------------------------------------------------------------------------
+% Shared preamble for MIT coursework writeups.
+%
+% Usage, from any class folder:
+%     \documentclass[11pt]{exam}
+%     \input{preamble}
+%
+% Paths resolve from the repo root: Overleaf compiles there, and so does
+% latexmk when you run it from the root (see latexmkrc / README).
+% ---------------------------------------------------------------------------
+
+% --- math ---
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathtools}
+\usepackage{optidef}                  % min/max problem environments
+
+% --- layout ---
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage[margin=0.75in]{geometry}  % override per-file with \geometry{...}
+\usepackage{enumitem}
+\usepackage{setspace}
+\usepackage{titlesec}
+\usepackage{hyperref}
+
+% --- code ---
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{minted}                   % needs -shell-escape; latexmkrc sets it
+
+\lstset{
+  language=Python,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue},
+  stringstyle=\color{red},
+  commentstyle=\color{gray},
+  showstringspaces=false,
+  frame=single,
+  breaklines=true,
+}
+
+% --- macros ---
+\newcommand{\norm}[2]{\left\lVert#1\right\rVert_#2}
+\newcommand{\abs}[1]{\lvert#1\rvert}
+\newcommand{\todo}[1]{\textit{\textcolor{orange}{[#1]}}}

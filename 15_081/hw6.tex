@@ -1,0 +1,138 @@
+\documentclass[11pt]{exam}
+\usepackage{graphicx} % Required for inserting images
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{optidef}
+\usepackage{listings}
+\usepackage{xcolor} % for custom colors
+\usepackage{minted} % for code
+
+% === Make things tighter ===
+\usepackage[margin=0.75in]{geometry} % <- widen/narrow by changing 1.25in
+\usepackage{setspace}
+% \setstretch{0.95} % line spacing
+\usepackage{enumitem}
+% \setlist{nosep}  % removes vertical space around lists
+% \setlist[itemize]{topsep=3pt, itemsep=3pt, parsep=1pt, partopsep=0pt}
+% \setlist[enumerate]{topsep=3pt, itemsep=3pt, parsep=1pt, partopsep=0pt}
+\usepackage{titlesec}
+% \titlespacing*{\section}{0pt}{4.0ex plus 0.5ex minus 0.5ex}{0.8ex}
+% \titlespacing*{\subsection}{0pt}{3.0ex plus 0.3ex minus 0.3ex}{0.6ex}
+% \titlespacing*{\subsubsection}{0pt}{2.0ex plus 0.2ex minus 0.2ex}{0.4ex}
+% \titlespacing*{\paragraph}{0pt}{1.5ex plus 0.2ex minus 0.2ex}{0.4ex}
+
+
+\lstset{
+  language=Python,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue},
+  stringstyle=\color{red},
+  commentstyle=\color{gray},
+  showstringspaces=false,
+  frame=single,
+  breaklines=true
+}
+\title{15.081 Mathematical programming, HW6}
+\author{Erich Trieschman}
+\date{2025.12.04}
+\begin{document}
+\maketitle
+
+\begin{questions}
+    \question \textbf{(Given)} The following polyhedron with $R$ a positive real number and $e$ a vector of all 1s. 
+    \begin{align*}
+        P = \{x\in\mathbb R^n \mid Ax\leq b,\; 0 \leq x \leq Re\}
+    \end{align*}
+    Suppose $P$ has a feasible solution with all constraints inactive. \textbf{(Show)} $P$ is full-dimensional and give a valid initial ellipsoid for the ellipsoid method.
+    \begin{parts}
+        \part \textbf{($P$ full dimensional)} Consider such point $x_0 \in P$ such that all constraints are inactive. And for bookkeeping, rewrite $P$ as
+        \begin{align*}
+            P = \left\{x\in\mathbb R^n \mid Gx \leq f \right\},\; G=\begin{bmatrix}
+                A \\ -I \\ I
+            \end{bmatrix},\; f = \begin{bmatrix}b \\ 0 \\Re\end{bmatrix}
+        \end{align*}
+        Since $x_0$ is in the interior of $P$, define for each inequality, $i$, its signed distance from $x_0$ to that hyperplane
+        \begin{align*}
+            d_i = \frac{f_i - g_i^\top x_0}{||g_i||_2} > 0
+        \end{align*}
+        The smallest such distance, $\epsilon$, to any hyperplane $i$ is $\epsilon=\min_i d_i$. Note $\epsilon > 0$ since $d_i > 0\;\forall\;i \in [m]$ (since $x_0$ is in the interior).
+    
+        Now consider Euclidean ball $B(x_0, \epsilon) = \{y \mid (y - x_0)^\top(y-x_0) \leq \epsilon^2\}$. Note that $B(x_0, \epsilon)$ has full dimension (since $\epsilon > 0$). Lastly, $B(x_0, \epsilon)\subseteq P$ by construction of a ball contained in $P$. These two conditions imply that $P$ has full dimension.
+
+        \part \textbf{($P$ full dimensional; alternate proof)} In \textbf{Exercise 8.5} we proved that for bounded polyhedron $P$ with all rows of $G$ nozero, if $\exists\; x\in P$ such that $Gx < f \Longrightarrow P$ has full dimension. We have that $P \subseteq [0,Re]^n$, so $P$ is bounded. We are also given that $P$ has a feasible solution with all constraints inactive. We can ignore any all-zero rows of $G$ since those constraints are redundant. Therefore, it follows that that $P$ has full dimension.
+
+        \part \textbf{(Valid initial ellipsoid)} Again we construct a Euclidean ball, but this time one containing $P$. Observe that the structure of $P$ helps us with this: We are given that $x\in P \subseteq [0, R]^n$. Suffice to construct an ellipsoid that contains this box, $[0, R]^n$. Choose the center of this box, $c = \tfrac{R}{2}e$. The max distance from $c$ to a point on this box, $\delta$, is to any of its corners. Choose corner $\mathbf{0}\in\mathbb R^n$, and the distance is
+        \begin{align*}
+            \delta = \sqrt{(c - 0)^\top(c - 0)} = \sqrt{c^\top c} = \sqrt{n\times \tfrac{R^2}{4}}
+        \end{align*}
+        Then the following ball, $B(c, \delta) \supseteq P$, is a valid initial ellipsoid: 
+        \begin{align*}
+            B(c, \delta) = \left\{y\in\mathbb R^n \Big| (y - c)^\top (y-c) \leq \tfrac{nR^2}{4}\right\}
+        \end{align*}
+    \end{parts} 
+
+
+
+    
+    \question \textbf{Exercise 8.8 - min-cut revisited: (Given)} Undirected graph, $G=(\mathcal N, \mathcal E)$, two special nodes, $s,t\in \mathcal N$ and weights $c_e,\; e\in\mathcal E$. Suppose we want a minimum weight set of edges that intersects every path from $s\rightarrow t$. Let $\mathcal K$ be the set of all such paths from $s\rightarrow t$. This problem can be formulated as
+    \begin{align*}
+        \min_x\quad& \sum_{e\in\mathcal E}c_ex_e\\
+        \text{s.t.}\quad& \sum_{e\in K}x_e \geq 1,\quad \forall\;K\in\mathcal K\\
+        & 0\leq x_e\leq 1,\quad \forall\;e\in\mathcal E
+    \end{align*}
+    It turns out the extreme points of the feasible set are vectors with $0-1$ coordinates and that an optimal BFS corresponds to a minimum cut. \textbf{(Prove)} The associated separation problem can be solved in polynomial time. (\textit{Hint: You may consider the shortest path problem})
+    \newline \textbf{(Proof)} To do so, we must provide a polynomial-time algorithm for any vector, $\bar x$, to
+    \begin{enumerate}
+        \item check that it satisfies all constraints of the problem
+        \item and if not, provide a violated inequality 
+    \end{enumerate}
+    Note, the second set of constraints, $0\leq \bar x_e\leq 1,\ \forall\ e\in\mathcal E$, contain $2|\mathcal E|$ inequalities and are easily checked in polynomial time. The first set of constraints, however, are combinatorial in nature and require a more efficient separation check:
+    
+    Consider using the shortest path problem as a separation check oracle: Begin by defining the directed version of the undirected graph, $G^{(d)} = (\mathcal N, \mathcal A=\{\mathcal E_\rightarrow, \mathcal E_\leftarrow\})$ and assign lengths $l_{ij} = \bar x_{i,j}$ to each arc (i.e., the arc length in either direction is the corresponding $\bar x$ value for that edge).
+    
+    Since all lengths are nonnegative, there exist several polynomial-time algorithms for solving this shortest path problem (e.g., Dikjstras algorithm).
+
+    This problem provides the length of the shortest path, $K^*$ from $s\rightarrow t$ (shortest path length is $\sum_{e\in K^*} \bar x_e$) and for the original problem
+    \begin{enumerate}
+        \item If $\sum_{e\in K^*} \bar x_e \geq 1$, then we have just confirmed that the minimum-length $s\rightarrow t$ path is feasible and therefore provided a certificate that all path constraints are feasible, so $\bar x$ satisfies all constraints.
+        \item Else $\sum_{e\in K^*} \bar x_e < 1$, and we have found path $K^* \in \mathcal K$ whose corresponding constraint in the original problem is violated.
+    \end{enumerate}
+
+
+
+    
+
+    \question \textbf{Exercise 9.3: (Given)} The LP, $\min_{\{x\mid Ax=b, x\geq0\}}c^\top x$, where $A\in \mathbb R^{m\times n}$ has linearly independent rows, every BFS to the problem is nondegenerate (assumption 9.2.a), and at every BFS to the problem the reduced cost of every nonbasic variable is nonzero (assumption 9.2.b). Let $x$ be a feasible solution and suppose we have $p$ such that $x_i(c_i - A_ip) = 0,\ \forall i$. \textbf{(Show)} $x$ is a BFS.
+    \newline \textbf{(Proof)} By the representation theorem, any feasible $x$ can be written as a convex combination of extreme points (BFS), $x^{(k)}$, so from the given we have
+    \begin{align*}
+        \left(c^\top - p^\top A\right) \odot x = \mathbf{0}\quad&\iff\quad (c^\top - p^\top A) \odot\sum_{k=1}^K \lambda_k x^{(k)}  = \mathbf{0}
+        ,\quad\text{for some } \lambda\in\mathbb R_{\succeq0}^K, \lambda^\top e = 1
+        \tag{$\odot$ is elementwise product}
+    \end{align*}
+    Consider one such extreme point, $x^{(k)}$, where $\lambda_k > 0$, and its corresponding basis, $B^{(k)}$. We know at least one such point exists because $\lambda \succeq 0,\ \lambda^\top e = 1$.
+    By assumption 9.2.a (every BFS nondegenerate), we know $\lambda_k x^{(k)}_{B^{(k)}} \succ 0$. Therefore it must be that
+    \begin{align*}
+        \left(c^\top_{B^{(k)}} - p^\top A_{B^{(k)}}\right) \odot x_{B^{(k)}} = \mathbf{0} \quad\Longrightarrow\quad p^\top A_{B^{(k)}} = c_{B^{(k)}}^\top \quad
+    \end{align*}
+    $x^{(k)}$ a BFS means $A_{B^{(k)}}$ has linearly independent columns and is invertible, meaning $p^\top$ is a unique solution to
+    \begin{align*}
+        p^\top = c_{B^{(k)}}^\top A_{B^{(k)}}^{-1}
+    \end{align*}
+    From this we see that $c^\top - p^\top A$ is the reduced cost vector for BFS $x^{(k)}$
+    \begin{align*}
+        c^\top - p^\top A = c^\top - c_{B^{(k)}}^\top A_{B^{(k)}}^{-1} A =: \bar c
+    \end{align*}
+    And by assumption 9.2.b (reduced cost at nonbasic variables are nonzero) we have that 
+    \begin{align*}
+        \bar c_{N^{(k)}} = c^\top_{N^{(k)}} - p^\top A_{N^{(k)}} \neq \mathbf{0} \quad \Longrightarrow\quad x_{N^{(k)}} = \mathbf{0}
+    \end{align*}
+    Together, now we have that
+    \begin{align*}
+        Ax=b,\ x \succeq \mathbf{0} && 
+        x_{B^{(k)}} \succeq \lambda_k x^{(k)}_{B^{(k)}} \succ \mathbf{0} &&
+        x_{N^{(k)}} = \mathbf{0}
+    \end{align*}
+    Since $x_{N^{(k)}} = \mathbf{0}$, feasibility implies that $Ax = b \iff A_{B^{(k)}}x_{B^{(k)}} = b \iff x_{B^{(k)}} = A^{-1}_{B^{(k)}}b$. Therefore, $x = x^{(k)}$ and $x$ is a BFS.
+    
+\end{questions}
+\end{document}

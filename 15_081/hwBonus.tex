@@ -1,0 +1,125 @@
+\documentclass[11pt]{exam}
+\usepackage{graphicx} % Required for inserting images
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{optidef}
+\usepackage{listings}
+\usepackage{xcolor} % for custom colors
+\usepackage{minted} % for code
+
+% === Make things tighter ===
+\usepackage[margin=0.75in]{geometry} % <- widen/narrow by changing 1.25in
+\usepackage{setspace}
+% \setstretch{0.95} % line spacing
+\usepackage{enumitem}
+% \setlist{nosep}  % removes vertical space around lists
+% \setlist[itemize]{topsep=3pt, itemsep=3pt, parsep=1pt, partopsep=0pt}
+% \setlist[enumerate]{topsep=3pt, itemsep=3pt, parsep=1pt, partopsep=0pt}
+\usepackage{titlesec}
+% \titlespacing*{\section}{0pt}{4.0ex plus 0.5ex minus 0.5ex}{0.8ex}
+% \titlespacing*{\subsection}{0pt}{3.0ex plus 0.3ex minus 0.3ex}{0.6ex}
+% \titlespacing*{\subsubsection}{0pt}{2.0ex plus 0.2ex minus 0.2ex}{0.4ex}
+% \titlespacing*{\paragraph}{0pt}{1.5ex plus 0.2ex minus 0.2ex}{0.4ex}
+
+
+\lstset{
+  language=Python,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue},
+  stringstyle=\color{red},
+  commentstyle=\color{gray},
+  showstringspaces=false,
+  frame=single,
+  breaklines=true
+}
+\title{15.081 Mathematical programming, HW6}
+\author{Erich Trieschman}
+\date{2025.12.04}
+\begin{document}
+\maketitle
+
+\begin{questions}
+    \question \textbf{(Theorem of alternative)} Given matrices $A,B,C,D$ and vectors $e,f$, consider the linear system
+    \begin{align*}
+        Ax + By \geq e && Cx + Dy = f && x\geq 0 && y \ \text{free}
+    \end{align*}
+    \textbf{(Want)} State and prove a Theorem of Alternative for such a system.
+
+    \paragraph{Theorem of alternative:} Exactly one holds
+    \begin{align*}
+        (a)\ \exists\ x\geq 0,\ y:\quad& Ax + By \geq e,\ Cx + Dy = f\\
+        (b)\ \exists\ p\geq0,\ q:\quad& p^\top B + q^\top D = 0,\ p^\top A + q^\top C \leq 0,\ p^\top e + q^\top f > 0
+    \end{align*}
+    \paragraph{Proof:} \textbf{($(a) \Rightarrow \neg (b)$)} Contradiction (assume $(a)$ and $(b)$)
+    \begin{align*}
+        p^\top (Ax + By) &\geq p^\top e \tag{$\forall\ p \geq 0$, since $Ax + By \geq e$ from $(a)$}\\
+        p^\top (Ax + By) + q^\top (Cx + Dy) &\geq p^\top e + q^\top f \tag{$\forall\ q$, since $Cx + Dy=f$ from $(a)$}\\
+        (p^\top B + q^\top D)y + (p^\top A + q^\top C)x &> 0 \tag{since $p^\top e + q^\top f>0$ from $(b)$}\\
+        (p^\top A + q^\top C)x &> 0 \tag{since $p^\top B + q^\top D=0$ from $(b)$}\\
+        p^\top A + q^\top C &\not\leq 0 \tag{since $x\geq 0$ from $(a)$}
+    \end{align*}
+    Arriving at our contradiction, $p^\top A + q^\top C \not\leq 0$, since we assume $p^\top A + q^\top C \leq 0$. Therefore $(a) \Rightarrow \neg (b)$.
+
+    \paragraph{Proof:} \textbf{($\neg(a) \Rightarrow (b)$)} Consider the primal-dual pair
+    \begin{align*}
+        (P):\ \min\ x^\top 0 + y^\top 0 && & \text{s.t.}\ Ax + By \geq e,\ Cx + Dy = f,\ x\geq 0,\ y\ \text{free}\\
+        (D):\ \max\ p^\top e + q^\top f && & \text{s.t.}\ p\geq 0,\ q\ \text{free},\ p^\top A + q^\top C \leq 0,\ p^\top B + q^\top D = 0
+    \end{align*}
+    $(P)$ infeasible $\Longrightarrow (D)$ unbounded, since $(p,q)=(0,0)$ is a feasible solution to $(D)$.
+    
+    $(D)$ unbounded $\Longrightarrow \exists$ feasible $(p,q)$ such that $p^\top e + q^\top f \geq 1 \Longrightarrow p^\top e + q^\top f > 0$. 
+    
+    Feasible $(p,q) \Longrightarrow p\geq 0,\ p^\top A + q^\top C \leq 0,\ p^\top B + q^\top D = 0$. Therefore $\neg (a) \Rightarrow (b)$
+
+
+
+    \question \textbf{(Extreme point of concave optimization)} Consider the problem of the form $\min_{\{x\in P \}} f(x)$ where $f: \mathbb R^n \to \mathbb R$ is a concave function and $P$ is a polyhedron that does not contain a line. \textbf{(Prove)} if the problem has optimal solution(s), then $\exists$ an extreme point of $P$ that is an optimal solution.
+    
+    \textbf{(Proof)} Assume the problem has optimal solution(s). Pick some optimal $x^{(0)}$. If $x^{(0)}$ is an extreme point, we are done. Now suppose $x^{(0)}$ is not an extreme point. Then
+    \begin{align*}
+        \exists \lambda \in (0,1),\ y,z\in P,\ y\neq z:\quad x^{(0)} = \lambda y + (1-\lambda)z
+    \end{align*}
+    Concave $f(x)$ gives us
+    \begin{align*}
+        f(x^{(0)}) = f(\lambda y + (1-\lambda)z) \geq \lambda f(y) + (1-\lambda)f(z)
+    \end{align*}
+    But $f(x^{(0)})$ optimal means
+    \begin{align*}
+        f(x^{(0)}) \leq f(y),\ f(x^{(0)})\leq f(z) \Longrightarrow f(x^{(0)}) \leq \lambda f(y) + (1-\lambda)f(z)
+    \end{align*}
+    So for any optimal $x^{(0)}$ that is not an extreme point, we must have
+    \begin{align*}
+        f(x^{(0)}) = \lambda f(y) + (1-\lambda)f(z) = f(y) = f(z)
+    \end{align*}
+    So $y,z$ are also optimal. If either $y$ or $z$ is an extreme point of $P$, we are done.
+    Otherwise, both $y$ and $z$ are optimal and non-extreme, so we may apply the above argument to each of them: every optimal point that is not an extreme point can be written as a convex combination of two distinct optimal points in $P$.
+    
+    With this process, we obtain a sequence of optimal points, $x^{(0)},\; x^{(1)},\; x^{(2)},\;\dots$
+
+    Since $P$ does not contain a line, this process cannot continue indefinitely. The series is forced to the boundary of $P$ and the process must eventually reach point $x^{(E)}$ where no convex combination is possible. But by definition, $x^{(E)}$ is an extreme point and we are done. 
+
+
+
+
+
+    \question \textbf{(Linear program reformulation)} Consider the following nonconvex program
+    \begin{align*}
+        \min_x\; \sum_{j=1}^k \frac{s_j^\top x + r_j}{p^\top x + q} && \text{s.t.}\; Ax \geq b
+    \end{align*}
+    Where $s_j,p \in \mathbb R^n,\ A\in \mathbb R^{m\times n},\ b\in\mathbb R^m,\ r_j,q\in \mathbb R$. Suppose $p^\top x + q > 0\ \forall\ x:Ax\geq b$. \textbf{(Provide)} A linear program that is equivalent to the nonconvex problem. 
+    
+    \emph{Hint: consider the change-of-variables: $y = \tfrac{1}{p^\top x + q}$ and $z = yx$}. Following the hint, we reformulate the nonconvex problem using change-of-variables in $y$ and then $z$:
+    \begin{align*}
+        \min_{x,y}\;& y \sum_{j=1}^k s_j^\top x + r_j && \text{s.t.}\; Ax \geq b,\ y=\frac{1}{p^\top x + q} 
+            \tag{$y := \tfrac{1}{p^\top x + q}$}\\
+        \min_{x,y}\;& \sum_{j=1}^k s_j^\top (yx) + yr_j && \text{s.t.}\; A(yx) \geq yb,\ p^\top (yx) + yq = 1,\ y\geq 0
+            \tag{rearranging, multiplying by y, and establishing $y > 0$ from given}\\
+        \min_{y,z}\;& \sum_{j=1}^k s_j^\top z + yr_j && \text{s.t.}\; Az \geq yb,\ p^\top z + yq = 1,\ y\geq 0
+            \tag{$z := yx$}
+    \end{align*}
+    The final reformulation is a linear program: it has a sum of linear terms in the objective ($\sum_{j=1}^k s_j^\top z + yr_j$), a set of $m+1$ linear inequality constraints ($Az \geq yb,\ y\geq 0$), and a single linear equality constraint ($p^\top z + yq = 1$).
+
+
+    
+\end{questions}
+\end{document}

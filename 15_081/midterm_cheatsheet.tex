@@ -1,0 +1,399 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{mathtools,amssymb}
+\usepackage{lipsum}
+\usepackage{hyperref}
+\usepackage{layout}
+\usepackage{geometry}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{amsthm}
+\newcommand*{\vertbar}[1][10ex]{\rule[-1ex]{0.5pt}{#1}}
+\newcommand*{\horzbar}{\rule[.5ex]{2.5ex}{0.5pt}}
+\newcommand{\norm}[2]{\left\lVert#1\right\rVert_#2}
+\newcommand{\abs}[1]{\lvert#1\rvert}
+
+\newcommand{\userMarginInMm}{7}
+% Usage: \setpaperscale{<scalar>} (e.g., \setpaperscale{1})
+\usepackage{fp}
+\newcommand{\setpaperscale}[1]{%
+    \FPeval\calcpaperwidth{clip(5.5 * #1)}%
+    \FPeval\calcpaperheight{clip(8.5 * #1)}%
+    \geometry{%
+        paperwidth=\calcpaperwidth in,%
+        paperheight=\calcpaperheight in,%
+        left=\userMarginInMm mm,%
+        right=\userMarginInMm mm,%
+        top=\userMarginInMm mm,%
+        bottom=\userMarginInMm mm,%
+        footskip=5mm%
+    }%
+}
+\setpaperscale{1.55}
+
+% no page numbers
+\pagestyle{empty}
+
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+    pdfpagemode=FullScreen,
+}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+    
+\lstset{frame=tb, language=Python,
+    aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=none,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=3}
+
+\begin{document}
+
+\section{Linear algebra and set review}
+\paragraph{Proof formats} \textbf{(Set inclusion)} Prove $P = Q \Longrightarrow$ Prove $(P\subseteq Q)$ and $(Q\subseteq P)$. \textbf{(Contradiction)} Prove $A \Rightarrow B \Longrightarrow$ Assume $A$ and $\neg B$ and find contradiction. (\textbf{Contrapositive}) Prove $A \Rightarrow B \Longrightarrow$ Prove $\neg B\Rightarrow \neg A$. \textbf{(Induction)} Prove $A(n) \Longrightarrow$ \emph{Base:} prove $A(0)$, \emph{Assumption:} assume $A(n)$; \emph{Induction:} derive $A(n+1)$.
+
+\paragraph{Matrix formats} $A = \begin{bmatrix}A_1 & A_2& \dots & A_n\end{bmatrix} = 
+    \begin{bmatrix} a_1' & \dots & a_m'\end{bmatrix}^T,\quad Ax = \sum_i A_ix_i = 
+    \begin{bmatrix} a_1'x & \dots & a_m'x \end{bmatrix}^T$
+
+\paragraph{$A \in \mathbb R^{n\times n}$ invertible} $\iff \text{rank}(A) = n \iff$ the columns of $A$ are linearly indepenent $\iff$ $\forall\;b,\; Ax=b$ has unique solution.
+
+
+\paragraph{Polyhedron} A set that can be described in the form $P=\{x \in \mathbb R^n \mid Ax \geq b\}$. To \textbf{test boundedness} use contradiction: Suppose $\exists d\neq 0$ such that $x + \lambda d \in P\; \forall \lambda \geq 0$, usually arriving at contradiction that $d=0$. 
+
+\paragraph{Distance} The shortest path from point $x_0$ to plane $a^Tx = b$ is orthogonal to the plane. Write as $x = x_0 - t*a \Longrightarrow b = a^Tx = a^T(x_0 - t*a) = a^Tx_0 - t\norm{a}{2}^2 \Longrightarrow t = (b - a^Tx_0)/\norm{a}{2}^2$. The signed displacement is $(x_0 - x) = t*\norm{a}{2} = (b - a^Tx_0)/\norm{a}{2}$
+
+
+\paragraph{Projection} $\Pi_k(S) = \{\pi_k(x) \mid x \in S\}$ where $\pi_k(x) = \pi_k(x_1, \dots, x_n) = (x_1, \dots, x_k)$. $S$ nonempty $\iff \Pi_k(S)$ nonempty. \textbf{Corrolary} For $P\subset \mathbb R^{n+k}$ a polyhedron, then $\{x \in \mathbb R^n \mid \exists y\in \mathbb R^k \text{ with } (x,y)\in P\}$ is a polyhedron. 
+
+\paragraph{Fourier-Motzkin elimination} Tradeoff dimension decrease for constraints increase. \textbf{Elimination algorithm:} Lift optimization problem: $\max_{\{x \mid Ax\geq b\}}c^Tx \Rightarrow P' = \{(x, x_0) \mid Ax \geq b, c^Tx = x_0\}$. Use elimination to arrive at $Q = \{ x_0\mid \alpha_i x_0 \leq \beta_i\}$; the optimization becomes $\min_{\{x_0 \mid x \in Q\}}$.
+{\tiny
+\begin{align*}
+    P &= \{x\in \mathbb R^n \mid a_i'x \geq b_i, i\in [m]\} = \left\{x\in \mathbb R^n \mid a_{in}x_n \geq -\sum_j a_{ij}x_j + b_i, i\in [m]\right\}, &&
+    &Q &= \left\{x\in \mathbb R^{n-1} \mid \begin{cases}
+        d_j + f_j'\overline x \geq d_i + f_i'\overline x & a_{jn}<0, a_{jn}>0\\
+        0 \geq d_k + f_k'\overline x & a_{kn} = 0
+    \end{cases}\right\} = \Pi_{n-1}(P)\\
+\end{align*}
+}
+
+\paragraph{Convexity} A \textbf{Convex function} $ f(\lambda x + (1 - \lambda)y)\leq \lambda f(x) + (1-\lambda)f(y), \; \forall f:\mathbb R^T \mapsto \mathbb R,\; \forall x,y \in \mathbb R^n,\; \forall \lambda \in [0, 1]$. A \textbf{Convex set} $S \subset \mathbb R^n$ such that $\lambda x + (1 - \lambda)y \in S, \forall x,y \in S, \lambda \in [0,1]$. A \textbf{convex combination} of a finite number of elements of convex set, $S$ also belongs to that set. \textbf{(Proof with induction)} Base case: given for 2 elements by definition. Assume step $k$, then
+{\footnotesize
+\begin{align*}
+    \sum_{i=1}^{k+1}\lambda_i x^i = \lambda_{k+1}x^{k+1} + (1 - \lambda_{k+1})\sum_{i=1}^k \frac{\lambda_i}{1 - \lambda_{k+1}}x^i && \text{ with }\lambda_i \geq 0, \sum_i\lambda_i = 1,\; \left(\sum_{i=1}^k \frac{\lambda_i}{1 - \lambda_{k+1}}x^i\right) \in S
+\end{align*}
+}
+
+% \paragraph{Caratheodory theorem} Let $C = \{x\in \mathbb R^m \mid x = A\lambda, \lambda \geq 0\}, A\in \mathbb R^{m\times n}$. Then $\forall x\in C,\; \exists \lambda^*\geq0$ with $|\text{supp}(\lambda^*)|\leq m$. \textbf{(Proof sketch)} Suppose $|\text{supp}(\lambda^*)|> m \Longrightarrow \exists d\in \mathcal N(A)$ such that $\text{supp}(d)\subseteq \text{supp}(\lambda)$ since rows of $A_{\text{supp}(\lambda)}$ linearly dependent. Can move along $d$ while $A(\lambda + \theta d) = x$. Do this until one value of $\lambda$ is driven to 0.
+
+\paragraph{Affine subspace} $y \in S = \{x \mid Ax=b\} \iff (x - x^0) \in S_0 = \{y \mid Ay = 0\},\; \forall x\in S$ and for fixed $x^0\in S$. 
+\textbf{Subspace dimension} Let $S = \{x \mid A x \geq b\}$ and fix any $x^0$ with $A x^0 \geq b$. Then $S = \{x^0 + y \mid y \in S_0\}, \quad S_0 = \{y \mid A y \geq 0\}$.
+The affine hull of $S$ is $\text{aff}(S) = \{x_0 + \text{span}(x - x_0 : x \in S)\}$. Its dimension is $\dim(S) = \dim(\text{aff}(S)) = n - \operatorname{rank}(A_{I_=})$, where $I_= = \{i\mid a_i^Tx = b, \forall x\in S\}$.
+
+
+\section{Linear programming}
+\paragraph{Extreme points$\iff$ vertices$\iff$ basic feasible solutions:}
+\textbf{Extreme point} $x\in P$ such that $\nexists y,z\in P, \; \lambda \in [0,1]$ such that $x = \lambda y + (1 - \lambda)z$ and $x \neq y,z$.
+\textbf{Vertex} $x\in P$ such that $\exists\,c$ where $c'x < c'y, \; \forall\, y\in P, y\neq x$
+\textbf{Basic feasible solution} A \textbf{basic solution} satisfies $x \in \mathbb R^n$ such that i) all equality constraints of $P$ are active, ii) of all active constraints of $P$, $n$ are linearly independent. A \textbf{basic feasible solution} is a basic solution with $x \in P$ 
+
+
+\paragraph{Extreme point $\Rightarrow$ BFS:} Let $I=\{i \mid a_i'x = b_i\}$. Suppose $x\in P$ not a BFS, then normals $\{a_i\}_{i\in I}$ do not span $\mathbb R^n \Longrightarrow \exists\, d \neq 0 \in\mathbb R^n$ such that $a_i'd = 0 \forall\,i \in I$. 
+Consider points $y = x + \epsilon d,\, z=x - \epsilon d$. For $i\in I, a_i'y = a_i'x + \epsilon a_i'd = b_i$ so constraints remain active. For $i\notin I$ we have $a_i'x > b_i$. 
+Let $\overline \epsilon =  \min\Big\{\,\tfrac{a_i' x-b_i}{\,|a_i' d|\,}\mid i\notin I,\ a_i' d\neq 0\Big\} > 0$.
+Then $\forall \epsilon \in [0, \overline \epsilon], i \notin I, a_i'y = a_i'x + \epsilon a_i'd \geq a_i'x - \abs{\epsilon a_i'd} > a_i'x - (a_i'x - b_i) = b_i$. Hence $y,z\in P$. 
+Since $d \neq 0, y\neq z,\; x = \frac{1}{2}(y + z)$, a nontrivial convex combination of two distinct feasible points. Contradiction $\qed$ 
+
+\paragraph{BFS implies $x_{j \notin I} = 0$:} Consider $Ax = b, x\geq 0$ with $A\in \mathbb R^{m\times n}$ with $m$ linearly independent rows. $x$ a basic solution $\iff Ax = b$ and $\exists$ $m$ indices $B$ indices such that $A_B$ are linearly independent. Then $Ax = A_Bx_B = b$ and if $j \notin B \rightarrow x_j = 0$.
+
+\paragraph{Existence of extreme points} For nonempty $P = \{x \mid Ax \geq b\}$ the following are equivalent: (a) $P$ has at least one extreme point, (b) $P$ does not contain a line, (c) $\exists n$ linearly independent rows in $A$. \textbf{(b)$\Rightarrow$(a)} Start at any $x\in P$. If $x$ a BFS, we're done. Else, let $I = \{i \mid a_i'x = b\}$ and note $\exists d \neq 0$ such that $a_i'd = 0\forall i \in I$.
+No line $\Rightarrow \exists \lambda, j\notin I$ such that $a_j'(x + \lambda d) = b_j$. Note $j\notin I \Rightarrow a_j'x \neq b_j \Rightarrow a_j'd \neq 0$ and $i\in I \Rightarrow a_i'd = 0$ by construction. 
+Together, $a_j$ cannot be a linear combination of $\{a_i\}_{i\in I}$. 
+\textbf{Corrolaries:} Bounded polyhedron has at least one BFS. $\{x \mid x \geq 0\}$ does not contain a line. Standard form polyhedron does not contain a line since $P\subseteq \{x \mid x \geq 0\}$
+
+\paragraph{Existence of optimal extreme point} For $\min_{\{x\in P\}}c'x$ and $P$ has at least one extreme point. Then optimal cost is either $-\infty$ or $\exists$ extreme point that's optimal. \textbf{(Proof)} for some $x \in P$ with rank $k < n$, we show we can construct $y\in P$ with rank $k+i$ and $c'y \leq c'x$. Begin with $I = \{i \mid a_i'x = b_i\}$, which by rank, $k \Rightarrow \exists d \neq 0$ such that $a_i'd = 0 \forall i \in I$. WLOG, $c'd \leq 0$ since we can always negate $d$. Consider $y = x + \lambda d \Rightarrow a_i'y = b_i \,\forall\, i \in I$. If $y \in P \;\forall \lambda > 0 \Rightarrow$ optimal cost would be $-\infty$. Else, this half-line exits $P$. At the point of exit, we have $\lambda^*, j \notin I$ such that $a_j'(x + \lambda^*d) = b_j$. Note $c'd \leq 0 \Rightarrow c'y \leq c'x$. Here we have produced new $y$ whose cost has not increased, but whose rank has. The process can be repeated until rank is $n$
+
+\paragraph{Existence of unique optimum}  $\min_{\{x \mid Ax=b, x\geq0\}} c^Tx$, $x^*$ optimal, $B, N$ the sets of basic and nonbasic indices, $I\subseteq N = \{i \in N \mid \bar c_i = 0\}$. $x^*$ unique optimal $\iff I$ empty. \textbf{(Proof sketch $\Leftarrow$)} Contradiction. Suppose $\exists y \neq x^*,\; c^Ty = c^Tx^*$. Let $d = y - x^* \Rightarrow Ad = 0 \Rightarrow d_B = -A_B^{-1}A_Nd_N$. Notice $0 = c^Td = c_B^Td_B - c_N^Td_N = \bar c_N^Td_N$. $I = \emptyset$ and $x^*$ optimal $\Longrightarrow \bar c_N = 0 \Longrightarrow d_N = 0 \Longrightarrow d_B = 0 \Longrightarrow y = x$ a contradiction $\qed$ 
+
+\paragraph{Degeneracy}
+$x\in \mathbb R^n$ of $P$ degenerate $\iff $ some basic variable is zero $\iff \exists$ another basis that produces the same BFS $\iff$ $> n$ constraints are active at $x$. In standard form, $supp(x) < m$. Algorithm consequence: Possible stalling ($\bar c_j < 0$ and $x_j = 0$ allows for removing variable without affecting cost) Possible cycling.
+
+
+\paragraph{Convert any problem to standard form} WLOG, all rows of $A$ are linearly independent (prove using two-way containment)
+{\footnotesize
+\begin{align*}
+    \max_{\{x \mid a_i'x \geq b_i, a_j'x \leq b_j\}}\;& c'x 
+    &&\Longrightarrow &
+    \max_{\{x \mid a_i'(x^+ - x^-) \geq b_i, a_j'(x^+ - x^-) \leq b_j, x^+\geq 0,x^-\geq 0\}}\;& c'x 
+    &&\Longrightarrow & 
+    \min_{\{x \mid a_i'x - s_i = b_i\, a_j'x +s_j = b_j, x, s\geq 0\}}\;& -c'x
+\end{align*}
+}
+
+
+\paragraph{Problems involving absolute value} At optimal, for each $i$ we must have either $x_i^+ = 0$ or $x_i^- = 0$. Otherwise, we could change both by same amount, preserve feasibility, and reduce cost.
+{\footnotesize
+\begin{align*}
+    \min_{\{x \mid Ax \geq b\}}\quad& \sum_i c_i \abs{x_i}
+    &&\Longrightarrow & 
+    \min_{\{x \mid Ax \geq b, x_i \leq z_i, -x_i\leq z_i\}}\quad& \sum_i c_i'z_i
+    &&\text{or} &
+    \min_{\{x \mid A(x^+ - x^-) \geq b, x_i^+, x_i^- \geq 0\}}\quad& \sum_i c_i'(x_i^+ + x_i^-)
+\end{align*}
+}
+
+
+
+\section{Simplex method}
+\paragraph{Feasible direction} $d$ such that, for $x\in P,\; \exists \theta > 0$ where $x + \theta d \in P$. At a BFS with basic/nonbasic indices, $(B, N)$, we construct a search direction that guarantees feasibility: (i) $d_j = 1, j \in N$, (ii) $d_k = 0, k\in N\setminus\{j\}$, (iii), $d_B = -B^{-1}A_j$ since $A(x + \theta d) = b \Rightarrow 0 = Ad = \sum_{i=1}^nA_id_i = \sum_{b\in B}A_bd_b + A_j = Bd_B + A_j$
+
+\paragraph{Reduced cost vector} For entering variable $j, \bar c_j = c'd = c_j + c_B^Td_B = c_j - c_B^TB^{-1}A_j$. For all directions, $\bar c = c -c_B^TB^{-1}A \in \mathbb R^n$
+\newline\textbf{If $\bar c \geq 0 \Rightarrow x$ optimal:} Define $d = y - x$, 
+\begin{align*}
+    y,x \in P \Longrightarrow 0 = Ad = Bd_B + Nd_N \Longrightarrow \mathbf{d_B = -B^{-1}Nd_N}\\
+    \mathbf{c^Td} = c_B^Td_B + c_N^Td_N = -c_B^T(B^{-1}Nd_N) + c_N^Td_N = (c_N^T - c_B^TB^{-1}N)d_N = \mathbf{\bar c_N^Td_N}
+\end{align*}
+$x$ BFS and $y$ feasible $\Longrightarrow x_N = 0, y_N \geq 0\Longrightarrow  d_N = y_N - 0\geq 0 \Longrightarrow c^Td = \bar c_N^T d_N  \geq 0 \Longrightarrow c'(y-x) \geq 0 \Longrightarrow c'y \geq c'x$, so $x$ optimal. \textbf{(Corrolary)} Basis $B$ optimal if (a) $B^{-1}b \geq 0$ and (b) $\bar c \geq 0$.
+
+
+\paragraph{Feasible and optimal $\theta$} Want $\theta^* = \max\{\theta \geq 0 \mid x + \theta d \in P\}$. Note if $d \geq 0 \Longrightarrow x + \theta d \geq 0\; \forall \theta \geq 0$ and if $c^Td <0 \Longrightarrow \theta^* = \infty$. Otherwise, for $d_i < 0,\; x_i + \theta d_i \geq 0\Rightarrow \theta \leq -x_i/d_i$.  $\theta^* = \min_{\{i\mid d_i < 0\}} (-x_i/d_i)$. Note for $d < 0, \;-x_i / d_i > 0$
+
+\paragraph{Entering variable and non-leaving basic variables are linearly independent} Call new basis $\bar B$ and suppose they were linearly dependent $\Rightarrow \exists \lambda \neq 0$, such that $\lambda' A_{\bar B} = 0 \Rightarrow \lambda'A_B^{-1}A_{\bar B} = 0$. But since $A_B^{-1}A_B = I \Rightarrow A_B^{-1}A_{\bar B} = [e_1,\dots A_B^{-1}A_j,\dots e_m]$. The $\ell$th entry is $-d_{B_\ell} \neq 0$ and all other columns are 0 in the $\ell$th entry, thus $A_B^{-1}A_j$ is linearly independent from $A_B^{-1}A_{B\setminus\{\ell\}}$.
+
+\paragraph{Simplex iteration} (1) Start with BFS $x$ and associated basis indices, $B$. (2) Compute the reduced cost vector $\bar c$. If $\bar c \geq 0 \Rightarrow x$ optimal and terminate. Else choose $j: \bar c_j < 0$. (3) Compute $d_B = -A_B^{-1}A_j$. If $d \geq 0 \Rightarrow \theta^* = \infty$ since $\bar c_j = c'd < 0$;terminate with optimal cost $-\infty$. Else choose $\theta^* = \min_{\{i\in B\mid d_i < 0\}}(-x_i/d_i)$ (4) Identify leaving index $\ell: \theta^* = (-x_{\ell}/d_{\ell})$ and form a new basis replacing $A_{B_\ell}$ with $A_j$. New BFS, $y$ has $y_j = \theta^*,\; y_B = x_B + \theta^*d,\; y_i = 0$ otherwise. (4) Add to each non-zeroth row a multiple of the $\ell$th row so $-d_\ell = [A_B^{-1}A_j]_\ell = 1$ and $-d_{i \neq\ell} = [A_B^{-1}A_j]_{i\neq\ell} = 0$
+
+
+\paragraph{Simplex terminates for nondegenerate problems} At each step, we move $\theta^*$ along $d: c'd < 0$. Never revisit BFS.
+
+\paragraph{Initializing simplex method} Consider standard form problem $\min_{\{x \mid Ax = b, x \geq 0\}} c'x$. WLOG, $b\geq 0$. Construct new problem $\min_{\{x, y \mid Ax + y = b, x\geq 0, y \geq 0\}} \mathbf{1}'y$. This problem has a known BFS, namely $(x, y) = (0, b)$. Solving this problem returns BFS $x$ for the original problem. \textbf{Infeasibility detection:} If $\mathbf{1}^Ty^* > 0 \Longrightarrow \nexists x \geq 0 : Ax = b$.
+
+
+\paragraph{Anticycling} \textbf{Lexicographic pivoting:} Always keep non-zero rows sorted lexicographically. For each row $i$ with $d_i < 0$, normalize row $i$ by dividing by $d_i$. Always pivot on lexicographically smallest
+
+\paragraph{Revised simplex} Form matrix $[A_B^{-1} \mid A_B^{-1}A_j]$, perform row operations, $Q$, to obtain $[\bar A_B^{-1} \mid e_\ell]$; solves $A_{\bar B}^{-1}$, in $O(m^2)$.
+
+\paragraph{Tableau implementation} Here the efficiency comes from maintaining and updating $A_B^{-1}[b \mid A]$. The tableau structure is
+\begin{align*}
+    \begin{bmatrix}
+        -c_B^TA_B^{-1}b & \vline& c^T - c_B^TA_B^{-1}A\\
+        \hline
+        A_B^{-1}b & \vline & A_B^{-1}A
+    \end{bmatrix} = \begin{bmatrix}
+        -c^Tx & \vline& \bar c_1 & \dots & \bar c_n\\
+        \hline
+        x_B & \vline & -d^{(1)} & \dots & -d^{(n)}\\
+    \end{bmatrix}
+\end{align*}
+\begin{table}[h]
+    \centering
+    \tiny
+    \begin{tabular}{r p{8cm}cc}
+    \hline
+    \textbf{Step} && \textbf{Iteration 1} & \textbf{Iteration 2} \\
+    \hline
+    1.& Choose pivot column, $l$, based on $\bar c^T$ (lexicographically, or smallest $\bar c_j$) &
+        $\begin{bmatrix}
+        0 & -2 & \textcolor{red}{-1} & 0 & 0\\
+        2 & 1 & \textcolor{red}{-1} & 1 & 0\\
+        6 & 1 & \textcolor{red}{1} & 0 & 1\\
+        \end{bmatrix}$ &
+        $\begin{bmatrix}
+        6 & \textcolor{red}{-1} & 0 & 0 & 1\\
+        8 & \textcolor{red}{2} & 0 & 1 & 1\\
+        6 & \textcolor{red}{1} & 1 & 0 & 1\\
+        \end{bmatrix}$ \\
+    2.& Choose pivot row, $i$, using ratio test ($\{i\in B \mid d^{(\ell)}_i < 0, \text{argmin}(-x_i/d^{(\ell)}_i)\}$) & 
+        $\begin{bmatrix}
+        0 & -2 & \textcolor{red}{-1} & 0 & 0\\
+        2 & 1 & \textcolor{red}{-1} & 1 & 0\\
+        \textcolor{red}{6} & \textcolor{red}{1} & \textcolor{red}{1} & \textcolor{red}{0} & \textcolor{red}{1}\\
+        \end{bmatrix}$ &
+        $\begin{bmatrix}
+        6 & \textcolor{red}{-1} & 0 & 0 & 1\\
+        \textcolor{red}{8} & \textcolor{red}{2} & \textcolor{red}{0} & \textcolor{red}{1} & \textcolor{red}{1}\\
+        6 & \textcolor{red}{1} & 1 & 0 & 1\\
+        \end{bmatrix}$  \\
+    3.& Apply row operations to get $d^{(\ell)}_i = 1$ and $d^{(\ell)}_{k\neq i} = 0$ &
+        $\begin{bmatrix}
+        0 & -2 & \textcolor{red}{-1} & 0 & 0\\
+        8 & 2 & \textcolor{red}{0} & 1 & 1\\
+        6 & 1 & \textcolor{red}{1} & 0 & 1\\
+        \end{bmatrix}$ &
+        $\begin{bmatrix}
+        6 & \textcolor{red}{-1} & 0 & 0 & 1\\
+        4 & \textcolor{red}{1} & 0 & 1/2 & 1/2\\
+        2 & \textcolor{red}{0} & 1 & -1/2 & 1/2\\
+        \end{bmatrix}$  \\
+    4.& Apply row operations to set $\bar c_l = 0$ & 
+        $\begin{bmatrix}
+        6 & -1 & \textcolor{red}{0} & 0 & 1\\
+        8 & 2 & \textcolor{red}{0} & 1 & 1\\
+        6 & 1 & \textcolor{red}{1} & 0 & 1\\
+        \end{bmatrix}$ &
+        $\begin{bmatrix}
+        10 & \textcolor{red}{0} & 0 & 1/2 & 3/2\\
+        4 & \textcolor{red}{1} & 0 & 1/2 & 1/2\\
+        2 & \textcolor{red}{0} & 1 & -1/2 & 1/2\\
+        \end{bmatrix}$ \\
+    \hline
+\end{tabular}
+\end{table}
+
+
+
+
+
+
+
+\section{Duality}
+
+% \paragraph{Intuition}
+% Suppose we had $p \in \mathbb R^m$ where
+% \begin{itemize}
+%     \item Standard form problem, $\min_{\{x \mid Ax = b, x\geq 0\}}c'x$: $p^TA \leq c^T \Longrightarrow p^Tb = p^TAx \leq c^Tx \;\forall x$ feasible. 
+%     \item General form problem, $\min_{\{x \mid Ax \geq b\}}c'x$: $p\geq 0$ and $p^TA = c^T \Longrightarrow p^Tb \leq p^TAx = c^Tx \;\forall x$ feasible. 
+%     \item $A_B^{-1}$ uniquely determines $x,p$: $p^Tb = (c_B^TA_B^{-1})b = c_B^T(A_B^{-1}b) = c_B^Tx_B = c^Tx \Longrightarrow \bar c^T = c^T - c_B^TA_B^{-1}A = c^T - p^TA$
+% \end{itemize}
+\paragraph{Lagrangian} Consider standard form problem $\min_{\{x \mid Ax = b, x \geq 0\}} c'x$. The lagrangian is $L(x,p) = c'x + p'(b - Ax)$ and the Dual function is $g(p) = \min_{x\geq 0} c'x + p'(b-Ax) = p'b + \min_{x\geq 0} (c' - p'A)x$. \textbf{(Saddlepoint)} A pair $(x^*, p^*), x^*\geq 0$ are primal-dual optimal (standard-form) $\iff$ they are a saddlepoint: $L(x^*, p) \leq L(x^*, p^*) \leq L(x, p^*) \quad \forall x\geq 0, p$. \textbf{(Dual problem)} The solution to the inner minimization is 0 if $\mathbf{c' - p'A \geq 0}$ and $-\infty$ otherwise, so to maximize $g(p)$ the Dual Problem is $\max_{\{p \mid p'A\leq c'\}}p'b$. 
+
+
+\paragraph{Sign convention}
+In a \textbf{minimization problem} with \textbf{natural inequalities} $Ax \geq b$, the pairs ($p, b-Ax$) and ($x, c-p^TA$) have opposite inequality directions. Constraint is violated when $Ax < b$. In minimization, we want the penalty to increase the Dual function, which is achieved with $p\geq 0$ through $p'(b - Ax)$. In a \textbf{maximization problem} with \textbf{natural inequalities} $Ax \leq b$, the pairs ($p, Ax-b$) and ($x, c-p^TA$) have opposite inequality directions. Intuition: $x_j(c_j - p^TA)$ encodes reduced costs. \textbf{Equality constraints} correspond to free dual variables and always consider $b - Ax$. 
+
+
+\paragraph{Common dual-primal pairs}
+$\left((P):\min_{\{x \mid Ax = b, x\geq 0\}}c^Tx \iff (D):\max_{\{p \mid p\text{ free}, p^TA \leq c\}}p^Tb\right)$
+\newline\noindent$\left((P):\min_{\{x \mid Ax \geq b\}}c^Tx \iff
+    (D):\max_{\{p\mid p\geq 0, p^TA = c\}}p^Tb\right)$
+\newline\noindent$\left((P):\min_{\{x \mid Ax \geq b, x\geq 0\}}c^Tx \iff
+    (D):\max_{\{p\mid p\geq 0, p^TA \geq c\}}p^Tb\right)$
+\newline\noindent$\left((P):\max_{\{x \mid Ax \leq b, x\geq 0\}}c^Tx \iff
+    (D):\min_{\{p\mid p\geq 0, A^Tp \geq c\}}b^Tp\right)$
+\newline\noindent$\left((P):\min_{\{x \mid A_1x \geq b_1, A_2x = b_2, x\geq 0\}}c^Tx \iff
+    (D):\max_{\{p_1, p_2\mid p_1\geq 0,\,p_2\text{ free}, p_1^TA_1 + p_2^TA_2 \leq c\}}p_1^Tb_1 + p_2^Tb_2\right)$
+
+
+
+\paragraph{Dual simplex} In Tableau, always keep Dual constraints, $\bar c = c^T - p^TA \geq 0$, and pivot to make primal constraint $A_B^{-1}b \geq 0$.
+\begin{align*}
+    \begin{bmatrix}
+        -p^Tb & \vline& c^T - p^TA\\
+        \hline
+        A_B^{-1}b & \vline & A_B^{-1}A
+    \end{bmatrix} = 
+    \begin{bmatrix}
+        -c_B^TA_B^{-1}b & \vline& c^T - c_B^TA_B^{-1}A\\
+        \hline
+        A_B^{-1}b & \vline & A_B^{-1}A
+    \end{bmatrix} = \begin{bmatrix}
+        -c^Tx & \vline& \bar cn\\
+        \hline
+        A_B^{-1}b & \vline & A_B^{-1}A\\
+    \end{bmatrix}
+\end{align*}
+\paragraph{Dual simplex iteration} (1) Start with basic solution $x$ and associated basis indices, $B$, and $\bar c \geq 0$. (2) Compute $A_B^{-1}b$. If $A_B^{-1}b \geq 0 \Rightarrow x$ optimal and terminate. Else choose $\ell: A_B^{-1}b_\ell < 0$. (3) Compute $v^{(\ell)} = [A_B^{-1}A]_\ell$. If $v^{(\ell)} \geq 0 \Rightarrow$ problem is unbounded; terminate with optimal cost $\infty$. Else choose $\gamma^* = \min_{\{i\mid v^{(\ell)}_i < 0\}}(\bar c_i / \abs{v_i})$. (4) Identify leaving index $j: \gamma^* = (\bar c_j / \abs{v_j})$ and form a new basis replacing $A_{B_\ell}$ with $A_j$. New BFS, $y$ has $y_j = \theta^*,\; y_B = x_B + \theta^*d,\; y_i = 0$ otherwise. (5) Add to each non-zeroth row a multiple of the $\ell$th row so $v^{(\ell)}_j = 1$ and $v^{(i\neq \ell)}_j = 0$ 
+
+
+\paragraph{Dual degeneracy} For basis, $B$, a basic solution in the dual is $p^T = c_B^TA_B^{-1}$. $p^T$ degenerate $\iff \exists$ some nonbasic index $j$ with reduced cost $\bar c_j = 0 \Longrightarrow$ i.e., multiple  primal BFS correspond to the same dual solution. 
+\textbf{Dual-primal link} Dual degenerate $\Longrightarrow$ multiple primal optimal BFS yield same $x^*$. Primal degenerate $\Longrightarrow$ multiple dual feasible basis yield same $p^*$. 
+\textbf{Degenerate dual $\not \Rightarrow$ degenerate primal}: $(P):\min_{\{x\mid x_1, x_2 \geq 0, x_1 + x_2 \geq 0\}}x_2,\; (D): \min_{\{p\mid p\geq 0, p\geq 0, p\geq 1\}}p0$
+
+\paragraph{Weak duality}
+Let $(x,p)$ feasible $(P),(D)$, then $p'b \leq c'x$. \textbf{(Proof)} Let $u_i = p_i(a_i'x - b_i),\; v_j = (c_j - p'A_j)x_j$. By construction, $\text{sign}(a_i'x-b) = \text{sign}(p_i)$ and $\text{sign}(c_j - p'A_j) = \text{sign}(x_j)$ So $u_i, v_j \geq 0\; \forall i,j$. Now
+\begin{align*}
+    0 \leq \sum_i u_i + \sum_j v_j = p'Ax - p'b + c'x - p'Ax = c'x - p'b \Longrightarrow p'b \leq c'x
+\end{align*} 
+
+\paragraph{Strong duality} If $(P), (D)$ have optimal solutions, the respective costs are equal: $c'x = p'b$. 
+\paragraph{Strong duality proof using simplex} Consider primal-dual pair, $(P):\min_{\{x \mid Ax = b, x\geq 0\}}c^Tx$, $(D):\max_{\{p \mid p\text{ free}, p^TA \leq c\}}p^Tb$. We can find $x^*$ optimal with basis $A_B$ using the simplex algorithm. At the optimum, $\bar c^T = c^T - c_BA_B^{-1}A \geq 0$. Let $p^* = c_BA_B^{-1}$ and note $p^{*T}A \leq c^T \Longrightarrow p^*$ feasible. Also $p^{*T}b = c_B^TA_B^{-1}b = c_B^Tx_B^* = c^Tx^*$ so $p^*$ optimal with equal optimal cost $\qed$
+
+\paragraph{Strong duality proof using Farkas' lemma} Consider primal-dual pair, $(P):\min_{\{x\mid Ax\geq b\}}c'x,\; (D): \min_{\{p\mid p\geq 0, p'A=0\}}p'b$ and assume primal optimal $x$. Let $I = \{i\mid a_i'x = b_i\}$. Choose $d$ such that $a_id \geq 0\;\forall i \in I \Rightarrow a_i'(x + \epsilon d)\geq a_ix = b_i\;\forall i\in I$. For $j \notin I$ and $\epsilon$ sufficiently small, $a_j'(x + \epsilon d) > b_i \Rightarrow x + \epsilon d$ feasible solution. By optimality of $x\Rightarrow c'd \geq 0$. 
+By Farkas' lemma, $\exists p_i\geq 0, i\in I$ such that $c = \sum_{i\in I}p_ia_i$. For $j\notin I$, let $p_j = 0$. Now we have $p\geq 0,\; p'A = c'$. Also, $p'b = \sum_{i\in I}p_ib_i = \sum_{i\in I}p_ia_ix_i = c'x \qed$ 
+
+\paragraph{Primal-dual outcome possibilities} $(P) / (D)$ unbounded $\Rightarrow (D) / (P)$ infeasible. \textbf{(Proof)} $(P)$ unbounded $\Rightarrow c'x = -\infty \Rightarrow p'b \leq -\infty$ by weak duality; impossible. $(P)$ finite optimum $\iff (D)$ finite optimum by strong duality. $(P) / (D)$ infeasible $\Rightarrow (D) / (P)$ infeasible \textit{or} unbounded.
+
+\paragraph{Complementary slackness}
+$x,p$ optimal solutions for $(P),(D) \iff p_i(a_i'x - b_i) = 0 \; \forall i, (c_j - p'A_j)x_j = 0 \; \forall j$. Recall in the proof of \textbf{Weak duality} we defined $u_i, v_j$ and showed $u_i \geq 0, v_j \geq 0, c'x-p'b = \sum_iu_i + \sum_jv_j$. \textbf{(Proof $\Rightarrow$)} By \textbf{Strong duality}, $c'x = p'b \Longrightarrow \sum_iu_i + \sum_jv_j = 0 \Longrightarrow u_i = v_j = 0 \forall i,j$. \textbf{(Proof $\Leftarrow$)} if $u_i = v_j = 0\;\forall i,j \Longrightarrow c'x - p'b = 0 \Longrightarrow c'x - p'b$.  
+
+
+\paragraph{Strict complementary slackness}
+Given primal-dual pair $(P): \min_{\{x \mid Ax = b, x \geq 0\}} c^Tx, (D): \max_{\{p \mid p^TA \leq c\}} p^Tb$, both with optimal solutions, then $\exists$ optimal $x\geq 0, p$ such that $\forall j$ either $x_j > 0$ or $p^TA_j < c_j$. \textbf{(Proof sketch)} (i) first prove $\exists p:p^TA\leq c, p^TA_j < c_j$ in case where $x_j = 0\, \forall x^{*(i)}$. Set up primal-dual problems $(P'): \min_{\{x \mid Ax = b, x \geq 0\}} c^Tx - \delta e_j^Tx, (D): \max_{\{p \mid p^TA \leq c - \delta e_j\}} p^Tb$. Consider reduced cost vector $\bar c' = (c - \delta e_j) - c_BB^{-1}A \Longrightarrow \delta \leq  c_j - c_BB^{-1}A_j$. Reason that for sufficiently small $\delta$, same $x^*$ is optimal; note new constraint of $(D')$. (ii) Then consider the sets of optimal solutions and corresponding sets of indices: 
+\begin{align*}
+  \mathcal X &= \{x \mid Ax = b, x\geq 0, c^Tx = val(P)\} &\quad \mathcal P &= \{p \mid p^TA \leq c, p^Tb = val(D)\}\\
+  S &= \{j \mid \exists x \in \mathcal X, x_j > 0\} &\quad S^C &= \{j \mid \exists x_j = 0 \;\forall x \in \mathcal X\}
+\end{align*}
+Define $\bar x = \frac{1}{|S|} \sum_{k \in S} x^{(k)}$, $\bar p = \frac{1}{|S^C|} \sum_{k \in S^C} p^{(k)}$. Prove feasiblity and optimality. Since $S, S^C$ partition the indices, we have $\forall j \in [n]$ either $x_j > 0$ or $p^TA_j < c_j$
+
+
+
+\section{Farkas' lemma}
+\paragraph{Intuition} Consider standard form constraints, $Ax = b, x\geq 0$. Suppose $\exists p$ such that $p'A \geq 0',\; p'b < 0$. Then $\forall x \geq 0,\; p'Ax \geq 0$. But since $p'b \leq 0$ we have $p'Ax \neq p'b \Rightarrow Ax \neq b \; \forall x\geq 0$. 
+\paragraph{Farkas' lemma } For $A, b$: $\exists x$ such that $x\geq 0, Ax = b \iff \nexists p$ such that $p'A \geq 0', p'b < 0$. (\textbf{Alternatives:} (i) For $A,b$: $\forall p$ such that $p'A\geq 0 \Rightarrow p'b \geq 0 \iff \exists x\geq 0$ such that $b = Ax$. (ii) For $A, b, d$: $\forall x$ such that $Ax\leq b \Rightarrow c'x \leq d \iff \exists p\geq 0$ such that $p'A = c'$ and $p'b \leq d$)
+
+\paragraph{Farkas' lemma proof using Duality} 
+\textbf{(Proof (a)$\Rightarrow \neg$(b))} $\exists x: x\geq 0, Ax = b \Rightarrow p'b = p'Ax \Rightarrow$ so $\nexists p$ such that $p'b < 0$ and $p'b = p'Ax \geq 0$.
+\textbf{(Proof $\neg$(a)$\Rightarrow$(b))} Consider primal-dual pair, $(P):\max_{\{x\mid x\geq 0, Ax=b\}}0'x,\; (D): \min_{\{p\mid p'A\geq 0\}}p'b$. Not (a) $\rightarrow (P)$ infeasible $\Rightarrow (D)$ unbounded, since $p = 0$ is feasible. $(D)$ unbounded $\Rightarrow \exists p$ feasible such that $p^Tb < 0$. 
+
+\paragraph{Farkas' lemma proof using Separating hyperplanes}
+\textbf{(Proof $\neg$(a)$\Rightarrow$(b))} Let $S = \{y \mid \exists x : y = Ax, x\geq 0\} = \{Ax \mid x \geq 0\}$, noting $b \notin S$. By Separating Hyperplane theorem, $\mathbf{\exists p: p^Tb < p^Ty} \; \forall y\in S$. Now $\forall \lambda > 0, \lambda A_i \in S \Longrightarrow p^Tb < \lambda p^TA_i \iff p^TA > (1/\lambda) p^Tb \Rightarrow \lim_{\lambda \rightarrow \infty} p^TA_i \geq 0 \Rightarrow \mathbf{p^TA \geq 0}$. 
+
+\paragraph{Farkas' lemma worked examples}
+\begin{itemize}
+    \item \textbf{(Statement)} Every vector satisfying $Ax \geq 0, x\geq 0$ also satisfies $x_1 = 0 \iff \exists p\geq 0$ such that $p^TA \leq 0, p^TA_1 < 0$. 
+    
+    \textbf{(Proof)} Consider primal-dual pair, $(P):\max_{\{x\mid x\geq 0, Ax\geq 0\}}-e_1^Tx,\; (D): \min_{\{p\mid p^TA\leq -e_1, p\geq 0\}}p^T0$. \textbf{(Proof $\Rightarrow$)} $val((P)) = 0 \Longrightarrow (D)$ feasible and there exists such a $p$. \textbf{(Proof $\Leftarrow$)} $p^TA_1 < 0 \Rightarrow p^TA_1 \leq -1 \Rightarrow (D)$ feasible with $val((D) = 0) \Longrightarrow e_1^Tx = 0 \Longrightarrow x_1 = 0$.
+
+    \item \textbf{(Statement)} $\exists x \neq 0$ such that $Ax=0, x\geq 0 \iff \nexists p$ such that $p^TA > 0$
+    \newline\textbf{(Proof $\Rightarrow$)} Consider primal-dual pair, $(P):\min_{\{x\mid x\geq 0, Ax= 0\}}0^Tx,\; (D): \max_{\{p\mid p \text{ free}, p^TA\leq 0\}}p^T0$. $(P)$ feasible $\Rightarrow (D)$ feasible and $p^TA \leq 0$. \textbf{(Proof $\Leftarrow$)} Note $p^TA < 0 \Rightarrow p^TA \leq e$ because we can scale. Now consider primal-dual pair, $(P):\min_{\{p\mid A^Tp \geq e\}}0^Tp,\; (D): \max_{\{x \mid x\geq 0, Ax = 0\}}e^Tx$. $(P)$ feasible $\Rightarrow e^Tx = 0$ and $x\geq 0 \Rightarrow x = 0$. 
+
+    \item \textbf{(Statement)} $Ax < 0, x$ feasible $\iff S = \{u \mid u^TA = 0, u \geq 0, \mathbf{1}^Tu = 1\} = \emptyset$
+    
+    \textbf{(Proof $\Leftarrow$ using Farkas)} $S = \{u \mid [A, \mathbf{1}]^Tu = [\mathbf{0}^T, 1]^T, u \geq 0\}$. By Farkas $\Longrightarrow \exists\;p, q$ free such that $p^TA^T + q\mathbf{1}^T \geq \mathbf{0}^T$ and $p^T\mathbf{0} + q < 0 \Longrightarrow q < 0$ and $Ap > 0 \Longrightarrow Ap < 0$
+
+    \textbf{(Proof $\Leftarrow$ 1 using Strong duality)} Consider primal-dual pair $(P): \min_{\{u\mid  [A, \mathbf{1}]^Tu = [\mathbf{0}^T, 1]^T, u \geq 0\}}\mathbf{0}^Tu,\; (D): \max_{\{(p,q)\mid Ap + \mathbf{1}q \leq 0, (p,q) \text{ free}\}} q$. $(P)$ infeasible $\Longrightarrow (D)$ unbounded (since $(0,0)$ feasible) $\Longrightarrow q > 0 \Longrightarrow Ap < 0$.
+
+    \textbf{(Proof $\Rightarrow$ 2 using Strong duality)} Note $Ax < 0 \iff Ax \leq -\mathbf{1}$. Now consider primal-dual pair $(P): \max_{\{x\mid Ax \leq -\mathbf{1}\}}\mathbf{0}^Tx,\; (D): \min_{\{u\mid u\geq 0, u^TA = 0\}} -\mathbf{1}^Tu$. $(P)$ feasible $\Longrightarrow (D)$ feasible $\Longrightarrow  -\mathbf{1}^Tu=0$ by strong duality $\Longrightarrow S = \emptyset$ since requires $\mathbf{1}^Tu = 1$
+\end{itemize} 
+
+\paragraph{Separating hyperplane theorem} $S \in \mathbb R^n$ nonempty, closed, convex and $z \notin S$. Then $\exists c \in \mathbb R^n$ such that $c'z < c'x \;\forall x \in S$. \textbf{(Proof sketch)} Fix $w \in S$, let $B = \{x\mid \norm{x - z}{2} \leq \norm{w - z}{2}\}$, and let $D = S \cap B$. $\exists y\in D$ such that $\norm{y - z}{2} \leq \norm{x - z}{2}\; \forall x \in D$. $\forall x \in S\setminus D \Rightarrow \norm{x - z}{2} > \norm{w - z}{2}\geq \norm{y - z}{2}$ so $y$ minimizes $\norm{x - z}{2} \forall x\in S$ (so $y$ is closest element of $S$ to $z$). Let $x \in S$. $S$ convex $\Rightarrow y + \lambda(x - y) \in S\; \forall \lambda \in (0, 1]$. 
+{\footnotesize
+\begin{align*}
+    \norm{y - z}{2}^2 &\leq \norm{y + \lambda (x - y) - z}{2}^2 = \norm{y - z}{2}^2 + 2\lambda(y - z)^T(x - y) + \lambda^2\norm{x - y}{2}^2 \overset{1/\lambda}{\Longrightarrow} 2(y-z)^T(x - y) + \lambda\norm{x - y}{2}^2 \geq 0 \overset{\lim_{\lambda \rightarrow 0}}{\Longrightarrow} (y-z)^T(x - y)\geq 0\\
+     &\Longrightarrow (y - z)^Tx \geq (y - z)^Ty = (y-z)^Tz + (y - z)^T(y-z) > (y-z)^Tz \Longrightarrow c^Tx > c^Tz \tag{$c = y - z$}
+\end{align*}
+}
+
+
+\section{Cones and extreme rays}
+\paragraph{Definitions}\textbf{(Cone)} $C \in \mathbb R^n$ if $\lambda x \in C \;\forall \lambda \geq 0, x\in C$. \textbf{(Note)} $0\in C$. \textbf{(Polyhedral cone)} $\mathcal C = \{x\in \mathbb R^n \mid Ax \geq 0\}$. For $P = \{x\in \mathbb R^n\mid Ax \geq b\}, y\in P$, \textbf{(recession cone at $y$)} $RC_P(y) = \{d \in \mathbb R^n \mid y + \lambda d \in P,\;\forall \lambda \geq 0\}$. Further, $RC_P(y) = RC_P(z) \forall y,z\in P \Longrightarrow RC_P = \{d\in \mathbb R^n\mid Ad \geq 0\}$. For $Q = \{x\in \mathbb R^n\mid Ax = b, x\geq 0\}, RC_Q = \{d\in \mathbb R^n \mid Ad = 0, d\geq 0\}$. \textbf{(Extreme ray def.1)} $x\neq 0 \in C \subset \mathbb R^n$ is an extreme ray if there are $n-1$ linearly independent constraints active at x. \textbf{(Extreme ray def.2)} An extreme ray of $RC_p$ with nonempty $P$ is an extreme ray of $P$.
+
+
+\paragraph{Equivalences} For polyhedral cone $\mathcal C\subset \mathbb R^n$ defined by $a_i'x \geq 0, i\in [m]$, the following are equivalent: $0$ is an extreme point of $\mathcal C\iff \mathcal C$ does not contain a line $\iff \exists n$ vectors out of $a_{[m]}$ which are linearly independent
+
+
+\paragraph{Finite optimal cost over cone} The optimal cost of $\min_{\{x \in C=\{x\mid Ax \geq 0\}\}} c^Tx = -\infty \iff \exists$ extreme ray $d\in C$ such that $c'd < 0$. \textbf{(Proof $\Leftarrow$)} Trivial. If $\exists d\in C$ such that $c'd < 0$ then $\lambda d\in C \forall \lambda \geq 0 \Rightarrow \min_{d\in C}c'd = -\infty$. \textbf{(Proof $\Rightarrow$)} From given we assume $\exists x\in C$ such that $c'x = -1$. Define $P = \{x \mid Ax \geq 0, c^Tx = -1\}\subset C$. $C$ pointed $\Rightarrow $ C does not contain a line $\Rightarrow P$ has at least 1 extreme point, call it $d$. $d$ extreme $\Rightarrow n$ linearly active constraints, one of which must be $c^Tx = -1$. The remaining $n-1$ are from $x \in C$ so $d$ is an extreme ray of $C$. 
+
+\paragraph{Finite optimal cost over polygon} The optimal cost of $\min_{\{x \in P=\{x\mid Ax\geq b\}\}} c^Tx = -\infty \iff \exists$ extreme ray $d\in RC_P$ such that $c'd < 0$. \textbf{(Proof $\Leftarrow$)} Trivial. If $d \in RC_P, c'd < 0$, then $\forall x\in P, x + \lambda d \in P\;\forall \lambda \geq 0 \Rightarrow c'(x + \lambda d) = c'x + \lambda c'd$. As $\lambda \rightarrow \infty \Rightarrow \lambda c'd \rightarrow -\infty$. \textbf{(Proof $\Rightarrow$)} Consider primal-dual pair $(P):\min_{\{x \in P=\{x\mid Ax\geq b\}\}} c^Tx,\; (D):\max_{\{p \in Q=\{p\mid p\geq 0, p^TA=c\}\}} p^Tb$. $(P)$ unbounded $\Rightarrow (D)$ infeasible $\Rightarrow (D'):\max_{\{p \in Q\}}p^T\mathbf{0}$ infeasible since same set as $(D)$. Dual of $(D')$, $(P') = \min_{\{x \in \tilde P=\{x\mid Ax\geq 0\}\}} c^Tx$ is unbounded (since $x = 0$ feasible). From previous theorem, $P$ contains no line $\Rightarrow \exists n$ linearly independent constraints $\Rightarrow \exists$ same $n$ linearly independent constraints in $\tilde P \Longrightarrow \tilde P$ is a pointed cone. Since $\tilde P \subseteq P \Rightarrow val((P)) \leq val((P')) = -\infty$. By previous theorem, $\exists$ extreme ray $d \in \tilde P$ such that $c'd < 0$. Conclude by noting that $\tilde P = RC_P  \qed$
+
+\paragraph{Resolution theorem}
+Let $P = \{x \mid Ax\geq b\}$ nonempty with at least one extreme point. Let $x^{[k]}$ be all extreme points, $w^{[r]}$ all extreme rays of $P$. 
+Then $P = Q = \left\{\sum_i \lambda_ix^i + \sum_j\theta_jw^j \mid \lambda_i \geq 0, \theta_j \geq 0, \sum_i\lambda_i = 1\right\}$. 
+% \textbf{(Proof $Q \subset P$)} $z \in Q \Rightarrow Az = \sum_i \lambda_i Ax^i + \sum_j\theta_j Aw^j \geq \sum_i\lambda_ib + 0 = b \Rightarrow z\in P$.
+\textbf{(Proof $P \subset Q$)} Contradiction. Consider problem $(P):\max_{\{\lambda, \theta \mid z = X\lambda + W\theta,\;\mathbf{1}^T\lambda = 1, \lambda,\theta \geq 0\}} \mathbf{0}$. By assumption, $(P)$ infeasible $\rightarrow (D):\min_{\{p\mid p^TX + q\mathbf{1}^T\geq 0,  p^TW \geq 0 \}}p^Tz + q$ unbounded (since $(p,q)=(0,0)$ is feasible) $\Rightarrow \exists (p,q)$ such that $p^Tz + q < 0$, but constraints say $p^TX + q\mathbf{1}^T \geq 0^T$ and $p^TW\geq 0^T \Rightarrow p^Tz\mathbf{1}^T < p^TX \Rightarrow \exists p: p^Tz < p^Tx^i\;\forall z\in P, \forall i\in [k]$, but each $x^i$ an extreme point, so for each $i$ this is a contradiction.
+
+\end{document}

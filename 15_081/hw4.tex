@@ -1,0 +1,592 @@
+\documentclass[11pt]{exam}
+\usepackage{graphicx} % Required for inserting images
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{optidef}
+\usepackage{listings}
+\usepackage{xcolor} % for custom colors
+\usepackage{minted} % for code
+
+% === Make things tighter ===
+\usepackage[margin=0.75in]{geometry} % <- widen/narrow by changing 1.25in
+\usepackage{setspace}
+% \setstretch{0.95} % line spacing
+\usepackage{enumitem}
+% \setlist{nosep}  % removes vertical space around lists
+% \setlist[itemize]{topsep=3pt, itemsep=3pt, parsep=1pt, partopsep=0pt}
+% \setlist[enumerate]{topsep=3pt, itemsep=3pt, parsep=1pt, partopsep=0pt}
+\usepackage{titlesec}
+% \titlespacing*{\section}{0pt}{4.0ex plus 0.5ex minus 0.5ex}{0.8ex}
+% \titlespacing*{\subsection}{0pt}{3.0ex plus 0.3ex minus 0.3ex}{0.6ex}
+% \titlespacing*{\subsubsection}{0pt}{2.0ex plus 0.2ex minus 0.2ex}{0.4ex}
+% \titlespacing*{\paragraph}{0pt}{1.5ex plus 0.2ex minus 0.2ex}{0.4ex}
+
+
+\lstset{
+  language=Python,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue},
+  stringstyle=\color{red},
+  commentstyle=\color{gray},
+  showstringspaces=false,
+  frame=single,
+  breaklines=true
+}
+\title{15.081 Mathematical programming, HW4}
+\author{Erich Trieschman}
+\date{2025.11.06}
+\begin{document}
+\maketitle
+
+\begin{questions}
+    \question \textbf{Exercise 5.2:} Sensitivity with respect to changes in basic column A
+    \newline\textbf{(Given)} LP in standard form, with $A\in \mathbb R^{m\times n}$ and $m$ linearly independent rows, optimal basis $B$, and nondegenerate optimal primal solution, $x^*$, and dual solution $p$. Assume first column, $A_1$ is basic and we change the first entry to $a_{11} \leftarrow a_{11} + \delta$. Lastly define $E\in \mathbb R^{m\times m}$ as a matrix of zeros except $e_{11} = 1$.
+    \begin{parts}
+        \part \textbf{(Show)} for $\delta$ small enough, $B + \delta E$ is a basis matrix for the new problem
+        \newline $B + \delta E$ is a basis matrix $\iff$ the columns of $B + \delta E$ are linearly independent. \textbf{(Contradiction)} Suppose $\exists x \neq 0$ such that
+
+        \begin{align*}
+          (A_1 + \delta e_1)x_1 + \sum_{i \in B(2),\dots B(m)} A_i x_i &= 0\\
+          \delta e_1x_1 + \sum_{i \in B(1),\dots B(m)} A_i x_i &= 0\\
+          \sum_{i \in B(1),\dots B(m)} A_i x_i = Bx &= -\delta e_1x_1\\
+          x &= -\delta B^{-1} e_1x_1
+        \end{align*}
+        If $x_1 = 0 \Longrightarrow x = 0$ and we have a contradiction. We now consider the case that $x_1 \neq 0$:
+        \begin{align*}
+          \tilde x &= -\delta B^{-1}e_1 = -\delta [B^{-1}]_1 \tag{$\tilde x := x / x_1$}\\
+          \tilde x_1 = 1 &= -\delta [B^{-1}]_{11}\\
+          \delta &= -\frac{1}{[B^{-1}]_{11}}
+        \end{align*}
+        So our assumption that $\exists x \neq 0$ only holds for $\delta = -1/[B^{-1}]_{11}$. Choose any $\delta < -1/[B^{-1}]_{11}$ (or $\delta > -1/[B^{-1}]_{11}$, for that matter) and we do not have the equality $\tilde x = -\delta B^{-1}e_1$ and we have a contradiction. 
+
+        
+
+        \part \textbf{(Show)} Under basis $B + \delta E$, the vector $x_B = (I + \delta B^{-1}E)^{-1}B^{-1}b$
+        \newline We know
+        \begin{align*}
+          (B + \delta E)x_B &= b\\
+          Bx_B + \delta Ex_B &= b\\
+          x_B + \delta B^{-1}Ex_B &= B^{-1}b\\
+          (I + \delta B^{-1}E)x_B &= B^{-1}b\\
+          x_B &= (I + \delta B^{-1}E)^{-1}B^{-1}b \tag{if $(I + \delta B^{-1}E)$ invertible}
+        \end{align*}
+        Next we show $(I + \delta B^{-1}E)$ is invertible. Note by rearranging that $(B + \delta E) = B(I + \delta B^{-1}E)$. Since $B$ invertible and $(B + \delta E)$ invertible (from part (a)), we must also have that $(I + \delta B^{-1}E)$ invertible.
+
+
+
+
+        \part \textbf{(Show)} for $\delta$ small enough, $B + \delta E$ is an optimal basis matrix for the new problem
+        \newline $B + \delta E$ is an optimal basis matrix $\Longrightarrow$ $x_B \geq 0$ (perturbed problem feasibility) and $\tilde{\bar c} \geq 0$ (perturbed problem optimality)
+        \begin{subparts}
+          \subpart ($x_B \geq 0$) 
+          \newline $B$ optimal basis $\Longrightarrow x^*_B = B^{-1}b \geq 0$. And from part (b) we've shown that $(B + \delta E)^{-1}b = (I + \delta B^{-1}E)^{-1}B^{-1}b$. Observe the form of $(I + \delta B^{-1}E)$ can be seen as a rank-1 update to an invertible matrix
+          \begin{align*}
+            (I + \delta B^{-1}E) = (I + \delta B^{-1}_1e_1^\top)
+          \end{align*}
+          Using the Sherman-Morrison formula for matrix inverses
+          \begin{align*}
+            (I + \delta B^{-1}_1e_1^\top)^{-1} &= I^{-1} - \frac{1}{1 + e_1^\top I^{-1}\delta B^{-1}_1} I^{-1}(\delta B^{-1}_1e_1^\top) I^{-1}\\
+            &= I - \frac{1}{1 + \delta e_1^\top B^{-1}_1} (\delta B^{-1}_1e_1^\top)\\
+            &= I - \frac{\delta}{1 + \delta B^{-1}_{11}} B^{-1}E
+          \end{align*}
+          And
+          \begin{align*}
+            x_B(\delta) &= (I - \frac{\delta}{1 + \delta B^{-1}_{11}} B^{-1}E)B^{-1}b\\
+            &= B^{-1}b - \frac{\delta}{1 + \delta B^{-1}_{11}} B^{-1}E B^{-1}b\\
+            &= B^{-1}b - \gamma(\delta) B^{-1}E B^{-1}b \tag{for $\gamma(\delta) = \frac{\delta}{1 + \delta B^{-1}_{11}}, \delta \neq -\frac{1}{B_{11}^{-1}}$}\\
+            &= B^{-1}b - \gamma(\delta) v \tag{for $v = f(B^{-1},b) = B^{-1}E B^{-1}b$}
+          \end{align*}
+          Thus
+          \begin{align*}
+            x_B(\delta) \;=\; x_B^* - \gamma(\delta)\, v,
+            \quad
+            x_B^* := B^{-1}b \succeq 0,
+            \quad
+            \gamma(\delta) := \frac{\delta}{1 + \delta B^{-1}_{11}},
+            \quad
+            v := B^{-1}E B^{-1}b.
+          \end{align*}
+          For each coordinate $i$,
+          \begin{align*}
+            [x_B(\delta)]_i
+            = [x_B^*]_i - \gamma(\delta)\, v_i.
+          \end{align*}
+          \begin{itemize}
+            \item If $v_i > 0$, this is nonnegative provided
+            $\gamma(\delta) \le [x_B^*]_i / v_i$.
+            \item If $v_i < 0$, it is nonnegative provided
+            $\gamma(\delta) \ge [x_B^*]_i / v_i$.
+            \item If $v_i = 0$, there is no restriction.
+          \end{itemize}
+          Thus we may choose
+          \begin{align*}
+            \gamma(\delta) = \frac{\delta}{1 + \delta B^{-1}_{11}}, 
+            \quad \delta \neq -\frac{1}{B^{-1}_{11}},
+            \quad\text{and}\quad 
+            |\gamma(\delta)| \le \min_{i:v_i\neq0} \frac{[B^{-1}b]_i}{|v_i|},
+          \end{align*}
+          Note $\exists \gamma(\delta)$ since $\delta \rightarrow 0 \Longrightarrow \gamma(\delta) \rightarrow 0$ so we can choose sufficiently small $\gamma(\delta)$ for all requirements to hold. 
+
+          \subpart ($\tilde{\bar c} \geq 0$) 
+          \newline Under the original problem, $x_B^*$ optimal and $\bar c = c - c_B^\top B^{-1}A \geq 0$. Now under the perturbed problem we have
+          \begin{align*}
+            \tilde{\bar{c}} = [\tilde{\bar{c}}_B, \tilde{\bar{c}}_N] &= \left[c_B - c_B^\top(B + \delta E)^{-1}(B + \delta E), c_N - c_B^\top(B + \delta E)^{-1}N\right]\\
+            [\tilde{\bar{c}}_B, \tilde{\bar{c}}_N] &= \left[c_B - c_BI, c_N -  c_B^\top(B + \delta E)^{-1}N\right]
+          \end{align*}
+          Since $\bar c_B = 0$ in the new perturbed problem, suffice to confirm $\tilde{\bar{c}}_N \geq 0$:
+          \begin{align*}
+            \tilde{\bar{c}}_N &= c_N -  c_B^\top(B + \delta E)^{-1}N\\
+            &= c_N - c_B^\top (B^{-1} - \gamma(\delta)B^{-1}EB^{-1})N \tag{for $\gamma(\delta) = \frac{\delta}{1 + \delta B^{-1}_{11}}, \delta \neq -\frac{1}{B_{11}^{-1}}$}\\
+            &= \left(c_N - c_B^\top B^{-1}N\right) - \gamma(\delta)c_B^\top B^{-1}EB^{-1}N\\
+            &= \bar{c}_N - \gamma(\delta)u \tag{for $\bar c_N = c_N - c_B^\top B^{-1}N, u = c_B^\top B^{-1}EB^{-1}N$}
+          \end{align*}
+          For each coordinate $i$,
+          \begin{align*}
+            \tilde{\bar c}_{N(i)} = \bar c_{N(i)} - \gamma(\delta)u_i
+          \end{align*}
+          \begin{itemize}
+            \item If $u_i > 0$, this is nonnegative provided
+            $\gamma(\delta) \le \bar c_{N(i)} / u_i$.
+            \item If $u_i < 0$, it is nonnegative provided
+            $\gamma(\delta) \ge \bar c_{N(i)} / u_i$.
+            \item If $u_i = 0$, there is no restriction.
+          \end{itemize}
+          Thus we may choose
+          \begin{align*}
+            \gamma(\delta) = \frac{\delta}{1 + \delta B^{-1}_{11}}, 
+            \quad \delta \neq -\frac{1}{B^{-1}_{11}},
+            \quad\text{and}\quad 
+            |\gamma(\delta)| \le \min_{i:u_i\neq0} \frac{|\bar c_{N(i)}|}{|u_i|}
+          \end{align*}
+        \end{subparts}
+        Because $\gamma(\delta) \rightarrow 0$ as $\delta \rightarrow 0$, $\exists \delta_0$ such that $\forall |\delta| < \delta_0$, both conditions hold and $\delta \neq -1 / B_{11}^{-1}$
+        
+        
+        
+        \part \textbf{(Given)} $(I + \delta B^{-1}E)^{-1} \approx I - \delta B^{-1}E$, where $\approx$ indicates that second-order terms are ignored. \textbf{(Show)} $c_B^\top x_B \approx c^\top x^* - \delta p_1 x_1^*$, where $x_B$ is defined in part (b).
+        \begin{align*}
+          x_B &= (I - \delta B^{-1}E)^{-1}B^{-1}b\\
+          x_B &\approx (I - \delta B^{-1}E)B^{-1}b = B^{-1}b - \delta B^{-1}EB^{-1}b\\
+          c_B^\top x_B &\approx c_B^\top B^{-1}b - \delta c_B^\top B^{-1}EB^{-1}b\\
+          c_B^\top x_B &\approx c_B^\top x^*_B - \delta c_B^\top B^{-1}Ex^*_B \tag{since $B^{-1}b = x_B^*$}\\
+          c_B^\top x_B &\approx c^\top x^* - \delta p^\top Ex^*_B \tag{since $c_B^\top x_B^* = c^\top x^*, p^\top = c_B^\top B^{-1}$}\\
+          c_B^\top x_B &\approx c^\top x^* - \delta p_1e_1^\top x^*_B \tag{since $p^TE = p_1e_1^\top$}\\
+          c_B^\top x_B &\approx c^\top x^* - \delta p_1x^*_1 \tag{since $e_1^\top x^*_B = x^*_{B(1)} = x^*_1$ for $A_1$ basic}\\
+        \end{align*}
+
+    \end{parts}
+
+
+
+
+
+
+
+    \question \textbf{Exercise 5.3:} Sensitivity with respect to changes in basic column A
+    \newline\textbf{(Given)} LP in standard form, with $A\in \mathbb R^{m\times n}$ and $m$ linearly independent rows. Assume $A_1, \dots, A_m$ form optimal basis, $B$, and suppose we change $A_1 \leftarrow A_1 + \delta A_0$. Define $B(\delta) = [A_1 + \delta A_0, A_2, \dots, A_m]$, and $[\delta_1, \delta_2]$ to be the closed interval range of values of $\delta$ for which $\det B(\delta) \neq 0$.
+    \newline\textbf{(Show)} The subset of $[\delta_1, \delta_2]$ for which $B(\delta)$ is an optimal basis is a closed interval. 
+    \newline\newline We begin by characterizing when $B(\delta)$ is an optimal basis and then analyzing the resulting set of feasible $\delta$.  
+    \begin{align*}
+      B(\delta) \text{ an optimal basis } \Longrightarrow \begin{cases}
+        x_B(\delta) \geq 0 & x_B(\delta) = (B(\delta))^{-1}b \geq 0\\
+        \bar c(\delta) \geq 0 &\bar c(\delta) = c - c_{B(\delta)}^\top (B(\delta))^{-1}A(\delta)
+      \end{cases}
+    \end{align*}
+    \paragraph{Inverting $B(\delta)$ using Sherman-Morrison formula.} Note $B(\delta) = B + \delta A_0 e_1^\top$. Making the same observation as in Exercise 5.3.b,
+    \begin{align*}
+      B(\delta) = B + \delta A_0 e_1^\top &= (I + \delta A_0 e_1^\top B^{-1})B && B(\delta)^{-1} = (B + \delta A_0 e_1^\top)^{-1} = B^{-1}(I + \delta A_0 e_1^\top B^{-1})^{-1}\\
+    \end{align*}
+    When $(I + \delta A_0 e_1^\top B^{-1})$ is invertible. As a given, we know $B(\delta)$ invertible for $\delta \in [\delta_1, \delta_2]$, and therefore this term is invertible within the same $\delta$-range. 
+    
+    Taking the same steps as in Exercise 5.3.c, we decompose the inverse of $(I + \delta A_0 e_1^\top B^{-1})$ using the Sherman-Morrison formula for matrix inversions. First note the rank-1 update form of the matrix
+    \begin{align*}
+      (I + \delta A_0 e_1^\top B^{-1}) \iff (I + \delta A_0 b^{-1\top}_1) \tag{where $b^{-1\top}_1$ is row 1 of $B^{-1}$}
+    \end{align*}
+    Then take the inversion decomposition
+    \begin{align*}
+      (I + \delta A_0 b^{-1\top}_1)^{-1} &= I^{-1} - \frac{\delta}{1 + \delta b^{-1\top}_1 I^{-1} A_0}I^{-1}A_0b^{-1\top}_1I^{-1}\\
+      &= I - \frac{\delta}{1 + \delta b^{-1\top}_1 A_0}A_0b^{-1\top}_1 \tag{for $1 + \delta b_1^{-1\top}A_0 \neq 0$}
+    \end{align*}
+
+
+
+    \paragraph{Feasible $\delta$ for Sherman-Morrison formula} We see that $(1 + \delta b^{-1\top}_1 A_0 ) \neq 0$ for $\delta \in [\delta_1, \delta_2]$ since
+    \begin{align*}
+      \det(B(\delta)) &= \det((I + \delta A_0b_1^{-1\top})B) = \det(I + \delta A_0b_1^{-1\top})\det(B)\\
+      &= \det(B) (1 + \delta b^{-1\top}_1 A_0 ) \tag{since $\det(I + uv^\top) = 1 + v^\top u$}\\
+      &\neq 0 \text{, for $\delta \in [\delta_1, \delta_2]$ from given}
+    \end{align*}
+    With this setup, we are prepared to define the set of $\delta$ for which $x_B(\delta) \geq 0$ (perturbed problem feasibility) and $\bar c_B(\delta) \geq 0$ (perturbed problem optimality).
+    
+    
+    \paragraph{Feasible $\delta$ for $x_B(\delta)\geq 0$.}
+    \begin{align*}
+      x_B(\delta) &= B^{-1}(I + \delta A_0 e_1^\top B^{-1})^{-1}b\\
+      &= B^{-1}\left(I - \frac{\delta}{1 + \delta b^{-1\top}_1 A_0}A_0b^{-1\top}_1\right)b = B^{-1}b - \frac{\delta}{1 + \delta b^{-1\top}_1 A_0}B^{-1}A_0b^{-1\top}_1b\\
+    \end{align*}
+    For feasibility of the perturbed problem, we need to choose $\delta \in [\delta_1, \delta_2]$ such that
+    \begin{align*}
+      B^{-1}b &\succeq \frac{\delta}{1 + \delta b^{-1\top}_1 A_0}B^{-1}A_0b^{-1\top}_1b\\
+      B^{-1}b &\succeq \gamma(\delta) p \tag{for scalar $\gamma(\delta) = \delta / (1 + \delta b^{-1\top}_1 A_0)$ and vector $p = B^{-1}A_0b^{-1\top}_1b$}\\
+      [B^{-1}b]_i &\geq \gamma(\delta)p_i\;\forall i\in[m]\\
+      \gamma(\delta) &\in \left[\max_{\{i: p_i < 0\}}[B^{-1}b]_i/p_i,\min_{\{i: p_i > 0\}}[B^{-1}b]_i/p_i \right] := [\underline \gamma_p, \overline \gamma_p] \tag{unbounded on one side if $\{i: p_i \overset{<}{>} 0\} = \emptyset$}\\
+    \end{align*}
+    Note $\gamma(\delta) \in [\underline \gamma_p, \overline \gamma_p]$ is a continuous function of the form $\delta / (1 + \alpha\delta)$. This function increases monotonically over any interval that does not include $\delta: 1 + \alpha\delta = 0$. Since we are given that $(1 + \delta b^{-1\top}_1 A_0 ) \neq 0$ over $[\delta_1, \delta_2]$, we have that
+    \begin{align*}
+      \gamma(\delta) \in [\underline \gamma_p, \overline \gamma_p] \Longrightarrow \delta &\in [\delta_{1_\gamma p}, \delta_{2_\gamma p}]
+    \end{align*}
+    In words, the set of feasible $\delta$ for $x_B(\delta)\geq 0$ is an interval, which may be open on either side if $\{i: p_i \overset{<}{>} 0\} = \emptyset$.
+
+    \paragraph{Feasible $\delta$ for $\bar c_N(\delta)\geq 0$.}
+    \begin{align*}
+      \bar c(\delta) = [\bar{c_B}(\delta), \bar{c_N}(\delta)] &= \left[c_B - c_B^\top(B(\delta))^{-1}B(\delta), c_N - c_B^\top(B(\delta))^{-1}N\right]\\
+      [\bar{c_B}(\delta), \bar{c_N}(\delta)] &= \left[c_B - c_BI, c_N -  c_B^\top(B(\delta))^{-1}N\right]
+    \end{align*}
+    Since $\bar c_B(\delta) = 0$ in the new perturbed problem, suffice to confirm $\bar{c_N}(\delta) \geq 0$:
+    \begin{align*}
+      \bar{c_N}(\delta) &= c_N -  c_B^\top(B + \delta A_0 e_1^\top)^{-1}N = c_N - c_B^\top B^{-1} (I + \delta A_0 e_1^\top B^{-1})^{-1}N\\
+      &= c_N -  c_B^\top B^{-1}\left(I - \frac{\delta}{1 + \delta b^{-1\top}_1 A_0}A_0b^{-1\top}_1\right)N\\
+      &= c_N - c_B^\top B^{-1}N - \frac{\delta}{1 + \delta b^{-1\top}_1 A_0}c_B^\top B^{-1}A_0b_1^{-1\top}N
+    \end{align*}
+    Note $c_N - c_B^\top B^{-1} = \bar c_N$ from the original problem for notation simplicity. For optimality of the perturbed problem, we need to choose $\delta \in [\delta_1, \delta_2]$ such that
+    \begin{align*}
+      \bar c_N &\succeq \frac{\delta}{1 + \delta b^{-1\top}_1 A_0}c_B^\top B^{-1}A_0b_1^{-1\top}N\\
+      \bar c_N &\succeq \gamma(\delta) q \tag{for scalar $\gamma(\delta)$ defined above and vector $q = c_B^\top B^{-1}A_0b_1^{-1\top}N$}\\
+      [\bar c_N]_i &\geq \gamma(\delta)q_i\;\forall i\in[m]\\
+      \gamma(\delta) &\in \left[\max_{\{i: q_i < 0\}}[\bar c_N]_i/q_i,\min_{\{i: q_i > 0\}}[\bar c_N]_i/q_i \right] := [\underline \gamma_q, \overline \gamma_q] \tag{unbounded on one side if $\{i: q_i \overset{<}{>} 0\} = \emptyset$}\\
+    \end{align*}
+    Using the same logic as above about monotonically increasing $\gamma(\delta)$ over $[\delta_1, \delta_2]$, we have that
+    \begin{align*}
+      \gamma(\delta) \in [\underline \gamma_q, \overline \gamma_q] \Longrightarrow \delta &\in [\delta_{1_\gamma q}, \delta_{2_\gamma q}]
+    \end{align*}
+
+    \paragraph{Feasible $\delta$ is a closed interval}
+    From the requirements presented above, feasible $\delta$ must be the intersection of closed interval, $[\delta_1, \delta_2]$, with interval $[\delta_{1_\gamma p}, \delta_{2_\gamma p}]$ to guarantee feasibility of $x_B(\delta)$ and interval $[\delta_{1_\gamma q}, \delta_{2_\gamma q}]$ to guarantee optimality of $\bar c(\delta)$. 
+    \begin{align*}
+      \delta \in [\delta_1, \delta_2]\cap [\delta_{1_\gamma p}, \delta_{2_\gamma p}] \cap [\delta_{1_\gamma q}, \delta_{2_\gamma q}]
+    \end{align*}
+    The intersection of a closed interval with two other intervals (open or closed) is a closed interval, hence we have proved the result.    
+
+
+
+    \question \textbf{Exercise 5.14}
+    \newline\textbf{(Given)} Given LP 
+    \begin{align*}
+      \min_x \quad& (c + \theta d)^\top x\\
+      \text{s.t.}\quad & Ax = b + \theta f\\
+      & x\geq 0
+    \end{align*}
+    Where $A\in \mathbb R^{m\times n}$ with $m$ linearly independent rows. Assume the problem is feasible and optimal cost $f(\theta)$ finite for $\theta \in [\theta_1, \theta_2]$. 
+    \begin{parts}
+      \part \textbf{(Given)} A basis $B$ is optimal for $\theta = -10$ and $\theta = 10$. \textbf{(Prove)} $B$ is optimal for $\theta = 5$. 
+      \begin{subparts}
+        \subpart ($\theta = 5$ feasible) The provided $\theta$ values for optimal basis $B$ tell us
+        \begin{align*}
+          x_{B_{10}} = B^{-1}(b + 10 f) \succeq 0 && x_{B_{-10}} = B^{-1}(b - 10 f) \succeq 0
+        \end{align*}
+        Observe that
+        \begin{align*}
+          x_{B_{5}} = B^{-1}(b + 5 f) = \frac{3}{4}\underbrace{B^{-1}(b + 10f)}_{\succeq 0} \;+\; \frac{1}{4}\underbrace{B^{-1}(b - 10f)}_{\succeq 0} \succeq 0
+        \end{align*}
+        So basis $B$ feasible for $\theta = 5$
+        
+        \subpart ($\theta = 5$ optimal) The provided $\theta$ values for optimal basis $B$ tell us
+        \begin{align*}
+          \bar c_{10} = (c + 10d) - c_B^\top B^{-1}A \succeq 0 && \bar c_{-10} = (c - 10d) - c_B^\top B^{-1}A \succeq 0
+        \end{align*}
+        Observe that
+        \begin{align*}
+          \bar c_5 = (c + 5d) - c_B^\top B^{-1}A = \frac{3}{4}\underbrace{(c + 10d) - c_B^\top B^{-1}A}_{\succeq 0} \;+\; \frac{1}{4}\underbrace{(c - 10d) - c_B^\top B^{-1}A}_{\succeq 0} \succeq 0
+        \end{align*}
+        So basis $B$ optimal for $\theta = 5$
+      \end{subparts}
+
+      \part \textbf{(Show)} $f(\theta)$ is piecewise quadratic function of $\theta$ and give an upper bound on the number of pieces
+      \newline We are given that this LP is feasible within a range of $\theta$. Feasibility tells us that within this range, $\exists B(\theta)$ such that
+      \begin{align*}
+        x^*_{B(\theta)} = B(\theta)^{-1}(b + \theta f)
+      \end{align*}
+      The optimal cost can be written as
+      \begin{align*}
+        f(\theta) = (c + \theta d)^\top x^* &= (c + \theta d)_{B(\theta)}^\top x_{B(\theta)}^*\\
+        &= c_{B(\theta)}^\top x_{B(\theta)}^* + \theta d_{B(\theta)}^\top x_{B(\theta)}^*\\
+        &= c_{B(\theta)}^\top B(\theta)^{-1}(b + \theta f) + \theta d_{B(\theta)}^\top B(\theta)^{-1}(b + \theta f)\\
+        &= \theta^2 d_{B(\theta)}^\top B(\theta)^{-1}f  \;+\; \theta \left(c_{B(\theta)}^\top B(\theta)^{-1}f + d_{B(\theta)}^\top B(\theta)^{-1}b\right) \;+\; c_{B(\theta)}^\top B(\theta)^{-1}b
+      \end{align*}
+      Which, for every fixed optimal basis, $B(\theta)$, is a quadratic function of $\theta$ since it can be written in the form
+      \begin{align*}
+        f(\theta) = \theta^2 v_{B(\theta)} + \theta u_{B(\theta)} + t_{B(\theta)}
+      \end{align*}
+      Here we notice that each optimal basis may define a different quadratic function in $\theta$ and for $A\in \mathbb R^{m\times n}$ with $m$ linearly independent constraints, we have $\binom{n}{m}$ possible bases corresponding to distinct quadratic equations. 
+
+
+      \part \textbf{(Given)} $b=0, c=0$ and a certain basis is optimal for $\theta = 1$. \textbf{(Answer)} For what other nonnegative values of $\theta$ is the same basis optimal?
+        \newline Rewriting the LP with new givens, we have
+        \begin{align*}
+          \min_x \quad& \theta d^\top x\\
+          \text{s.t.}\quad & Ax = \theta f\\
+          & x\geq 0
+        \end{align*}
+        Let $B$ be the optimal basis for $\theta = 1$. We know $B^{-1}f \succeq 0$ and $d - d_B^TB^{-1}A \succeq 0$. To determine the range of values of theta where $B$ remains optimal, consider
+        \begin{align*}
+          \theta B^{-1}f \succeq 0 && \theta d - \theta d_B^TB^{-1}A \succeq 0
+        \end{align*}
+        \paragraph{Feasibility} Clearly all $\theta \ge 0$ are feasible since this multiplies a nonnegative number ($\theta \ge 0$) by a nonnegative vector ($B^{-1}f \succeq 0$). 
+        \paragraph{Optimality} $B$ remains optimal so long as $\theta d - \theta d_B^\top B^{-1}A \succeq 0$. And we observe
+        \begin{align*}
+          \theta d - \theta d_B^\top B^{-1}A = \theta\underbrace{(d - d_B^\top B^{-1}A)}_{\succeq 0} \succeq 0 \tag{for $\theta \geq 0$}
+        \end{align*}
+        Together, we've shown all $\theta \geq 0$ preserve feasibility and optimality of optimal basis $B$.
+
+
+      \part Is $f(\theta)$ convex, concave, or neither?
+      \newline In part (b) we showed that $f(\theta)$ has the form $f(\theta) = \theta^2 v_{B(\theta)} + \theta u_{B(\theta)} + t_{B(\theta)}$ for varying $(v_{B(\theta)}, u_{B(\theta)}, t_{B(\theta)})$ depending on optimal basis $B(\theta)$. $f(\theta)$ is convex (concave) if $v_{B(\theta)} \geq 0$ ($v_{B(\theta)} \leq 0$) for every optimal basis, $B(\theta)$, and it is neither if the piecewise quadratic equations are not all consistently $\geq 0$ or $\leq 0$
+
+      Now considering $v_{B(\theta)} = d_{B(\theta)}^\top B(\theta)^{-1}f$, there is nothing in the problem data, $(d, B, f)$ requiring $v_{B(\theta)}$ to be either strictly positive or strictly negative, so without more restrictions on $f(\theta)$ it is neither guaranteed to be convex nor concave, so it is most likely neither. 
+    \end{parts}
+
+    \question \textbf{Exercise 6.3} \textbf{(Given)} The LP in the text book
+    \begin{parts}
+      \part \textbf{(Given)} Two feasible solutions are provided below. Construct a restricted master problem (RMP) in which $x$ is constrained to be a convex combination of $x^1$ and $x^2$. \textbf{(Also want)} The optimal primal solution and the corresponding simplex multipliers (dual variables).
+
+        \begin{align*}
+        x^1 &= (x_{11}, x_{12}, x_{13}, x_{21}, x_{22}, x_{23}) = (20, 0, 0, 0, 10, 10)\\
+        x^2 &= (x_{11}, x_{12}, x_{13}, x_{21}, x_{22}, x_{23}) = (0, 10, 10, 20, 0, 0)
+        \end{align*}
+
+        The cost and linking vectors are
+        \begin{align*}
+        c = [0,1,0,0,1,1]^\top,
+        \qquad
+        d = [1, 0,0,0,0,1].
+        \end{align*}
+
+        The restricted master problem uses the coefficients of each column $x^i$:
+        \begin{align*}
+        \max_{\lambda} \quad& \lambda_1 c^\top x^1 + \lambda_2 c^\top x^2\\
+        \text{s.t.}\quad & \lambda_1 d^\top x^1 + \lambda_2 d^\top x^2 \le 15 \tag{linking constraint}\\
+        & \lambda_1 + \lambda_2 = 1,\quad \lambda_i \ge 0 \tag{convexity constraint.}
+        \end{align*}
+
+        Plugging in numbers:
+        \begin{align*}
+        \max_{\lambda} \quad& 20\lambda_1 + 10\lambda_2\\
+        \text{s.t.}\quad & 30\lambda_1 + 0\lambda_2 \le 15 \\
+        & \lambda_1 + \lambda_2 = 1,\quad \lambda_i \ge 0.
+        \end{align*}
+
+        By inspection, the resource constraint is binding and both columns are active at optimality:
+        \begin{align*}
+        \lambda_1 = \lambda_2 = 0.5,
+        \qquad
+        z^* = 20(0.5) + 10(0.5) = 15.
+        \end{align*}
+
+        \paragraph{Finding the simplex multipliers (dual variables).}
+        Let $r$ be the dual on the convexity constraint (free), and let $q$ be the dual variable on the linking constraint ($q \ge 0$).  
+        The Lagrangian of  is
+        \begin{align*}
+        L(\lambda, q, r) &= 20\lambda_1 + 10\lambda_2 + r(1 - \lambda_1 - \lambda_2) + q(15 - 30\lambda_1),
+        \quad q \ge 0.
+        \end{align*}
+
+        Maximizing $L$ with respect to $\lambda \ge 0$ gives
+        \begin{align*}
+        g(q, r)
+        &= r + 15q + \max_{\lambda \ge 0}
+        \left\{ (20 - r - 30q)\lambda_1 + (10 - r)\lambda_2 \right\}.
+        \end{align*}
+
+        For the maximization to be finite, both coefficients of $\lambda_1$ and $\lambda_2$ must be nonpositive, so the dual feasible region is
+        \begin{align*}
+        \mathcal{P} = \{(q, r)\mid 20 - r - 30q \le 0,\; 10 - r \le 0,\; q \ge 0\}.
+        \end{align*}
+
+        And the dual problem is
+        \begin{align*}
+        \min_{q, r}\quad & r + 15q\\
+        \text{s.t.}\quad & r + 30q \ge 20,\\
+        & r \ge 10,\\
+        & q \ge 0
+        \end{align*}
+
+        By inspection, the dual is minimized at $r = 10,\ q = \tfrac{1}{3}$, the simplex multipliers.
+
+      \part \textbf{(Want)} Using the simplex multipliers $(q,r) = (\tfrac{1}{3}, 10)$ from part (a), formulate the subproblem and solve by inspection.
+        The subproblem is defined as
+        \begin{align*}
+        \max_x \quad & (c - q d)^\top x \tag{$q$ is the dual on the linking constraint}\\
+        \text{s.t.}\quad & A x = b \tag{the uncoupled constraints defining $P$}\\
+        & x \ge 0
+        \end{align*}
+        
+        Substituting numbers:
+        \begin{align*}
+        \max_x \quad & [-\tfrac{1}{3}, 1, 0, 0, 1, \tfrac{2}{3}]\,x\\
+        \text{s.t.}\quad &
+          x_{11} + x_{12} + x_{13} = 20\\
+          & x_{21} + x_{22} + x_{23} = 20\\
+          & x_{11} + x_{21} = 20\\
+          & x_{12} + x_{22} = 10\\
+          & x_{13} + x_{23} = 10\\
+          & x \ge 0
+        \end{align*}
+        
+        Eliminating the dependent variables $x_{21},x_{22},x_{23}$:
+        \begin{align*}
+        x_{21} &= 20 - x_{11}, &
+        x_{22} &= 10 - x_{12}, &
+        x_{23} &= 10 - x_{13}
+        \end{align*}
+        
+        Substitute and simplify:
+        \begin{align*}
+          \max_{x_{11},x_{13}}\, & -\tfrac{1}{3}x_{11} - \tfrac{2}{3}x_{13} + \tfrac{50}{3}\\
+          \text{s.t.}\;
+          & x_{11} + x_{12} + x_{13} = 20,\\
+          & 0 \le x_{11} \le 20,\;
+          0 \le x_{12} \le 10,\;
+          0 \le x_{13} \le 10
+        \end{align*}
+        To maximize the objective we push $x_{11}+x_{13}$ to its smallest feasible value (10), and  assign that total to the variable with the smaller penalty ($x_{11}$).
+        
+        Therefore:
+        \begin{align*}
+        x_{11}&=10,\quad x_{13}=0,\quad x_{12}=10\\
+        x_{21}&=10,\quad x_{22}=0,\quad x_{23}=10\tag{backsubstitute}\\
+        x^3 &= [10, 10, 0, 10, 0, 10]
+        \end{align*}
+        
+        The corresponding objective value is
+        \begin{align*}
+        (c - q d)^\top x^3 &= [-\tfrac{1}{3},1,0,0,1,\tfrac{2}{3}]^\top[10,10,0,10,0,10]\\
+        &= -\tfrac{10}{3} + 10 + \tfrac{20}{3} = \tfrac{40}{3}\\
+        \tfrac{40}{3} > r = 10 \Longrightarrow (c - q d)^\top x^3 - r > 0
+        \end{align*}
+        which means the subproblem produced an improving column (positive reduced cost in a maximization context), and $x^3$ should be added to the restricted master problem.  
+
+      \part \textbf{(Want)} What is the reduced cost variable, $\lambda_i$, associated with the optimal extreme point $x^i$ obtained from the subproblem solved in part (b)?
+
+        After adding $x^3$ as a new column, the restricted master problem becomes:
+        \begin{align*}
+        \max_{\lambda}\quad & 20\lambda_1 + 10\lambda_2 + 20\lambda_3\\
+        \text{s.t.}\quad & 30\lambda_1 + 0\lambda_2 + 20\lambda_3 \le 15 \tag{linking constraint}\\
+        & \lambda_1 + \lambda_2 + \lambda_3 = 1, \quad \lambda_i \ge 0. \tag{convexity constraint}
+        \end{align*}
+
+        By visual inspection of the convex combinations, this problem attains the same optimal solution as in part (a): $\lambda_1 = \lambda_2 = 0.5,\quad \lambda_3 = 0$ and the objective remains $z^* = 15$
+
+
+      \part \textbf{(Want)} An upper bound on the optimal cost
+      \newline Consider the Dantzig-Wolfe formulation of the master problem and the restricted master problem
+      \begin{align*}
+        P^{(MP)}:\;\max_\lambda\quad & \sum_{i\in \mathcal I}\lambda_ic^\top x^i 
+          &&\iff & \max_\lambda\quad & c^\top X \lambda \\
+        \text{s.t.}\quad & \sum_{i\in \mathcal I}\lambda_id^\top x^i = b
+          && & \text{s.t.}\quad & d^\top X \lambda = b\\
+        & \sum_{i\in \mathcal I}\lambda_i = 1,\; \lambda_i \ge 0
+        && & & \lambda^\top \mathbf{1} = 1,\; \lambda \ge 0
+      \end{align*}
+      Where $\mathcal I$ is the set of all extreme points of the unlinked problem, $\mathcal P$, and $X$ is a matrix of all $x^i,\; i\in \mathcal I$. The Lagrangian of $P^{(MP)}$ is
+      \begin{align*}
+        L(\lambda, q, r)
+        &= c^\top X \lambda + q(b - d^\top X \lambda) + r(1 - \mathbf{1}^\top \lambda), \quad q \ge 0\\[3pt]
+        g(q,r)
+        &= \max_{\lambda \ge 0} L(\lambda, q, r)
+         = qb + r + \max_\lambda (c^\top X - q d^\top X - r \mathbf{1}^\top)\lambda\\
+        &= qb + r + \max_{i \in \mathcal I} (c^\top x^i - q d^\top x^i - r)
+         && \text{(since optimum at an extreme point)}\\
+        &= qb + r + \max_{x \in \mathcal P} (c - q d)^\top x - r
+         && \text{(equivalent formulation over $\mathcal P$)}\\
+        &= qb + \max_{x \in \mathcal P} (c - q d)^\top x
+         && \text{(dependence on $r$ cancels)}
+      \end{align*}
+      By construction, the dual function, $g(q,r)$ is an upper bound on $P^{(MP)},\; \forall q\geq 0$. We can choose simplex multiplier $q$ as the dual for our restricted master problem, and use the solution to our pricing subproblem, $\max_{x \in \mathcal P} (c - qd)^\top x$ to get our upper bound:
+      \begin{align*}
+        qb &= \tfrac{1}{3} * 15\\
+        (c - q b)^\top x^3 &= \tfrac{40}{3}\\
+        g(q,r) &= \tfrac{15}{3} + \tfrac{40}{3} = \mathbf{\tfrac{55}{3} }
+      \end{align*}
+      
+    \end{parts}
+
+
+
+    \question \textbf{Exercise 6.5} 
+    \textbf{(Given)} Consider an LP of the form
+    \begin{align*}
+      \min \quad& c^\top x + d^\top y\\
+      \text{s.t.}\quad& Ax + Dy \leq b\\
+      & Fx \leq f\\
+      & y\geq 0
+    \end{align*}
+    \begin{parts}
+      \part \textbf{(Given)} Access to a fast subroutine for solving $\min_{\{x \mid Fx \leq f\}}h^\top x$ for arbitrary $h$. \textbf{(Want)} How would I go about solving the problem?
+
+      This subroutine lends itself to the Dantzig-Wolfe algorithm. Consider the separable sets 
+      \begin{align*}
+        \mathcal P_x = \{x \mid Fx \leq f\} && \mathcal P_y = \{y \mid y \geq 0\}
+      \end{align*}
+      $\mathcal P_x$ may be a complex polyhedron, while $\mathcal P_y$ is the nonnegative orthant, trivially composed of extreme rays $e_j,\; j\in [\text{length}(d)]$. The Dantzig-Wolfe decomposition of the master problem is 
+      \begin{align*}
+        \min \quad& \sum_i \lambda_x^i c^\top x^i + \sum_k \theta_x^kc^\top w_x^k + \sum_j y_j d^\top e_j\\
+        \text{s.t.}\quad& \sum_i \lambda_x^i A x^i + \sum_k \theta_x^kA w_x^k + \sum_j y_j D e_j \leq b \tag{$q$}\\
+        & \sum_i \lambda_x^i = 1 \tag{r}\\
+        & \lambda_x^i, \theta_x^k, y_j \geq 0,\; \forall i, j, k
+      \end{align*}
+      The algorithm then could be:
+      \begin{enumerate}
+        \item As is done in the textbook, suppose we have a basic feasible solution, $(\tilde x, \tilde y)$, to the master problem and corresponding basis, $B$. 
+        \begin{itemize}
+          \item We may find $B$ through the method described in the textbook (p251), which is similar to Phase 1 of the two-phase simplex method.
+          \item In the subsequent steps, let $B^k \leftarrow B$, $(B^k)^{-1} \leftarrow B^{-1}$
+        \end{itemize}
+        \item Calculate $p^\top = c_{B^k}^\top (B^k)^{-1}$, where $c_{B^k}$ is the vector of objective coefficients corresponding to $B^k$. Let $q$ be the indexes of $p$ corresponding to the linked constraint, $Ax + Dy \leq b$, and let $r$ be the index corresponding to the convexity constraint
+        \item Solve the pricing subroutine below. As a given, we have a fast algorithm for this
+        \begin{align*}
+          g = \min_x\;& (c^\top - q^\top A)x \quad \text{s.t.}\; Fx \leq f \tag*{$h = (c^\top - q^\top A)$}\\
+        \end{align*}
+        \begin{enumerate}
+          \item Note by construction of $p$ corresponding to feasible basis $B$, and inclusion of all $e_j$ in the Dantzig-Wolfe decomposition, we are guaranteed that $d^\top \succeq qD$, so suffice to only check this subproblem. 
+          \item If $g \geq r$, then all reduced costs in the master problem are nonnegative, and we have an optimal basis, $B^k$. Terminate with corresponding optimal basic feasible solution.
+          \item If $g = -\infty$, then the pricing subroutine problem provides us with an extreme ray of the separable constraint set, $w^k_x$. The reduced cost of the corresponding variable, $\theta^k_x$, in the Dantzig-Wolfe decomposition of the full master problem is negative and we want to include $w^k_x$ in our restricted master problem.
+          \item If $g < r$ but finite, then the pricing subroutine problem provides us with an extreme point of the corresponding separable constraint set, $x^i$. The reduced cost of corresponding variable, $\lambda^k_x$, in the Dantzig-Wolfe decomposition of the full master problem is negative and we want to include $\lambda^k_x$ in our restricted master problem. 
+        \end{enumerate}
+        \item Introduce the new column, $w^k_x$ or $x^i$, and the corresponding variable, $\theta^k_x, \lambda^i_x$, into the restricted master problem. Use the simplex method with the new column and variable to update $B^k, (B^k)^{-1}$. Return to step 2 and iterate until termination. 
+      \end{enumerate}
+
+      \part \textbf{(Given)} Access to a fast subroutine for solving $\min_{\{y\mid Dy \leq h, y\geq 0\}}d^\top y$ for arbitrary $h$. \textbf{(Want)} How would I go about solving the problem?
+      \newline This subroutine lends itself to Benders Decomposition (delayed constraint generation algorithm). Consider the reformulation of the provided problem
+      \begin{align*}
+        \min_{x,z} \quad& c^\top x + z\\
+        \text{s.t.}\quad& Fx \leq f\\
+        & p^{i\top}(b - Ax)\leq z,\; \forall i \text{ extreme points of } P = \{p\mid p^\top D \leq d^\top\}\\
+        & w^{j\top}(b - Ax)\leq 0,\; \forall j \text{ extreme rays of } P\\
+      \end{align*}
+      The algorithm then could be
+      \begin{enumerate}
+        \item Initialize by solving a relaxed problem, perhaps $\min_{\{x,z \mid Fx \leq f, z \geq z_0\}} c^\top x + z$ and obtain optimal solution $(\tilde x^*, \tilde z^*)$. In the subsequent steps, let $(x^{k*}, z^{k*})$
+        \item Solve the decomposition subproblem, $(P_{x^{k*}})$. As a given, we have a fast algorithm for $(P_{x^{k*}})$
+        \begin{align*}
+          (P_{x^{k*}})\quad \min_y\;&d^\top y \quad &&\text{s.t}\;Dy \leq (b - Ax^{k*}),\; y\geq 0 \tag*{$h = b-Ax^{k*}$}\\
+          (D_{x^{k*}})\quad \max_p\;&p^\top(b-Ax^{k*}) \quad &&\text{s.t}\;p\geq 0,\; p^\top D \leq d\\
+        \end{align*}
+        \begin{enumerate}
+          \item If $val(P_{x^{k*}}) \leq z^{k*}$, then all constraints are satisfied and we have an optimal solution to the master problem. Terminate.
+          \item If $val(P_{x^{k*}}) > z^{k*}$, then this corresponds to an optimal solution, $p^k$ to $(D_{x^{k*}})$ whose cost is greater than $z^{k*}$. Include this, $p^{k\top}(b - Ax) \leq z$ as a new constraint in the relaxed master problem
+          \item If $(P_{x^{k*}})$ is infeasible, then $(D_{x^{k*}})$ is unbounded and optimal solution to the dual corresponds to extreme ray, $w^k$. Include this, $w^{k\top}(b - Ax) \leq 0$ as a new constraint in the relaxed master problem.
+        \end{enumerate} 
+        \item Solve a new relaxed problem of the form below and return to step 2 with optimal $(x^{k*}, z^{k*})$.
+        \begin{align*}
+          \min_{x,z} \quad& c^\top x + z\\
+          \text{s.t.}\quad& Fx \leq f\\
+          & p^{i\top}(b - Ax) \leq z,\; \forall i = 1, \dots, k_i \\
+          & w^{j\top}(b - Ax) \leq 0, \; \forall j = 1, \dots, k_j\\
+        \end{align*}
+        where vectors $p^{i}, w^{j}$ are iteratively added to the problem in each step 2 of the iteration.
+      \end{enumerate}
+
+    \end{parts}
+
+\end{questions}
+\end{document}

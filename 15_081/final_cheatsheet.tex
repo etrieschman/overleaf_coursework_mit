@@ -1,0 +1,1081 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{mathtools,amssymb}
+\usepackage{lipsum}
+\usepackage{hyperref}
+\usepackage{layout}
+\usepackage{geometry}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{amsthm}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{xcolor}
+\usepackage{titlesec}
+
+\newcommand*{\vertbar}[1][10ex]{\rule[-1ex]{0.5pt}{#1}}
+\newcommand*{\horzbar}{\rule[.5ex]{2.5ex}{0.5pt}}
+\newcommand{\norm}[2]{\left\lVert#1\right\rVert_#2}
+\newcommand{\abs}[1]{\lvert#1\rvert}
+
+\title{15.081 Math Programming class notes}
+\author{Erich Trieschman}
+\date{2025 Fall semester}
+
+% bullet list spacing
+\setlist[itemize]{
+    leftmargin=10pt,
+    labelindent=5pt,labelsep=.4em}
+\setlist{topsep=0pt,itemsep=5pt,parsep=0pt,partopsep=0pt}
+\newcommand{\userMarginInMm}{7}
+% Usage: \setpaperscale{<scalar>} (e.g., \setpaperscale{1})
+\usepackage{fp}
+\newcommand{\setpaperscale}[1]{%
+    \FPeval\calcpaperwidth{clip(5.5 * #1)}%
+    \FPeval\calcpaperheight{clip(8.5 * #1)}%
+    \geometry{%
+        paperwidth=\calcpaperwidth in,%
+        paperheight=\calcpaperheight in,%
+        left=\userMarginInMm mm,%
+        right=\userMarginInMm mm,%
+        top=\userMarginInMm mm,%
+        bottom=\userMarginInMm mm,%
+        footskip=5mm%
+    }%
+}
+
+% theme spacing
+\titlespacing*{\section}{0pt}{3ex plus 0.3ex minus 0.2ex}{0.5ex}
+\titlespacing*{\subsection}{0pt}{3ex plus 0.2ex minus 0.1ex}{0.5ex}
+\titlespacing*{\paragraph}{0pt}{1.9ex}{0.5em}
+
+% equation text size
+\AtBeginEnvironment{align*}{\footnotesize}
+
+% section colors
+\definecolor{sectionblue}{HTML}{1781F2}
+\definecolor{subsectionpurple}{HTML}{C158FF}
+
+\titleformat{\section}
+  {\color{sectionblue}\normalfont\Large\bfseries}
+  {\thesection}{0.6em}{}
+
+\titleformat{\subsection}
+  {\color{subsectionpurple}\normalfont\large\bfseries}
+  {\thesubsection}{0.6em}{}
+
+
+
+
+\setpaperscale{1.55}
+
+
+ \hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+    pdfpagemode=FullScreen,
+}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+    
+\lstset{frame=tb, language=Python,
+    aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=none,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=3}
+
+\begin{document}
+
+\section{Linear algebra and set review}
+\paragraph{Proof formats} \textbf{(Set inclusion)} Prove $P = Q \Longrightarrow$ Prove $(P\subseteq Q)$ and $(Q\subseteq P)$. \textbf{(Contradiction)} Prove $A \Rightarrow B \Longrightarrow$ Assume $A$ and $\neg B$ and find contradiction. (\textbf{Contrapositive}) Prove $A \Rightarrow B \Longrightarrow$ Prove $\neg B\Rightarrow \neg A$. \textbf{(Induction)} Prove $A(n) \Longrightarrow$ \emph{Base:} prove $A(0)$, \emph{Assumption:} assume $A(n)$; \emph{Induction:} derive $A(n+1)$.
+
+\paragraph{Matrix formats} $A = \begin{bmatrix}A_1 & A_2& \dots & A_n\end{bmatrix} = 
+    \begin{bmatrix} a_1^\top  & \dots & a_m^\top \end{bmatrix}^\top ,\quad Ax = \sum_i A_ix_i = 
+    \begin{bmatrix} a_1^\top x & \dots & a_m^\top x \end{bmatrix}^\top $
+
+\paragraph{$A \in \mathbb R^{n\times n}$ invertible} $\iff \text{rank}(A) = n \iff$ linearly independent columns/rows $\iff$ $Ax=b$ unique $x$
+
+\paragraph{Sherman-Morrison-Woodbury formula} 
+for $A\in \mathbb{R}^{n\times n}, U,V \in \mathbb{R}^{n\times k}\ (\text{special case: } u,v \in \mathbb R^n)$
+\begin{align*}
+    (A+UV^\top)^{-1} = A^{-1} - A^{-1}U(I+V^\top A^{-1}U)^{-1}V^\top A^{-1}
+    && (A+uv^\top)^{-1} = A^{-1} - \frac{A^{-1}uv^\top A^{-1}}{(1+v^\top A^{-1}u)}
+\end{align*}
+
+
+\paragraph{Polyhedron} A set $P=\{x \in \mathbb R^n \mid Ax \geq b\}$. To \textbf{test boundedness} use contradiction: Suppose $\exists d\neq 0$ such that $x + \lambda d \in P\; \forall \lambda \geq 0$, usually arriving at contradiction that $d=0$. 
+
+\paragraph{Distance} The shortest path from point $x_0$ to plane $a^\top x = b$ is orthogonal to the plane. Write as $x = x_0 - t*a: b = a^\top x = a^\top (x_0 - t*a) = a^\top x_0 - t\norm{a}{2}^2 \Longrightarrow t = (b - a^\top x_0)/\norm{a}{2}^2$.
+
+
+% \paragraph{Projection} $\Pi_k(S) = \{\pi_k(x) \mid x \in S\}$ where $\pi_k(x) = \pi_k(x_1, \dots, x_n) = (x_1, \dots, x_k)$. $S$ nonempty $\iff \Pi_k(S)$ nonempty. \textbf{Corrolary} For $P\subset \mathbb R^{n+k}$ a polyhedron, then $\{x \in \mathbb R^n \mid \exists y\in \mathbb R^k \text{ with } (x,y)\in P\}$ is a polyhedron. 
+
+\paragraph{Fourier-Motzkin elimination} Tradeoff of decrease in dimension for increase in constraints:
+\begin{align*}
+    P = \{x\in \mathbb R^n \mid a_i^\top x \geq b_i, i\in [m]\} = \{x\in \mathbb R^n \mid a_{in}x_n \geq -\sum_j a_{ij}x_j + b_i, i\in [m]\} &&
+    Q = \left\{x\in \mathbb R^{n-1} \mid \begin{cases}
+        d_j + f_j^\top \overline x \geq d_i + f_i^\top \overline x & a_{jn}<0, a_{jn}>0\\
+        0 \geq d_k + f_k^\top \overline x & a_{kn} = 0
+    \end{cases}\right\} = \Pi_{n-1}(P)
+\end{align*}
+% \textbf{Elimination algorithm for solving LP:} Lift optimization problem: $\max_{\{x \mid Ax\geq b\}}c^\top x \Rightarrow P' = \{(x, x_0) \mid Ax \geq b, c^\top x = x_0\}$. Use elimination to arrive at $Q = \{ x_0\mid \alpha_i x_0 \leq \beta_i\}$; the optimization becomes $\min_{\{x_0 \mid x \in Q\}}$.
+
+\paragraph{Basis} for subset $S$ is a collection $\mathcal X = \{x^{(0)}, x^{(1)},\dots\}\subset S \subseteq \mathbb R^n$ such that (i) span$(\mathcal X) = \{y\mid y=\sum_i a_ix^{(i)}\} = S$ and (ii) vectors defining $\mathcal X$ are linearly independent.
+
+% \paragraph{Constructing a basis} Given span $S$ of vectors $x^1, \dots, x^K$ has dimension $m$ and $x^1, \dots, x^k$ linearly indepenent. We can form a basis by starting with those vectors. Since for $k < m$ we know at least one vector in $x^{k+1},\dots, x^K$ is linearly independent from the original set, choose that one.
+
+\paragraph{Convex function} $ f(\lambda x + (1 - \lambda)y)\leq \lambda f(x) + (1-\lambda)f(y), \; \forall f:\mathbb R^n  \mapsto \mathbb R,\; \forall x,y \in \mathbb R^n,\; \forall \lambda \in [0, 1]$
+% \newline\noindent The max of convex functions is convex: 
+% \begin{align*}
+%     f(\lambda x + (1 - \lambda)y) &= \max_{i\in[m]}f_i(\lambda x + (1 - \lambda)y) \leq \max_{i\in[m]}\left(\lambda f_i(x) + (1 - \lambda)f_i(y)\right)\\
+%     &\leq \max_{i\in[m]}\lambda f_i(x) + \max_{i\in[m]}(1 - \lambda)f_i(y) = \lambda f(x) + (1 - \lambda)f(y)
+% \end{align*}
+
+
+\paragraph{Convex set} $S \subset \mathbb R^n$ such that $\lambda x + (1 - \lambda)y \in S, \forall x,y \in S, \lambda \in [0,1]$. A \textbf{convex combination} of a finite number of elements of convex set, $S$ also belongs to that set. \textbf{(Proof with induction)} Base case: given for 2 elements by definition. Assume step $k$, then
+\begin{align*}
+    \sum_{i=1}^{k+1}\lambda_i x^i = \lambda_{k+1}x^{k+1} + (1 - \lambda_{k+1})\sum_{i=1}^k \frac{\lambda_i}{1 - \lambda_{k+1}}x^i && \text{ with }\lambda_i \geq 0, \sum_i\lambda_i = 1,\; \left(\sum_{i=1}^k \frac{\lambda_i}{1 - \lambda_{k+1}}x^i\right) \in S
+\end{align*}
+
+% \paragraph{Caratheodory theorem} Let $C = \{x\in \mathbb R^m \mid x = A\lambda, \lambda \geq 0\}, A\in \mathbb R^{m\times n}$. Then $\forall x\in C,\; \exists \lambda^*\geq0$ with $|\text{supp}(\lambda^*)|\leq m$. \textbf{(Proof sketch)} Suppose $|\text{supp}(\lambda^*)|> m \Longrightarrow \exists d\in \mathcal N(A)$ such that $\text{supp}(d)\subseteq \text{supp}(\lambda)$ since rows of $A_{\text{supp}(\lambda)}$ linearly dependent. Can move along $d$ while $A(\lambda + \theta d) = x$. Do this until one value of $\lambda$ is driven to 0. \textbf{(Extension)} Let $P = \{x\in \mathbb R^m \mid x = A\lambda, \lambda \geq 0, \mathbf{1}^\top \lambda = 1\}, A\in \mathbb R^{m\times n}$. Then $\forall x\in P,\; \exists \lambda^*\geq0$ with $|\text{supp}(\lambda^*)|\leq m+1$. \textbf{(Proof sketch)} Define $\tilde A = [A^\top , \mathbf{1}]^\top  \in \mathbb R^{(m+1)\times n}$ and use earlier proof. \textbf{(Dimension elimination in general)} (i) Identify or suppose linear dependence of rows/columns of $A_I$, (ii) choose $d$ such that $Ad = 0$, (iii) move along d until the dimension is reduced using simplex step size.
+
+\paragraph{Affine subspace} $y \in S = \{x \mid Ax=b\} \iff (x - x^0) \in S_0 = \{y \mid Ay = 0\},\; \forall x\in S$ and for fixed $x^0\in S$.
+\textbf{Dimension.}
+Let $S = \{x \mid A x \geq b\}$ and fix any $x^0$ with $A x^0 \geq b$. Then $S = \{x^0 + y \mid y \in S_0\}, \quad S_0 = \{y \mid A y \geq 0\}$.
+The affine hull of $S$ is $\text{aff}(S) = x_0 + \text{span}(x - x_0 : x \in S)$. Its dimension is $\dim(S) = \dim(\text{aff}(S)) = n - \operatorname{rank}(A_{I_=})$, where $I_= = \{i\mid a_i^\top x = b, \forall x\in S\}$.
+
+
+\section{Linear programming geometry}
+\paragraph{Extreme point} $x\in P$ such that $\nexists y,z\in P, \; \lambda \in [0,1]$ such that $x = \lambda y + (1 - \lambda)z$ and $x \neq y,z$.
+\textbf{Vertex} $x\in P$ such that $\exists\,c$ where $c^\top x < c^\top y, \; \forall\, y\in P, y\neq x$.
+\textbf{Basic feasible solution} A \textbf{basic solution} satisfies $x \in \mathbb R^n$ such that i) all equality constraints of $P$ are active, ii) of all active constraints of $P$, $n$ are linearly independent. A \textbf{basic feasible solution} is a basic solution with $x \in P$. To \textbf{construct a basic solution}, choose $m$ linearly independent columns of $A, A_B$, let $x_j = 0\; \forall j \notin B$, and solve system of equations, $Ax = b$ for unknowns $x_B = A_B^{-1}b$
+
+\paragraph{Extreme point $\Rightarrow$ BFS:} Let $I=\{i \mid a_i^\top x = b_i\}$. Suppose $x\in P$ not a BFS, then normals $\{a_i\}_{i\in I}$ do not span $\mathbb R^n \Longrightarrow \exists\, d \neq 0 \in\mathbb R^n$ such that $a_i^\top d = 0 \forall\,i \in I$. 
+Consider points $y = x + \epsilon d,\, z=x - \epsilon d$. For $i\in I, a_i^\top y = a_i^\top x + \epsilon a_i^\top d = b_i$ so constraints remain active. For $j\notin I$ we have $a_j^\top x > b_j$. 
+Let $\overline \epsilon =  \min\Big\{\,\tfrac{a_j^\top  x-b_j}{\,|a_j^\top  d|\,}\mid j\notin I,\ a_j^\top  d\neq 0\Big\} > 0$.
+Then $\forall \epsilon \in [0, \overline \epsilon],\ j \notin I,\ a_j^\top y = a_j^\top x + \epsilon a_j^\top d \geq a_j^\top x - \abs{\epsilon a_j^\top d} > a_j^\top x - (a_j^\top x - b_j) = b_j$. Hence $y,z\in P$. 
+Since $d \neq 0,\ y\neq z,\; x = \frac{1}{2}(y + z)$, a nontrivial convex combination of two distinct feasible points. Contradiction $\qed$ 
+
+\paragraph{Vertex $\Rightarrow$ Extreme point:} Suppose $x\in P$ a vertex. Then $\exists\,c$ such that $\forall y,z\in P\setminus\{x\}$, $c^\top x < c^\top z$ and $c^\top x < c^\top y$. This implies $\forall \lambda\in[0,1],\; c^\top x < c^\top (\lambda y + (1 - \lambda)z) \Longrightarrow x \neq  \lambda y + (1 - \lambda)z \qed$
+
+\paragraph{BFS $\Rightarrow$ Vertex:} Let $x\in P$ a BFS, $I=\{i \mid a_i^\top x = b_i\}$, and $c = \sum_{i\in I}a_i$. Then $c^\top x = \sum_{i\in I}a_i^\top x = \sum_{i\in I}b_i$. Furthermore, $\forall y \in P,\, c^\top y = \sum_{i\in I}a_i^\top y \geq \sum_{i\in I}b_i$. This shows $x$ optimal to problem of minimizing $c^\top x$. $x$ a BFS $\Longrightarrow$ there are $n$ linearly independent constraints active at $x$ and $x$ is the unique solution to the system of equations $a_i^\top x = b_i, i\in I \Longrightarrow x$ is the unique minimizer of $c^\top y, \forall y\in P \Longrightarrow x$ is a vertex.
+
+\paragraph{BFS properties and exercises}
+\begin{itemize}
+    \item \textbf{Finite number of BFS:} For $P = \{x \mid Ax \geq b\}$ with $m$ linearly independent rows of $A$, there are at most $\binom{n}{m}$ BFS
+    
+    \item \textbf{BFS implies $x_{j \notin I} = 0$:} Consider $Ax = b, x\geq 0$ with $A\in \mathbb R^{m\times n}$ with $m$ linearly independent rows. $x$ a BFS $\iff Ax = b$ and $\exists$ $m$ indices $B$ indices such that $A_B$ are linearly independent. Then $Ax = A_Bx_B = b$ and if $j \notin B \implies x_j = 0$.
+    
+    % \item \textbf{If standard form and all BFS nondegenerate} then support of any feasible $x$ is $\geq m$: Use resolution theorem and note i) support of convex combination of nondegenerate extreme points always $\geq m$, ii) linear positive combination of extreme rays is nonnegative.
+
+    \item \textbf{Standard form polyhedra defines $(n-m)$-dimensional affine subspace intersected with the positive orthant.} Let $P = \{x\in \mathbb R^3\mid Ax=b, x\geq0\}$ and $A\in\mathbb R^{m\times n}$ has $m$ linearly independent rows. If $n=m+1$, then $P$ has at most 2 BFS.
+    
+    \item $\min_{\{x\mid x_1 = 0, x\geq0\}}x_1$ shows: (i) there may be optimal solutions with support $>m$ (E.g., $(0, x_2, x_3)$), (ii) If there are several optimal solutions, there need not exist two optimal BFS (i.e., only BFS is $(0,0,0)$)
+    
+    \item $\min_{\{x\mid x_1 + x_2 = 1,\ x\geq 0\}}\max\{x_1 - x_2,\ x_2 - x_1\}$ shows: this problem need not have an optimal BFS $\in P$ ($x^* = (\tfrac{1}{2},\tfrac{1}{2})$)
+\end{itemize}
+
+\paragraph{Existence of extreme points.}
+For nonempty $P=\{x\mid Ax\ge b\}$ the following are equivalent:
+(a) $P$ has an extreme point;
+(b) $P$ contains no line;
+(c) $A$ contains $n$ linearly independent rows.
+
+\begin{itemize}
+\item \textbf{(b)$\Rightarrow$(a)} 
+Pick any $x\in P$. If $x$ is a BFS, done.  
+Otherwise, let $I=\{i\mid a_i^\top x=b_i\}$ be the active set and note that $A_I$ has linearly dependent rows. Thus $\exists\, d\neq 0$ with $A_I d = 0$. 
+Since $P$ contains no line, the ray $\{x+\lambda d\}$ cannot stay in $P\ \forall\ \lambda$.  
+Hence at some endpoint $\lambda^*$ of the feasible interval, a new constraint $j\notin I$ becomes tight, $a_j^\top(x+\lambda^* d)=b_j$. 
+Because $a_j^\top d\neq 0$ while $A_I d=0$, $a_j$ is linearly independent of $\{a_i\}_{i\in I}$.  
+Set $x\leftarrow x+\lambda^* d$ and update $I\leftarrow I\cup\{j\}$.  
+Each iteration strictly increases $rank(A_I)$; after at most $n$ steps we obtain $n$ independent active constraints. 
+
+\item \textbf{(a)$\Rightarrow$(c)} 
+$x\in P$ extreme point $\Rightarrow x$ a BFS $\Rightarrow \exists n$ constraints active at $x \Rightarrow$ corresponding rows of $A$ linearly independent
+
+\item \textbf{(c)$\Rightarrow$(b)} 
+Contradiction: suppose $\{x+\lambda d : \lambda\in\mathbb R\} \subset P$ with $d\neq 0$.  
+Feasibility for all $\lambda$ implies $A(x+\lambda d)\ge b \quad\forall\lambda \Longrightarrow Ad = 0$. 
+If $A$ has $n$ linearly independent rows, they span $\mathbb R^n$ so $Ad=0 \Rightarrow d=0$
+
+\item \textbf{Corollaries.}
+Bounded polyhedron has an extreme point. 
+$\mathbb R_{\geq0}^n$ contains no line $\implies$ polyhedron in standard form contains no line
+\end{itemize}
+
+
+
+
+\paragraph{Existence of optimal extreme point.}
+For $\min_{\{x\mid Ax\ge b\}}c^\top x$, either the cost is $-\infty$ or an optimal extreme point exists.
+\textbf{(Proof)}
+Let $x\in P$ with active set $I=\{i\mid a_i^\top x=b_i\}$ of rank $k<n \Longrightarrow \exists d\neq 0$ with $Ad=0$; choose sign so $c^\top d\le 0$.
+Consider $x+\lambda d$. If feasible for all $\lambda>0$, then $c^\top(x+\lambda d)\to -\infty$.  
+Otherwise let $\lambda^*>0$ be the first point where a new constraint $j\notin I$ becomes active, $a_j^\top(x+\lambda^* d)=b_j$.
+Set $x\leftarrow x+\lambda^* d$.  
+Then $c^\top x$ does not increase and $\text{rank}(I)$ increases by $1$.
+Repeat at most $n-k$ times $\qed$
+
+
+\paragraph{Unique optimum.}
+For $\min_{\{x \mid Ax=b, x\geq0\}} c^\top x$ with optimal BFS $x^*$ and reduced costs $\bar c_N$,
+$x^*$ is the unique optimum $\iff I=\{i\in N : \bar c_i=0\}=\emptyset$ (Dual nondegeneracy).
+\textbf{(Proof $\Leftarrow$)} Contradiction: 
+Suppose $\exists y\neq x^*$ with $c^\top y=c^\top x^*$.  
+Let $d=y-x^*$; then $Ad=A_Bd_B + A_Nd_N=0$ so $d_B = -A_B^{-1}A_N d_N$. 
+Since $0 = c^\top d  = c_B^\top d_B + c_N^\top d_N = \bar c_N^\top d_N$. 
+$I=\emptyset \implies \bar c_N>0\Rightarrow d_N=0\Rightarrow d_B=0$, so $y=x^*$, contradiction.
+\textbf{(Proof $\Rightarrow$)} Contradiction:
+Suppose $I\neq\emptyset$, and pick $j\in I$ with $\bar c_j=0$. Let $x(\theta)=x^*+\theta d,\; d_N=e_j,\; d_B=-A_B^{-1}A_N e_j$. 
+For small $\theta>0$, $x(\theta)$ is feasible and $c^\top x(\theta)=c^\top x^*+\theta\bar c_j=c^\top x^*$. So a second optimum exists, contradiction
+
+
+
+\paragraph{Full dimensional.} For nonempty $P=\{x \in \mathbb R^n \mid Ax\geq b\}$ the following are equivalent: (a) is full dimensional (has positive volume); (b) $\exists\ x\in P: Ax > b \iff$; (c) $n+1$ extreme points of $P$ do not lie on a common hyperplane. 
+\begin{itemize}
+    \item \textbf{(a)$\Rightarrow$(c)} Contrapositive: all extreme points must lie on the same hyperplane, $H$, so the convex hull of all extreme points, $P_S$, has dimension $n-1$. $dim(P) = dim(P_S)$, so $dim(P)=n-1$.
+    \item \textbf{(c)$\Rightarrow$(b)} For each constraint $i$, $\exists\ x^{(i)}: a_i^\top x > b$. Form a convex combination of $x^{(j)}\ \forall j$, which satisfies $x\in P: Ax > b$
+    \item \textbf{(b)$\Rightarrow$(a)} Choose interior point $x_0$. Distance from $x_0$ to each constraint is $d_i = (a_i^\top x_0 - b_i)/||a_i||_2$. Note $d_i > 0\ \forall\ i \implies \epsilon = \min_i d_i > 0$. So ball $B(x_0,\epsilon) = \{y\mid (y - x_0)^\top(y-x_0) \leq \epsilon\} \subseteq P$ has full dimension.
+\end{itemize}
+  
+
+
+\paragraph{Formulation: Convert any problem to standard form} WLOG, all rows of $A$ are linearly independent. This can be proved by showing two-way containment between set with and without dependent rows of $A$.
+{\footnotesize
+\begin{align*}
+    \max_{\{x \mid a_i^\top x \geq b_i, a_j^\top x \leq b_j\}}\;& c^\top x 
+    &&\Longrightarrow &
+    \max_{\{x \mid a_i^\top (x^+ - x^-) \geq b_i, a_j^\top (x^+ - x^-) \leq b_j, x^+\geq 0,x^-\geq 0\}}\;& c^\top (x^+ - x^-) 
+    &&\Longrightarrow & 
+    \min_{\{x \mid a_i^\top y - s_i = b_i\, a_j^\top y +s_j = b_j, y, s\geq 0\}}\;& -c^\top y
+\end{align*}
+}
+
+\paragraph{Maximums and absolute values.} For absolute values, at optimal for each $i$ we must have either $x_i^+ = 0$ or $x_i^- = 0$. Otherwise, we could change both by same amount, preserve feasibility, and reduce cost.
+{\footnotesize
+\begin{align*}
+    \min_{\{x \mid Ax \geq b\}}\quad& \max_{i\in[m]}(c_i^\top x + d_i) 
+    &&\Longrightarrow & 
+    \min_{\{x \mid Ax \geq b,\ z \geq c_i^\top x + d_i\}}\quad& z
+\end{align*}
+\begin{align*}
+    \min_{\{x \mid Ax \geq b\}}\quad& \sum_i c_i \abs{x_i}
+    &&\Longrightarrow & 
+    \min_{\{x \mid Ax \geq b, x_i \leq z_i,\ -x_i\leq z_i\}}\quad& \sum_i c_i^\top z_i
+    &&\text{or} &
+    \min_{\{x \mid A(x^+ - x^-) \geq b,\ x_i^+, x_i^- \geq 0\}}\quad& \sum_i c_i^\top (x_i^+ + x_i^-)
+\end{align*}
+}
+
+
+
+\section{Simplex method}
+
+
+\paragraph{Basic objects.} 
+Basis $B\in \mathbb R^{m\times m}$ (rank = $m$)
+defines $x_B = A_B^{-1}b$
+and $\bar c^\top = c^\top - c_B^\top A_B^{-1}A$. 
+Optimal when $x_B \ge 0$ and $\bar c \ge 0$.
+
+\paragraph{Feasible direction.} 
+A vector $d$ is a feasible direction at $x\in P$ if $\exists\,\theta>0$ with $x+\theta d\in P$.
+Feasibility requires
+\begin{align*}
+    A(x+\theta d)=b 
+    \;\Longrightarrow\;
+    A d = 0
+    \;\Longrightarrow\;
+    A_B d_B + A_N d_N = 0
+    \;\Longrightarrow\;
+    d_B = -A_B^{-1}A_N d_N.
+\end{align*}
+So any feasible direction from a BFS is determined by a choice of $d_N$ (typically $d_N\ge0$ for moves that keep $x+\theta d\ge0$).
+
+
+\paragraph{Reduced costs \& optimality.}
+The reduced cost vector with basis $B$ is $\bar c^\top = c^\top - c_B^\top A_B^{-1}A$.
+Let $y$ be any feasible point and set $d = y - x$.
+Then $A d = 0$, so $d_B = -A_B^{-1}A_N d_N$.
+The change in objective is
+\begin{align*}
+    c^\top(y-x) = c_B^\top d_B + c_N^\top d_N 
+    = c_B^\top(-A_B^{-1}A_N d_N) + c_N^\top d_N 
+    = (c_N^\top - c_B^\top A_B^{-1}A_N)d_N 
+    = \bar c_N^\top d_N.
+\end{align*}
+At a BFS, $x_N = 0$, and for any feasible $y$ we have $y_N\ge0$, hence $d_N = y_N - x_N \ge 0$.
+If $\bar c_N \ge 0 \implies \bar c_N^\top d_N \ge 0\ \forall\ y\in P \implies c^\top y \ge c^\top x \implies x$ is optimal.
+For optimal $x$ and \emph{infeasible} basic solution, $y$ ($Ay=b, y \not\geq 0$), with $\bar c^{(y)}\geq0$, we have $c^\top y\leq c^\top x$: $c^\top(y - x) = c^\top(y - x) - c_B^\top B^{-1}A(y-x) = \bar c^{(y)\top} y - \bar c^{(y)\top} x \geq - \bar c^{(y)\top} x$ (since $\bar c^{(y)}\geq 0$), $- \bar c^{(y)\top} x  \leq 0$ (since $\bar c^{(y)}\geq 0$ and $x\geq 0$).
+
+\paragraph{Simplex direction.} For entering index $j\in N$: 
+$d_j = 1,\quad d_k = 0\ (k\in N\setminus\{j\}),\quad d_B = -A_B^{-1}A_j$, since $Ad = 0 \Rightarrow A_B d_B + A_j = 0$
+
+\paragraph{Simplex step size $\theta$.} We seek the largest $\theta\ge0$ with $x+\theta d\ge0$.
+If $d \ge 0$ then $x+\theta d\ge0$ for every $\theta\ge0$ and if $\bar c_j<0$ the objective decreases without bound (unbounded LP).
+If some $d_i<0$, feasibility requires $x_i + \theta d_i \ge 0 \Rightarrow \theta \le -x_i/d_i$.
+Thus $\theta^* = \min_{i\in B: d_i<0} \{-x_i/d_i\}$ and the leaving index is the $i$ attaining this minimum. The new BFS is
+\begin{align*}
+y_j = \theta^*,\qquad
+y_B = x_B + \theta^* d_B,\qquad
+y_i = 0\ (i\in N\setminus\{j\})
+\end{align*}
+Whenever $\theta^* > 0$, simplex moves feasible solution and reduces costs ($\theta^* \bar c_j < 0$)
+
+
+\paragraph{Basis update and independence.}
+The updated basis $\bar B = (B\setminus\{\ell\})\cup\{j\}$ is linearly independent.
+If it were dependent, $\exists\,\lambda\neq0$ with $A_{\bar B}\lambda=0$.
+Multiplying by $A_B^{-1}$ yields $A_B^{-1}A_{\bar B}\lambda=0$.
+But
+\begin{align*}
+A_B^{-1}A_{\bar B} = 
+[e_1,\dots,e_{\ell-1},\ -A_B^{-1}A_j,\ e_{\ell+1},\dots,e_m],
+\end{align*}
+By construction, the $\ell$th entry is $-d_{B_\ell} \neq 0$ and all other columns are 0 in the $\ell$th entry, thus $A_B^{-1}A_j$ is linearly independent from $A_B^{-1}A_{B\setminus\{\ell\}}$, so $\bar B$ is independent and $y$ is a BFS.
+
+\paragraph{Simplex iteration} 
+(1) Start with BFS $x$ and associated basis $B$. 
+(2) Compute reduced costs $\bar c$. If $\bar c\ge0$: $x$ optimal. Else choose entering $j$ with $\bar c_j<0$.
+(3) Compute $d_B = -A_B^{-1}A_j$. If $d_B\ge0$: unbounded LP.
+(4) Compute $\theta^* = \min_{i\in B: d_i<0} -x_i/d_i$ and leaving index $\ell$.
+(5) Replace $B_\ell$ with $j$ and compute new BFS $y$.
+
+\paragraph{Termination (nondegenerate case).}
+If $\theta^*>0$ each pivot strictly decreases the objective, $c^\top y = c^\top x + \theta^*\,\bar c_j < c^\top x$.
+Since finitely many BFS exist and none repeat, simplex terminates.
+
+
+\paragraph{Initialization (Phase I).}
+To find an initial BFS, solve 
+$\min_{\{x, y \mid Ax + y = b, x\geq 0, y \geq 0\}} \mathbf{1}^\top y$.
+A starting BFS is $(x,y)=(0,b)$.
+\textbf{(Infeasibility)} If the optimum satisfies $\mathbf{1}^\top y>0$, the original LP is infeasible since this shows $\nexists x \geq 0 : Ax = b$.
+\textbf{(Degeneracy)} If optimal basis has $y=0$, drop artificial columns and pivot to obtain a pure-$x$ basis.
+\textbf{(Big M)} The Big-$M$ method instead solves $\min\ c^\top x + M\mathbf{1}^\top y$ for sufficiently large $M$.
+
+\paragraph{Anticycling.}
+\textbf{(Lexicographic rule)} normalize rows by pivot element; pivot on lexicographically smallest row.
+Ensures: (i) all rows remain lex-positive, (ii) objective row increases lexicographically, (iii) termination.
+\textbf{(Bland's rule)} choose entering $\min_{\{j:\bar c_j<0\}}j$ and leaving $\min_{\{i: d_i<0\}}i$. Prevents cycling.
+
+
+\paragraph{Revised simplex.}
+Naive simplex recomputes $A_B^{-1}$ each iteration ($O(m^3)$). Revised simplex updates inverses via 
+$[A_B^{-1} \mid A_B^{-1}A_j]\ \xrightarrow{\text{row ops}}\ [\bar A_B^{-1} \mid e_\ell] $
+yielding $O(m^2)$ per iteration.
+
+\paragraph{Upper bound constraints.} $B$ is still the basis of the BFS, but $N$ must be partitioned into $N\supseteq L=\{i:x_i=0\}$ and $N\supseteq U=\{ j:x_j = u_j\}$. Now $\forall\ d_i > 0$, $\theta^*$ will increase $x_i$, possibly over upper bound, $u_i$. Therefore the optimal stepsize determines the exiting variable, which is the $\arg\min$ of the following
+\begin{align*}
+    \theta^* = \min \left[ \min_{\{i \mid d_i < 0, i\in B\}}\left(- \frac{x_i}{d_i}\right),\quad \min_{\{i \mid d_i > 0, i\in B\}}\left(\frac{u_i - x_i}{d_i}\right)\right]
+\end{align*}
+Candidate entering variables are $j\in N: (\bar c_j < 0, x_j = 0) \cup (\bar c_j > 0, x_j = u_j)$. 
+
+
+\paragraph{Tableau implementation} efficiency comes from maintaining and updating $A_B^{-1}[b \mid A]$. The tableau structure is
+\begin{align*}
+    \begin{bmatrix}
+        -c_B^\top A_B^{-1}b & \vline& c^\top  - c_B^\top A_B^{-1}A\\
+        \hline
+        A_B^{-1}b & \vline & A_B^{-1}A
+    \end{bmatrix} = \begin{bmatrix}
+        -c^\top x & \vline& \bar c_1 & \dots & \bar c_n\\
+        \hline
+        x_B & \vline & -d^{(1)} & \dots & -d^{(n)}\\
+    \end{bmatrix}
+\end{align*}
+Left column: objective value $-c^\top x$ and current basic solution $x_B$. Right block: reduced costs $\bar c$ search directions $-d^{(j)} = A_B^{-1}A_j$
+\begin{table}[h]
+    \centering
+    \footnotesize
+    \begin{tabular}{r p{10cm}cc}
+    \hline
+    \textbf{Step} && \textbf{Iteration 1} & \textbf{Iteration 2} \\
+    \hline
+    1.& Choose pivot column: select $\ell$ with $\bar c_\ell<0$ &
+        $\begin{bmatrix}
+        0 & -2 & \textcolor{red}{-1} & 0 & 0\\
+        2 & 1 & \textcolor{red}{-1} & 1 & 0\\
+        6 & 1 & \textcolor{red}{1} & 0 & 1\\
+        \end{bmatrix}$ &
+        $\begin{bmatrix}
+        6 & \textcolor{red}{-1} & 0 & 0 & 1\\
+        8 & \textcolor{red}{2} & 0 & 1 & 1\\
+        6 & \textcolor{red}{1} & 1 & 0 & 1\\
+        \end{bmatrix}$ \\
+    2.& Ratio test: among rows, choose $i=\arg\min_{\{d^{(\ell)}_i < 0\}}\left(-x_i/d^{(\ell)}_i\right)$ & 
+        $\begin{bmatrix}
+        0 & -2 & \textcolor{red}{-1} & 0 & 0\\
+        2 & 1 & \textcolor{red}{-1} & 1 & 0\\
+        \textcolor{red}{6} & \textcolor{red}{1} & \textcolor{red}{1} & \textcolor{red}{0} & \textcolor{red}{1}\\
+        \end{bmatrix}$ &
+        $\begin{bmatrix}
+        6 & \textcolor{red}{-1} & 0 & 0 & 1\\
+        \textcolor{red}{8} & \textcolor{red}{2} & \textcolor{red}{0} & \textcolor{red}{1} & \textcolor{red}{1}\\
+        6 & \textcolor{red}{1} & 1 & 0 & 1\\
+        \end{bmatrix}$  \\
+    3.& Apply row operations to get $-d^{(\ell)}_i = 1$ and $d^{(\ell)}_{k\neq i} = 0$ &
+        $\begin{bmatrix}
+        0 & -2 & \textcolor{red}{-1} & 0 & 0\\
+        8 & 2 & \textcolor{red}{0} & 1 & 1\\
+        6 & 1 & \textcolor{red}{1} & 0 & 1\\
+        \end{bmatrix}$ &
+        $\begin{bmatrix}
+        6 & \textcolor{red}{-1} & 0 & 0 & 1\\
+        4 & \textcolor{red}{1} & 0 & 1/2 & 1/2\\
+        2 & \textcolor{red}{0} & 1 & -1/2 & 1/2\\
+        \end{bmatrix}$  \\
+    4.& Apply row operations to set $\bar c_l = 0$ & 
+        $\begin{bmatrix}
+        6 & -1 & \textcolor{red}{0} & 0 & 1\\
+        8 & 2 & \textcolor{red}{0} & 1 & 1\\
+        6 & 1 & \textcolor{red}{1} & 0 & 1\\
+        \end{bmatrix}$ &
+        $\begin{bmatrix}
+        10 & \textcolor{red}{0} & 0 & 1/2 & 3/2\\
+        4 & \textcolor{red}{1} & 0 & 1/2 & 1/2\\
+        2 & \textcolor{red}{0} & 1 & -1/2 & 1/2\\
+        \end{bmatrix}$ \\
+    \hline
+\end{tabular}
+\end{table}
+
+\paragraph{Tableau optimality condition exercises.}
+{\footnotesize
+\begin{align*}
+    \begin{array}{c|cccc}
+        -2 & 0 & \alpha\geq 1 & \delta\in[-1,0) & 0\\
+        \hline
+        1&0&3&0&1\\
+        \gamma&1&-2&2&0\\
+    \end{array} &\Longrightarrow
+    \begin{array}{c|cccc}
+        -2-\gamma\delta/2 & -\delta/2 & \alpha+\delta & 0 & 0\\
+        \hline
+        1&0&3&0&1\\
+        \gamma/2&1/2&-1&1&0\\
+    \end{array} &&\Longrightarrow
+    \begin{cases*}
+        \gamma > 0 & achieve optimal after pivot; original obj was suboptimal\\
+        \gamma = 0 & degenerate pivot; original obj was already optimal
+    \end{cases*}\\
+    \begin{array}{c|cccc}
+        * & 0 & 0&4&\gamma\\
+        \hline
+        2&1&0&-3&-5\\
+        0&0&1&0&\alpha\\
+    \end{array} &\Longrightarrow
+    \begin{array}{c|cccc}
+        * & 0 & -\gamma/\alpha&4&0\\
+        \hline
+        2&1&0&-3&-5\\
+        0&0&1/\alpha&0&1\\
+    \end{array} &&\Longrightarrow
+    \begin{cases*}
+        \gamma \geq 0 & optimal\\
+        \gamma < 0, \alpha > 0 & optimal\\
+    \end{cases*}
+\end{align*}
+}
+
+
+\section{Duality}
+
+% \paragraph{Intuition}
+\begin{itemize}
+    \item Standard form problem ($\min_{\{x \mid Ax = b, x\geq 0\}}c^\top x$): If $p$ satisfies $p^\top A \leq c^\top  \Longrightarrow p^\top b = p^\top Ax \leq c^\top x \;\forall$ feasible $x$. 
+    \item General form problem ($\min_{\{x \mid Ax \geq b\}}c^\top x$): If $p\geq 0$ satisfies $p^\top A = c^\top  \Longrightarrow p^\top b \leq p^\top Ax = c^\top x \;\forall$ feasible $x$
+    \item $A_B^{-1}$ uniquely determines $x,p: (x_B, p) = (A_B^{-1}b, c_B^\top A_B^{-1})$: $p^\top b = (c_B^\top A_B^{-1})b = c_B^\top (A_B^{-1}b) = c_B^\top x_B = c^\top x$
+\end{itemize}
+\paragraph{Lagrangian derivation (standard form).}
+{\footnotesize
+\begin{align*}
+    \mathbf{L(x,p)} = c^\top x + p^\top(b-Ax) = p^\top b + (c^\top - p^\top A)x 
+    && \mathbf{g(p)} = \min_{x\ge0} L(x,p) =
+        \begin{cases}
+        p^\top b, & c^\top - p^\top A \ge 0,\\
+        -\infty,   & \text{else}
+        \end{cases}
+    && \mathbf{\max\ g(p)} = \max_{\{p\mid p^\top A \le c^\top\}}\ p^\top b
+\end{align*}
+}
+$(x^*,p^*)$ is primal-dual optimal $\iff$ it is a \textbf{saddle point}: 
+$L(x^*,p) \le L(x^*,p^*) \le L(x,p^*) \quad \forall x\ge0,\ p$.
+
+\paragraph{Sign rules (minimization).}
+\begin{itemize}
+    \item \textbf{Constraint signs} come from enforcing $L(x,p)\le c^\top x$ for feasible $x$. For a constraint of the form $Ax \ge b$, feasibility means $b - Ax \le 0$. Using the Lagrangian term $p^\top(b-Ax)$ with $p\ge0$ to ensure $L(x,p) = c^\top x + p^\top(b-Ax) \le c^\top x$, so $g(p)=\inf_x L(x,p)$ is a \emph{lower bound} on the primal optimum.
+    \item \textbf{Variable signs} come from making $\inf_x L(x,p)$ finite. If $x \ge 0$, we require $(c^\top - p^\top A)\ge 0$; otherwise the Lagrangian can be
+    pushed to $-\infty$ by sending $x\to+\infty$. If $x$ is free, the only way to avoid $-\infty$ in both directions is $c^\top - p^\top A = 0^\top$
+\end{itemize}
+
+\paragraph{Common primal-dual pairs}
+{\footnotesize
+\begin{align*}
+    \min\ c^\top x: \{x\mid Ax = b,\ x\geq 0\} &\iff 
+        \max\ p^\top b: \{p \mid p^\top A \leq c\}
+    &
+    \min\ c^\top x: \{x \mid Ax \geq b\} &\iff
+        \max\ p^\top b: \{p\mid p\geq 0,\ p^\top A = c\}\\
+    \min\ c^\top x: \{x \mid Ax \geq b,\ x\geq 0\} &\iff
+        \max\ p^\top b: \{p\mid p\geq 0,\ p^\top A \leq c\}
+    &
+    \max\ c^\top x: \{x \mid Ax \leq b,\ x\geq 0\} &\iff
+        \min\ p^\top b: \{p\mid p\geq 0,\ p^\top A \geq c^\top\}
+\end{align*}
+\begin{align*}
+    \min\ c^\top x: \{x \mid A_1x \geq b_1,\ A_2x = b_2,\ x\geq 0\} &\iff
+        \max\ p_1^\top b_1 + p_2^\top b_2: \{p_1,\ p_2\mid p_1\geq 0,\ p_1^\top A_1 + p_2^\top A_2 \leq c\}\\
+    \min\ c^\top x + d^\top y: \{x,y \mid Ax + By \geq e,\ Cx+Dy = f,\ x\geq 0\} &\iff
+        \max\ p^\top e + q^\top f: \{p,q\mid p\geq0,\ p^\top A + q^\top C \leq c^\top,\ p^\top B + q^\top D = d\}
+\end{align*}
+}
+
+\paragraph{Weak duality. }
+If $x$ is primal feasible and $p$ is dual feasible, then $p^\top b \le c^\top x$.
+\textbf{(Proof)} Suppose $x, p$ primal-dual feasible and let $u_i = p_i(a_i^\top x - b_i),\; v_j = (c_j - p^\top A_j)x_j$. 
+By construction, $\text{sign}(a_i^\top x-b) = \text{sign}(p_i)$ and $\text{sign}(c_j - p^\top A_j) = \text{sign}(x_j)$ So $u_i, v_j \geq 0\; \forall i,j$
+\begin{align*}
+    c^\top x - p^\top b = p^\top Ax - p^\top b + c^\top x - p^\top Ax = p^\top(Ax - b) + (c^\top - p^\top A)x = \sum_i u_i + \sum_j v_j \geq 0
+\end{align*} 
+
+\paragraph{Strong duality.} If $(P), (D)$ have optimal solutions, then $c^\top x = p^\top b$. 
+\textbf{Simplex proof (standard form).}
+Let $x^*$ be an optimal BFS with basis $B$. Then $\bar c^\top = c^\top - c_B^\top A_B^{-1}A \ge 0$.  
+Define $p^{*\top} = c_B^\top A_B^{-1}$. Then
+\begin{align*}
+p^{*\top} A = c_B^\top A_B^{-1}A \le c^\top,\quad
+p^{*\top} b = c_B^\top A_B^{-1}b = c_B^\top x_B^* = c^\top x^*
+\tag{So $p^*$ dual feasible and optimal, with equal cost}
+\end{align*}
+
+% \textbf{Proof using Farkas' lemma} Consider primal-dual pair, $(P):\min_{\{x\mid Ax\geq b\}}c^\top x,\; (D): \min_{\{p\mid p\geq 0, p^\top A=c^\top\}}p^\top b$, let $x^*$ be an optimal BFS, and define $I = \{i\mid a_i^\top x^* = b_i\}$. Choose $d$ such that $A_Id \geq 0 \Longrightarrow A_I (x^* + \epsilon d)\geq A_Ix^* = b_I$. For $j \notin I$ and $\epsilon$ sufficiently small, $a_j^\top (x^* + \epsilon d) > b_i \Longrightarrow x^* + \epsilon d$ feasible solution. By optimality of $x^*\Longrightarrow c^\top d \geq 0$. 
+% By Farkas' lemma, $\exists\ p_I\geq 0$ such that $p_I^\top A_I = c$. Extend $p$ to all indices by setting $p_j = 0$ for $j\notin I$. Then $p \ge 0,\ p^\top A = p_I^\top A_I = c^\top$, so $p$ is dual feasible. Since $p^\top b = p_I^\top b_I = p_I^\top A_I x^* = c^\top x^*,\ p$ is dual feasible and attains the same value as the primal optimum.
+
+\paragraph{Complementary slackness.}
+$x,p$ are primal-dual optimal solutions $\iff p \odot (A x - b) = 0,\ (c - p^\top A) \odot x = 0$. Recall in the proof of Weak duality we defined $u_i, v_j$ and showed $u_i \geq 0,\ v_j \geq 0,\ c^\top x-p^\top b = \sum_iu_i + \sum_jv_j$. \textbf{(Proof $\Rightarrow$)} By \textbf{Strong duality}, $c^\top x = p^\top b \Longrightarrow \sum_iu_i + \sum_jv_j = 0 \Longrightarrow u_i = v_j = 0\ \forall\ i,j$. \textbf{(Proof $\Leftarrow$)} if $u_i = v_j = 0\ \forall\ i,j \Longrightarrow c^\top x - p^\top b = 0 \Longrightarrow c^\top x = p^\top b$. 
+
+\paragraph{Use as an optimality test.} To test candidate $x$ for optimality in $(P)$: (1) Check primal feasibility, (2) Form dual and identify $I=\{i\mid a_i^\top x=b_i\}$, (3) Solve for $p^\top A_I = c^\top_I$, (4) If $p$ satisfies dual feasibility, $x$ is optimal.  
+
+% \paragraph{Demonstrating $x$ is a BFS.} Given $x\in P=\{x\mid Ax=b,\ x\geq 0\},\ \exists\ p: (c^\top - p^\top A)\odot x = 0$ and assume (i) every BFS is nondegenerate and (ii) at BFS, nonbasic reduced costs are nonzero. 
+% {\footnotesize
+% \begin{align*}
+%     \text{for some } \lambda\in\mathbb R_{\succeq0}^K, \lambda^\top e = 1:\quad&
+%         \left(c^\top - p^\top A\right) \odot x = \mathbf{0}
+%         \;\iff\; (c^\top - p^\top A) \odot\sum_{k=1}^K \lambda_k x^{(k)}  = \mathbf{0} \\
+%     \text{for $x^{(k)}:\lambda_k >0$}:\quad&
+%         \left(c^\top_{B^{(k)}} - p^\top A_{B^{(k)}}\right) \odot x_{B^{(k)}} = \mathbf{0} 
+%         \;\Longrightarrow\; p^\top A_{B^{(k)}} = c_{B^{(k)}}^\top
+%         \;\Longrightarrow\; p^\top = c_{B^{(k)}}^\top A_{B^{(k)}}^{-1}\\
+%     :\quad& \bar c_{N^{(k)}} = c^\top_{N^{(k)}} - c_{B^{(k)}}^\top A_{B^{(k)}}^{-1}A_{N^{(k)}} \neq \mathbf{0} \;\Longrightarrow\; x_{N^{(k)}} = 0 \;\Longrightarrow\; x_{B^{(k)}} = A_{B^{(k)}}^{-1}b \;\Longrightarrow\; x = x^{(k)}
+% \end{align*} 
+% }
+
+\paragraph{Strict complementary slackness}
+Given Primal-Dual pair $(P): \min_{\{x \mid Ax = b, x \geq 0\}} c^\top x$, $(D): \max_{\{p \mid p^\top A \leq c\}} p^\top b$, both with optimal solutions, \textcolor{red}{$\exists$ optimal $x\geq 0, p$ such that $\forall j$ either $x_j > 0$ or $p^\top A_j < c_j$}. \textbf{(Proof sketch)} (i) first prove that for problem where $x_j = 0$ in all optimal solutions: Set up new primal-dual problems $(P'): \min_{\{x \mid Ax = b, x \geq 0\}} c^\top x - \delta e_j^\top x$, $(D'): \max_{\{p \mid p^\top A \leq c - \delta e_j\}} p^\top b$. Consider reduced cost vector $\bar c^\top  = (c - \delta e_j) - c_BB^{-1}A \Longrightarrow \delta \leq  c_j - c_BB^{-1}A_j$. Reason that for sufficiently small $\delta$, same $x^*$ is optimal for $(P')$ and note new constraint of dual implies $p^\top A_j < c_j$. (ii) Then consider the sets of optimal solutions and corresponding sets of indices: 
+\begin{align*}
+  \mathcal X = \{x \mid Ax = b, x\geq 0, c^\top x = val(P)\}, \quad 
+  S = \{j \mid \exists x \in \mathcal X, x_j > 0\} &&
+  \mathcal P &= \{p \mid p^\top A \leq c, p^\top b = val(D)\}, \quad
+  S^C = \{j \mid x_j = 0 \;\forall x \in \mathcal X\}
+\end{align*}
+Let $x^{(k)}\in \mathcal X$ with $x^{(k)}_k > 0$. Define $\bar x = \frac{1}{|S|} \sum_{k \in S} x^{(k)}$, $\bar p = \frac{1}{|S^C|} \sum_{k \in S^C} p^{(k)}$, and demonstrate feasiblity and optimality. Now since sets $S, S^C$ partition the index set, we have $\forall j \in [n]$ either $x_j > 0$ or $p^\top A_j < c_j$
+
+
+\paragraph{Primal-dual outcome possibilities.} $(P) / (D)$ unbounded $\Rightarrow (D) / (P)$ infeasible. \textbf{(Proof)} $(P)$ unbounded $\Rightarrow c^\top x = -\infty \Rightarrow p^\top b \leq -\infty$ by weak duality, which is impossible. $(P)$ finite optimum $\iff (D)$ finite optimum by strong duality. $(P) / (D)$ infeasible $\Rightarrow (D) / (P)$ infeasible \textit{or} unbounded.
+
+\paragraph{Primal-dual boundedness.} LP $\min_{\{x \mid Ax\leq b\}}c^\top x$ bounded $\iff c$ is a nonnegative linear combination of the rows of $A$. \textbf{(Proof)} Using duality, we see $(D): \max_{\{p \mid p \geq 0,\ p^\top A = c\}} p^\top b$ has a feasible set that is precisely this statement. So feasible optimal dual problem $\iff$ bounded optimal primal problem. 
+
+
+
+\paragraph{Dual simplex}
+Helpful to consider in the Tableau structure. Always keep Dual constraints, $\bar c = c^\top  - p^\top A \geq 0$, and pivot until primal constraints are feasible ($A_B^{-1}b \geq 0$). 
+\begin{align*}
+    \begin{bmatrix}
+        -p^\top b & \vline& c^\top  - p^\top A\\
+        \hline
+        A_B^{-1}b & \vline & A_B^{-1}A
+    \end{bmatrix} = 
+    \begin{bmatrix}
+        -c_B^\top A_B^{-1}b & \vline& c^\top  - c_B^\top A_B^{-1}A\\
+        \hline
+        A_B^{-1}b & \vline & A_B^{-1}A
+    \end{bmatrix} = \begin{bmatrix}
+        -c^\top x & \vline& \bar c^\top\\
+        \hline
+        A_B^{-1}b & \vline & A_B^{-1}A\\
+    \end{bmatrix}
+\end{align*}
+(1) Start with basic solution $x$ and corresponding basis $B$ with $\bar c \geq 0$, 
+(2) choose a row $\ell$ with $v^{(\ell)\top}=(A_B^{-1}b)_\ell < 0$ (if none, terminate with optimal),
+(3) choose column $j$ with $v^{(\ell)}_j < 0$,
+(4) use ratio $\gamma^* = \min_{j : v^{(\ell)}_j < 0} \frac{\bar c_j}{-v^{(\ell)}_j}$ to select the entering variable ($A_j$). If $v^{(\ell)}\geq 0$ terminate as unbounded.
+
+\subsection{Degeneracy}
+
+BFS $x\in P$ is \textbf{degenerate} if $>n$ constraints are active at $x$.   
+Degeneracy is representation-invariant for standard-form LPs (changing bases does not change which BFSs degenerate); \emph{not} generally true in non-standard form.
+
+\begin{itemize}
+    % \item \textbf{Intuition: Multiple basis for BFS.}
+    % If a basic variable is zero, its index can be swapped with a nonbasic zero variable, producing different bases for the same BFS. 
+    % Optimality depends on reduced costs, which depend on the basis. 
+    % Thus, for a degenerate optimal BFS, changing the basis may change reduced costs while leaving the point unchanged, so some corresponding bases need not be optimal.
+    
+    
+    \item \textbf{Dual nondegeneracy $\implies$ unique primal optimum.} See proof in LP geometry section. The converse is not true: (requires redundant constraint): $(P):\min_{\{x_1=1,\ x_2=1,\ x_1=1,\ x\geq0\}}0,\ (D):\max_{\{p_1 + p_3\leq0,\ p_2\leq0\}}p_1 + p_2$. 
+    
+    \item \textbf{Algorithmic consequences.}
+    \emph{Stalling}: new basis but same BFS. \emph{Cycling} return to a previously visited basis.
+
+    \item \textbf{Characterizations.}
+    Standard form (BFS has $m$ basic variables): $x$ degenerate $\iff \exists$ basic variable $x_i = 0 \iff |\mathrm{supp}(x)| < m \iff$ same BFS can be obtained from multiple bases. 
+    Inequality form: $x$ degenerate $\iff |I(x)=\{i\mid a_i^\top x = b_i\}| > n \iff A_I$ linearly dependent rows.
+
+
+    \item \textbf{Support size $m$ does not imply BFS.} Counterexample $P=\{x\mid x_1 + x_2 = 2,\ x_3 = 0\},\ x=[1,1,0]$ is feasible and has $|supp(x)|=2=m$, but rank$\left(A_{\mathrm{supp}(x)}\right) = 1$
+
+    \item Degeneracy (primal or dual) means \emph{multiple bases} can represent the same BFS. It does \emph{not} imply multiple optimal solutions.
+    
+    \item Dual basic solution (associated with $B$): $p^\top = c_B^\top A_B^{-1},\ \bar c_N^\top = c_N^\top - p^\top A_N$.
+    Dual BFS is \emph{degenerate} iff some nonbasic variable has reduced cost $\bar c_{j\in N} = 0$.
+    More than $n$ inequalities of $p^\top A \le c$ are tight at the same $p$, so several bases give the same dual BFS $p$.
+
+    \item Degenerate dual $\not \Rightarrow$ degenerate primal: E.g., $(P):\min_{\{x\mid x_1, x_2 \geq 0, x_1 + x_2 = 1\}}x_1 + x_2$, $(D): \max_{\{p\mid p\leq 1, p\leq 1\}}p$
+\end{itemize}
+
+
+
+
+
+
+\subsection{Farkas' lemma}
+\paragraph{Intuition.} Farkas gives a certificate of infeasibility: either (i) $Ax=b,\ x\ge0$ has a solution, or (ii) $\exists p: p^\top A \ge 0^\top,\quad p^\top b < 0$ that proves no such solution can exist. Suppose true, then $\forall\ x \geq 0,\ p^\top Ax \geq 0$. But since $p^\top b < 0$ we have $p^\top Ax \neq p^\top b \Longrightarrow Ax \neq b$. 
+
+
+\paragraph{Farkas' theorems of the alternative.} Exactly one holds: ($\exists x\ge0:\ Ax=b$) or ($\exists p:\ p^\top A \ge 0^\top,\ p^\top b < 0$). 
+Equivalently: ($\forall p: p^\top A \ge 0^\top,\ p^\top b \ge 0) \iff (\exists x\ge0:\ Ax = b)$.
+Cone constraint: ($\exists x \neq 0:\ Ax=0, x\geq 0) \iff (\nexists p:\ p^\top A > 0)$.
+General form inequality (include weak duality): ($\forall x$: $Ax\le b,\ c^\top x \le d) \iff (\exists p\ge0:\ p^\top A = c^\top,\ p^\top b \le d)$ 
+
+
+\paragraph{Proof using Duality} 
+\textbf{((a)$\Rightarrow \neg$(b))} $\exists x: x\geq 0, Ax = b \Rightarrow p^\top b = p^\top Ax \Rightarrow$ so $\nexists p$ such that $p^\top b < 0$ and $p^\top b = p^\top Ax \geq 0$. \textbf{($\neg$(a)$\Rightarrow$(b))} Consider primal-dual pair, $(P):\max_{\{x\mid x\geq 0, Ax=b\}}0^\top x,\; (D): \min_{\{p\mid p^\top A\geq 0\}}p^\top b$. Not (a) $\implies (P)$ infeasible $\implies (D)$ unbounded (since $p = 0$ feasible) $\implies \exists p$ feasible such that $p^\top b < 0$. 
+
+
+
+\paragraph{Proof using Separating hyperplanes}
+\textbf{($\neg$(a)$\Rightarrow$(b))} Let $S = \{y \mid x\geq 0,\ Ax=y\} = \{Ax \mid x \geq 0\}$. By assumption, $b \notin S$. 
+By Separating Hyperplane theorem, $\mathbf{\exists\ p: p^\top b < p^\top y} \; \forall\ y\in S$. 
+Now $\forall\ \lambda > 0,\ \lambda A_i \in S \Longrightarrow p^\top b < \lambda p^\top A_i \iff p^\top A > (1/\lambda) p^\top b \Rightarrow \lim_{\lambda \to \infty} p^\top A \geq 0 \Longrightarrow \mathbf{p^\top A \geq 0}$. 
+
+\paragraph{Farkas' lemma proof examples}
+\begin{itemize}
+    \item \textcolor{red}{($\{x\mid Ax\geq 0,\ x\geq 0\} \subseteq \{x\mid x_1=0\}) \iff (\exists p\geq 0$ such that $p^\top A \leq 0,\ p^\top A_1 < 0$)}: Consider primal-dual pair, $(P):\min_{\{x\mid x\geq 0,\ Ax\geq 0\}}-e_1^\top x,\; (D): \max_{\{p\mid p^\top A\leq -e_1,\ p\geq 0\}}p^\top 0$. \textbf{(Proof $\Rightarrow$)} $val((P)) = 0 \Longrightarrow (D)$ feasible and there exists such a $p$. \textbf{(Proof $\Leftarrow$)} $p^\top A_1 < 0 \Rightarrow p^\top A_1 \leq -1 \Rightarrow (D)$ feasible with $val((D) = 0) \Longrightarrow e_1^\top x = 0 \Longrightarrow x_1 = 0\ \qed$
+
+    \item \textcolor{red}{($\exists x \neq 0$ such that $Ax=0, x\geq 0) \iff (\nexists p$ such that $p^\top A > 0$)}:
+    \textbf{(Proof $\Rightarrow$)} Consider primal-dual pair, $(P):\min_{\{x\mid x\geq 0,\ Ax= 0\}}0^\top x,\; (D): \max_{\{p\mid p^\top A\leq 0\}}p^\top 0$. $(P)$ feasible $\Rightarrow (D)$ feasible and $p^\top A \leq 0$. \textbf{(Proof $\Leftarrow$)} Consider primal-dual pair, $(P):\min_{\{p\mid A^\top p \geq e\}}0^\top p,\; (D): \max_{\{x \mid x\geq 0,\ Ax = 0\}}e^\top x$ (note $p^\top A < 0 \Rightarrow p^\top A \leq e$ because we can scale). $(P)$ feasible $\Longrightarrow e^\top x = 0$ and $x\geq 0 \Longrightarrow x = 0\ \qed$ 
+
+    \item \textcolor{red}{($\exists x$ with $Ax < 0$) $\iff (S = \{u \mid u^\top A = 0, u \geq 0, \mathbf{1}^\top u = 1\} = \emptyset$)}    
+    \textbf{(Proof $\Leftarrow$ using Farkas)} $S = \{u \mid [A, \mathbf{1}]^\top u = [\mathbf{0}^\top , 1]^\top ,\ u \geq 0\}$. By Farkas, $S=\emptyset\Longrightarrow \exists\;p, q$ free such that $p^\top A^\top  + q\mathbf{1}^\top  \geq \mathbf{0}^\top $ and $p^\top \mathbf{0} + q < 0 \Longrightarrow q < 0$ and $Ap > 0 \implies Ax < 0$ for $x = -p$.
+    \textbf{(Proof $\Leftarrow$ using Strong duality)} Consider primal-dual pair $(P): \min_{\{u\mid  [A, \mathbf{1}]^\top u = [\mathbf{0}^\top , 1]^\top , u \geq 0\}}\mathbf{0}^\top u,\; (D): \max_{\{(p,q)\mid Ap + \mathbf{1}q \leq 0, (p,q) \text{ free}\}} q$. $(P)$ infeasible $\Longrightarrow (D)$ unbounded (since $(0,0)$ feasible) $\Longrightarrow q > 0 \Longrightarrow Ap < 0$.
+    \textbf{(Proof $\Rightarrow$ using Strong duality)} Note $Ax < 0 \iff Ax \leq -\mathbf{1}$. Now consider primal-dual pair $(P): \max_{\{x\mid Ax \leq -\mathbf{1}\}}\mathbf{0}^\top x,\; (D): \min_{\{u\mid u\geq 0, u^\top A = 0\}} -\mathbf{1}^\top u$. $(P)$ feasible $\Longrightarrow (D)$ feasible $\Longrightarrow  -\mathbf{1}^\top u=0$ by strong duality $\Longrightarrow S = \emptyset$ since requires $\mathbf{1}^\top u = 1$
+
+    \item \textcolor{red}{Standard form $x_j = 0\ \forall x^*$ optimal $\Rightarrow \exists p^*$ such that $p^{*\top} A_j < c_j$}
+    \textbf{(Proof)} Define new P-D pair: $(P')\ \min_{\{Ax=b, x\geq0,\ -c^\top x \geq -f^*\}}-e_j^\top x$, $(D')\ \max_{\{q^\top A -rc^\top \leq -e_j^\top,\ q\geq0\}}q^\top b -rf^*$. Two cases: (i) $r^*> 0$: We see that $\tfrac{q^*}{r^*}$ is optimal and feasible for $(D)$ since $\tfrac{q^*}{r^*}^\top b = f^*,\;\tfrac{q^*}{r^*}^\top A \leq c^\top - \tfrac{e_j}{r^*}^\top$. Further, this implies $\tfrac{q^*}{r^*}^\top A_j < c_j$. (ii) $r^*=0$: Then $q^{*\top}b = 0$. For $p^*$ optimal for $(D)$, we see $(p^{*} + q^*)^\top$ is also optimal and feasible for $(D)$. Further, $(p^{*} + q^*)^\top A = p^{*\top}A + q^{*\top}A \leq c^\top - e_j$ so $(p^* + q^*)^\top A_j < c_j \qed$
+
+    \item \textcolor{red}{$(\exists\ x\geq 0,\ y: Ax + By \geq e,\ Cx + Dy = f) \iff (\nexists\ p\geq0,\ q: p^\top B + q^\top D = 0,\ p^\top A + q^\top C \leq 0,\ p^\top e + q^\top f > 0)$}
+    \textbf{(Proof $\Rightarrow$)} Contradiction: assume both are true and use all properties to arrive at $p^\top A + q^\top C \not\leq 0$
+    \begin{align*}
+        p^\top (Ax + By) \geq p^\top e \Longrightarrow p^\top (Ax + By) + q^\top (Cx + Dy) \geq p^\top e + q^\top f > 0 \Longrightarrow (p^\top A + q^\top C)x > 0 \Longrightarrow p^\top A + q^\top C \not\leq 0
+    \end{align*}
+
+    \textbf{(Proof $\Leftarrow$)}
+    Consider the primal-dual pair below. From this, 
+    $(P)$ infeasible $\Longrightarrow (D)$ unbounded ($(0,0)$ feasible solution)
+    $\Longrightarrow \exists$ feasible $(p,q): p^\top e + q^\top f \geq 1 \Longrightarrow p^\top e + q^\top f > 0$. 
+    $\Longrightarrow p\geq 0,\ p^\top A + q^\top C \leq 0,\ p^\top B + q^\top D = 0$
+    \begin{align*}
+        (P):\ \min_{\{x,y\mid Ax + By \geq e,\ Cx + Dy = f,\ x\geq 0\}}\ x^\top 0 + y^\top 0  && 
+        (D):\ \max_{\{p,q\mid p\geq 0,\ p^\top A + q^\top C \leq 0,\ p^\top B + q^\top D = 0\}}\ p^\top e + q^\top f
+    \end{align*}
+
+\end{itemize} 
+
+
+% \subsection{Separating hyperplanes to duality}
+% \paragraph{Weierstrass' theorem} If $f:\mathbb R^n \mapsto \mathbb R$ continuous and $S\subseteq \mathbb R^n$ is nonempty, closed, and bounded, then $\exists x \in S$ such that $f(x)\leq f(y)\ \forall\ y \in S$. Similarly, $\exists z \in S$ such that $f(z)\geq f(y)\ \forall\ y \in S$. 
+% \paragraph{Separating hyperplane theorem} $S \in \mathbb R^n$ nonempty, closed, convex and $z \notin S$, $\exists c \in \mathbb R^n$ such that $c^\top z < c^\top x \;\forall\ x \in S$. \textbf{(Proof)} Fix $w \in S$, let $B = \{x\mid \norm{x - z}{2} \leq \norm{w - z}{2}\}$. $D = S \cap B$ is nonempty since $w\in D$, and closed since $S,B$ closed, bounded since $B$ bounded. Consider $f(x) = \norm{x - z}{2}$ which is continuous. By Weistrass' theorem $\exists y\in D$ such that $\norm{y - z}{2} \leq \norm{x - z}{2}\; \forall x \in D$. $\forall\ x \in S\setminus D \Rightarrow \norm{x - z}{2} > \norm{w - z}{2}\geq \norm{y - z}{2}$ so $y$ minimizes $\norm{x - z}{2}\ \forall\ x\in S$ (so $y$ is closest element of $S$ to $z$). Let $x \in S$. $S$ convex $\Rightarrow y + \lambda(x - y) \in S\; \forall\ \lambda \in (0, 1]$. 
+% \begin{align*}
+%     \norm{y - z}{2}^2 &\leq \norm{y + \lambda (x - y) - z}{2}^2 = \norm{y - z}{2}^2 + 2\lambda(y - z)^\top (x - y) + \lambda^2\norm{x - y}{2}^2\\
+%      &\overset{1/\lambda}{\Longrightarrow} 2(y-z)^\top (x - y) + \lambda\norm{x - y}{2}^2 \geq 0 \overset{\lim_{\lambda \rightarrow 0}}{\Longrightarrow} (y-z)^\top (x - y)\geq 0\\
+%      &\Longrightarrow (y - z)^\top x \geq (y - z)^\top y = (y-z)^\top z + (y - z)^\top (y-z) > (y-z)^\top z \Longrightarrow c^\top x > c^\top z \tag{$c = y - z$}
+% \end{align*}
+
+
+
+\subsection{Cones and extreme rays}
+\paragraph{Definitions}\textbf{(Cone)} A set $C\subset\mathbb R^n$ is a cone if $x\in C,\ \lambda\ge 0 \Rightarrow \lambda x \in C$. Hence $0\in C.$
+\textbf{(Polyhedral cone)} $\mathcal C = \{x\in \mathbb R^n \mid Ax \geq 0\}$.
+\textbf{(Recession cone)} For $P = \{x\in \mathbb R^n\mid Ax \geq b\}$ and any $y\in P$,  $RC_P(y) = \{d \in \mathbb R^n \mid y + \lambda d \in P,\;\forall\ \lambda \geq 0\}$. Note $\forall\ y,z\in P,\ RC_P(y) = RC_P(z) = RC_P := \{d\in \mathbb R^n\mid Ad \geq 0\}$. For $Q = \{x\in \mathbb R^n\mid Ax = b,\ x\geq 0\},\ RC_Q = \{d\in \mathbb R^n \mid Ad = 0,\ d\geq 0\}$. 
+
+
+\paragraph{Equivalences.} For polyhedral cone $\mathcal C = \{x\mid Ax\geq0\} \subset \mathbb R^n$, the following are equivalent: $0$ is an extreme point of $\mathcal C\iff \mathcal C$ does not contain a line $\iff \exists\ n$ linearly independent rows of $A$. \textbf{(Intuition)} A cone contains a line $\iff$ there is a direction $d\neq 0$ with $Ad=0$ and $-d\in C$; equivalently, equalities do not create a BFS at the origin.
+
+
+\paragraph{Extreme rays definition.} (1) $x\neq 0 \in C \subset \mathbb R^n$ is an extreme ray if there are $n-1$ linearly independent constraints active at x. (2) An extreme ray of $RC_P$ with nonempty $P$ is an extreme ray of $P$ (note: $\exists$ finite number of extreme rays in $P$). 
+
+\paragraph{Finite optimal cost over cone.} For $C=\{x\mid Ax\geq 0\}$, $\min_{\{x \in C\}} c^\top x = -\infty \iff \exists$ extreme ray $d\in C$ such that $c^\top d < 0$. \textbf{(Proof $\Leftarrow$)} Trivial: If $\exists d\in C$ such that $c^\top d < 0$ then $\lambda d\in C\ \forall\ \lambda \geq 0$. \textbf{(Proof $\Rightarrow$)} From given we assume $\exists x\in C$ such that $c^\top x = -1$. Define $P = \{x \mid Ax \geq 0, c^\top x = -1\}\subset C$. $C$ pointed $\Rightarrow $ C does not contain a line $\Rightarrow P$ has at least 1 extreme point, call it $d$. $d$ extreme $\Rightarrow n$ linearly active constraints, one of which must be $c^\top x = -1$. The remaining $n-1$ are from $x \in C \Longrightarrow d$ extreme ray of $C$ with $c^\top d < 0 \qed$ 
+
+\paragraph{Finite optimal cost over polyhedron.} For $P=\{x\mid Ax \geq b\}$, $\min_{\{x \in P\}} c^\top x = -\infty \iff \exists$ extreme ray $d\in RC_P$ such that $c^\top d < 0$. 
+\textbf{(Proof $\Leftarrow$)} Trivial: If $\exists d \in RC_P$ such that $c^\top d < 0$, then $x + \lambda d \in P,\ \forall\ x\in P,\ \forall\ \lambda \geq 0$. And $c^\top (x + \lambda d) = c^\top x + \lambda c^\top d \to -\infty$. As $\lambda \rightarrow \infty$. 
+\textbf{(Proof $\Rightarrow$)} Consider primal-dual pair $(P):\min_{\{x \in P\}} c^\top x,\; (D):\max_{\{p \in Q=\{p\mid p\geq 0, p^\top A=c\}\}} p^\top b$. $(P)$ unbounded $\Longrightarrow (D)$ infeasible $\Longrightarrow (D'):\max_{\{p \in Q\}}p^\top \mathbf{0}$ infeasible. Dual of $(D')$, $(P') = \min_{\{x \in \tilde P=\{x\mid Ax\geq 0\}\}} c^\top x$ is unbounded (since $x = 0$ feasible) $\Longrightarrow \exists$ extreme ray $d \in \tilde P$ such that $c^\top d < 0$ (by previous theorem).
+$\tilde P = RC_P \Longrightarrow$ extreme ray of $RC_P$ is extreme ray of $P \qed$
+
+\paragraph{Resolution theorem}
+For $P = \{x \mid Ax\geq b\}$ nonempty, $\{x^{(k)}\}_{k\in \mathcal K_P} \neq \emptyset$ all its BFS, $\{w^{(r)}\}_{r\in \mathcal R_P}$ all its extreme rays. 
+Then $P = Q = \left\{\sum_{k\in\mathcal K_P} \lambda_kx^{(k)} + \sum_{r\in\mathcal R_P}\theta_rw^{(r)} \mid \lambda_k \geq 0, \theta_r \geq 0, \sum_{k\in\mathcal K_P}\lambda_k = 1\right\}$. 
+\textbf{(Proof $Q \subset P$)} Trivial. Evaluate $x\in Q$ for $P$ feasibility.
+\textbf{(Proof $P \subset Q$)} Contradiction: Suppose $\exists z\in P,\ z \notin Q$. Consider primal-dual pair $(P):\max_{\{(\lambda, \theta) \mid z = X\lambda + W\theta,\ \mathbf{1}^\top \lambda = 1,\ \lambda,\ \theta \geq 0\}} \mathbf{0}$, $(D):\min_{\{(p,q)\mid p^\top X + q\mathbf{1}^\top \geq 0,  p^\top W \geq 0 \}}p^\top z + q$. 
+By assumption ($z \notin Q$), $(P)$ infeasible $\Longrightarrow (D)$ unbounded (since $(p,q)=(0,0)$ is feasible) $\Longrightarrow \exists (p,q)$ such that $p^\top z + q < 0$ and $p^\top X \geq -q\mathbf{1}^\top,\ p^\top W\geq 0^\top$
+$\Longrightarrow p^\top z < p^\top x^{(k)},\ \forall\ k\in\mathcal K_P$. 
+Now consider new problem $(P'): \min_{\{Ax \geq b\}}p^\top x$ which has maximum at $x^{(k^*)}$ for some $k^*\in\mathcal K_P$. Since $z\in P$ is feasible this means $p^\top z \geq p^\top x^{(k^*)}$, arriving at our contradiction to $p^\top z < p^\top x^{(k)},\ \forall\ k\in\mathcal K_P\qed$
+
+
+\section{Sensitivity analysis}
+Given starting optimal basis, $B$, and associated optimal solution, $x^*$, we have $B^{-1}b \geq 0$ (feasibility) and $\overline c = c - c_B^\top B^{-1}A \geq 0$ (optimality). This section examines how these change with changes to $(A,b,c)$ and how to efficiently solve for this deviation.
+
+
+\paragraph{New variable.} $\min_{\{x\mid x\geq 0, Ax + A_{n+1}x_{n+1} = b\}}c^\top x + c_{n+1}x_{n+1}$. Note that $(x, x_{n+1}) = (x^*,0)$ is a BFS to this new problem under original $B$. Suffice to check optimality of $\overline c_{n+1} = c_{n+1} - c^\top_BB^{-1}A_{n+1}\geq 0$. To solve: augment the simplex tableau with an additional column, $A_{n+1}$ and continue iterations.
+
+\paragraph{New inequality.} Introduce constraint $a_{m+1}^\top x\geq b_{m+1}$. If $x^*$ satisfies this constraint, the augmented problem is optimal. Else, bring into standard form with new variable, $x_n+1$ by defining
+\begin{align*}
+    \overline A = \begin{bmatrix}A & 0\\a^\top_{m+1}&-1\end{bmatrix} \quad
+    \overline B = \begin{bmatrix}B & 0\\a^\top_{{m+1}_B}&-1\end{bmatrix} \quad
+    \overline B^{-1} = \begin{bmatrix}B^{-1} & 0\\-a^\top_{{m+1}_B}B^{-1}&-1\end{bmatrix}
+\end{align*}
+To solve: observe that this problem is dual-feasible (infeasible x, but nonnegative reduced cost vector), so use the dual simplex beginning at current BFS. 
+
+\paragraph{Change in $b$.} Suppose $b'\leftarrow b + \delta e_i$. Optimality condition ($\overline c\geq 0$) unaffected, only feasibility ($x_B' = B^{-1}b'\geq 0)$ must be considered. We have $B^{-1}(b + \delta e_i) = x_B + \delta B^{-1}_i$. For any $\delta$ in 
+\begin{align*}
+    \max_{\{j\mid [B^{-1}]_{ji}>0\}}\left(-\frac{x_{B(j)}}{[B^{-1}]_{ji}}\right) \leq \delta \leq 
+    \max_{\{j\mid [B^{-1}]_{ji}<0\}}\left(-\frac{x_{B(j)}}{[B^{-1}]_{ji}}\right)
+\end{align*}
+optimality and primal feasiblity are satisfied. For $\delta$ outside this range, optimality (dual feasibility) is still satisfied, but not primal feasibility. Use dual simplex to find new solution.
+
+\paragraph{Change in $c$.} Suppose $c'\leftarrow c + \delta e_j$. Feasibility condition ($x_B = B^{-1}b \geq 0$) unaffected, only optimality $(\bar c' = c' - c_B'^{\top}B^{-1}A \geq 0)$ must be considered. If $j$ nonbasic, suffice to check $c_B^\top B^{-1}A_j \leq c_j + \delta \iff \overline c_j \geq -\delta$. If $j = \ell\in B$, $\bar c'^\top = (c + \delta e_j)^\top - (c_B + \delta e_\ell)^\top B^{-1}A$ 
+\begin{align*}
+    \bar c'_i: &&
+        \bar c_i = 0\ (i\in B\setminus \ell) &&
+        \bar c_i + \delta - \delta = \bar c_i = 0\ (i = \ell\in B) &&
+        \bar c_i - \delta e_\ell^\top B^{-1}A_i\ (i \in N)
+\end{align*}
+Suffice to check $\bar c'^\top_N = \bar c_N^\top - \delta e_\ell^\top B^{-1}A_N \geq 0 \Longrightarrow \overline c_N \geq \delta e_\ell^\top  B^{-1}A_N$. In both cases, if true, current solution is still optimal, else apply primal simplex starting at the current BFS. 
+
+\paragraph{Change in nonbasic column of $A$.} Suppose $a_{ij}'\leftarrow a_{ij} + \delta$. If $A_j$ nonbasic, then $B$ is unaffected and hence primal feasiblity is unaffected. Only reduced cost of column $j$ is affected. Condition to check is $c_j - c_B^\top B^{-1}(A_j + \delta e_i)\geq 0 \iff \overline c_j - \delta p_i \geq 0$. If this condition is violated, bring nonbasic column $A_j$ into the basis and contine with the primal simplex method. 
+
+\paragraph{Change in basic column of $A$.} Suppose $a_{ij}'\leftarrow a_{ij} + \delta$ and $A_j$ basic with $j=B(\ell)$. Then $B' \leftarrow B + \delta e_i e_\ell^\top$. Must reason about feasibility ($x_B' = (B + \delta e_i e_\ell^\top)^{-1}b$) and optimality ($\bar c'^\top = [\bar c'^\top_B, \bar c'^\top_N]= [0, c_N^\top - c_B(B + \delta e_i e_\ell^\top)^{-1}N$). Must reason about inverse (use Sherman-Morrison formula) to bound $\delta$.
+
+\paragraph{Global sensitivity} $G(c) = \min_{\{Ax=b, x\geq 0\}}c^\top x = \min_{\{i\in[N]\}}c^\top x^{(i)}$, a convex piecewise linear function of c. Use the primal problem to study this since changing $c$ affects optimality and not feasibility. $F(b) = \min_{\{Ax=b, x\geq 0\}}c^\top x = \max_{\{j\in[M]\}}p^{(j)\top} b$, a convex piecewise linear function of b. Use dual problem to study since changing $b$ affects dual optimality and not dual feasibility.
+
+
+\section{Large scale optimization}
+% The general flow in this section is: Start with a restricted master (few columns or few cuts), solve, use a subproblem to check optimality (and generate violated constraints if not). Iteratively expand restricted master with constraint or variable.
+
+\paragraph{Delayed column (row) generation.} Column generation either confirms we're optimal ($\min_{j\notin I}\bar c_j \geq 0$) or provides new \emph{variable} $j$. Row generation either confirms we're feasible ($z \geq \max_{j\notin I}\ \{a_j^\top x - b_j\}$) or provides new \emph{constraint} $j$.
+\begin{align*}
+    \min\ c^\top x\; \text{s.t.}\ Ax=b,\ x\geq 0 
+    &\Longrightarrow\;
+    \min\ c_I^\top x_I\; \text{s.t.}\ A_Ix_I=b,\ x_I\geq 0 
+    \;\Longrightarrow\;
+    \min_{j\notin I}\ \bar c_j = c_j - p^\top A_j \tag{column generation}\\
+    \min\ z\ \text{s.t.}\ z\odot e\geq A x - b
+    &\Longrightarrow\; 
+    \min\ z\ \text{s.t.}\ z\odot e\geq A_I x - b_I
+    \;\Longrightarrow\;
+    \max_{j\notin I}\ a_j^\top x - b_j \tag{row generation}
+\end{align*}
+
+
+\subsection{Dantzig-Wolfe decomposition.} 
+\begin{align*}
+    \min_{x_1,x_2}\; c_1^\top x_1 + c_2^\top x_2 \quad \text{s.t.}\; D_1x_1 + D_2x_2=b_0,\; x_1\in P_1,\; x_2\in P_2,\; \quad P_i = \{x_i\geq 0 \mid F_ix_i = b_i\}
+    \tag{Too many variables, partition feasible sets into blocks, $P_i$}
+\end{align*}
+
+\paragraph{Master problem.} Reformulate original problem using resolution theorem:
+\begin{align*}
+    \min_{\lambda, \theta}\; \sum_{i\in\{1,2\}}\left( \sum_{j\in\mathcal J_i}\lambda_i^jc_i^\top x_i^j + \sum_{k\in \mathcal K_i} \theta_i^kc_i^\top w_i^k\right)\quad 
+    \text{s.t.}\; \sum_{i\in\{1,2\}}\left( \sum_{j\in\mathcal J_i}\lambda_i^jD_i x_i^j + \sum_{k\in \mathcal K_i} \theta_i^kD_i w_i^k\right) = b_0,\; \mathbf{1}^\top \lambda_i = 1,\; \lambda_i^j,\theta_i^k\geq 0,\; \forall i,j,k
+\end{align*}
+
+\paragraph{Restricted master.} Solve using only a subset of $\{x_i^j,w_i^k\}$. Let duals be $q^k$ for $D_1x_1+D_2x_2=b_0$ and $r^k_i$ for $\mathbf{1}^\top\lambda_i=1$. 
+
+
+\paragraph{Subproblem.} Form $\min_{\{x_i\mid x_i\in P_i\}}\; (c_i^\top- q^{k\top} D_i)x_i - r^k_i$: \textbf{(i) Unbounded}: $\exists\, w_i^k$ with $\bar c = (c_i^\top - q^\top D_i)w_i^k < 0 \Rightarrow$ add variable $\theta_i^k$ and parameters $(c_i^\top w_i^k,\, D_i w_i^k)$. \textbf{(ii) Finite and $< r^k_i$}: $\exists\, x_i^j$ with $\bar c = (c_i^\top - q^\top D_i)x_i^j - r_i < 0 \Rightarrow$ add variable $\lambda_i^j$ and parameters $(c_i^\top x_i^j,\, D_i x_i^j)$.\textbf{(iii) Finite and $\ge r^k_i$ for all $i$}: $\bar c \ge 0 \Rightarrow$ optimal
+
+\paragraph{Iteration bound} The dual function is a lower bound on our master problem. At iteration $k$, we have dual-feasible values $q^k$ and $\min_{x_i\in P_i} (c_i^\top - q^{k\top} D_i)x_i$. Together these can be used to construct a lower bound:
+\begin{align*}
+    % \min_{\lambda,\theta}\; c^\top&(X\lambda + W\theta)\quad\text{s.t. } (\lambda, \theta) \in P= \{\lambda, \theta\mid D(X\lambda + W\theta) = b_0, \lambda_i^\top e = 1, \lambda\geq 0, \theta\geq0\} \tag{master}\\
+    \min_{\lambda, \theta}\ L(\lambda, \theta, q\geq0, r) &= \min_{\lambda,\theta}\ \left\{ c^\top(X\lambda + W\theta) + q^\top(b_0 - D(X\lambda + W\theta)) + \sum_{i=1}^2 r_i(1 - e^\top \lambda_i) \right\} \tag{Lagrangian}\\
+    g(q\geq0, r) &= q^\top b_0 + \sum_{i=1}^2 \left(r_i +  \min\left\{\min_{\lambda_i} (c_i^\top X_i - q^\top D_iX_i - r_i e^\top)\lambda_i,\;
+    \min_{\theta_i}(c_i^\top W_i - q^\top D_iW_i)\theta_i\right\}\right) \tag{Dual problem}\\
+    &= q^\top b_0 + \sum_{i=1}^2 \left(\min\left\{\min_{x_i^j} (c_i^\top x_i^j - q^\top D_ix_i^j),\;
+    \min_{w_i^k}(c_i^\top w_i^k - q^\top D_iw_i^k)\theta\right\}\right) \tag{optimal at extreme point or ray}
+    = q^\top b_0 + \sum_{i=1}^2\min_{x_i\in P_i} (c_i^\top - q^\top D_i)x_i\\
+    &\text{For any basic } \lambda_i^j: \bar c_i = (c_i^\top - q^\top D_i)x_i^j - r_i = 0 \Longrightarrow r_i = (c_i^\top - q^\top D_i)x_i^j \geq \min_{x_i\in P_i}(c_i^\top - q^\top D_i)x_i =: z_i
+\end{align*}
+
+
+\subsection{Benders decomposition} 
+
+\begin{align*}
+    \min_{x,y}\; c^\top x + f^\top y 
+    \quad \text{s.t.}\; 
+    Ax = b,\;
+    Dx + By = d,\;
+    x,y \ge 0
+    \tag{Too many constraints, keep $x$ in the master, eliminate $y$ via a subproblem}
+\end{align*}
+
+\paragraph{Master problem.} Eliminate $y$ via its subproblem and represent its cost by $z$. This significantly reduces the number of variables, but increases the number of constraints.
+Consider $x$ fixed, let $p$ be the dual variable for $By = d - Dx$, and let $\mathcal P = \{p \mid p^\top B \le f^\top\}$.
+Denote the extreme points of $\mathcal P$ by $p^i$ and the extreme rays by $w^j$.
+The full reformulation of the original problem is
+
+\begin{align*}
+    \min_{x,z}\;& c^\top x + z \quad \text{s.t.}\; Ax = b,\; x\geq0,\; p^{i\top}(d - Dx) \leq z,\; w^{j\top}(d - Dx)\leq 0,\quad \forall\ \text{extreme points } p^i\in\mathcal P,\;\text{extreme rays } w^j\in\mathcal P
+\end{align*}
+
+\paragraph{Restricted master.} Solve using the same objective as the master problem, but only a subset of $\{p^i, w^j\}$. For a given optimal solution to the restricted problem, $(x^k, z^k)$, check feasibility in master plroblem. 
+
+\paragraph{Subproblem.} Form $(P)\ \min_{\{y\mid By = d - Dx^k,y\geq 0\}}f^\top y$ and $(D)\ \max_{\{p\mid p^\top B \leq f^\top\}}p^\top(d - Dx^k)$: 
+\textbf{(i) $(D)$ unbounded}: $\exists\ w^j$ with $w^{j\top}(d - Dx^*) > 0 \Rightarrow$ add constraint $w^{j\top}(d - Dx) \leq 0$ to restricted problem
+\textbf{(ii) $(P)$ finite and $< z^k$}: $\exists\ p^i$ with $p^{i\top}(d - Dx^*) > z^* \Rightarrow$ add constraint $p^{i\top}(d - Dx) \leq z$ to restricted problem
+\textbf{(iii) $(P)$ finite and $\geq z^k$}: optimal solution to restricted problem that is feasible for the master problem $\Rightarrow$ optimal
+
+\paragraph{Integer knapsack problem.} Solved as a dynamic programming problem
+\begin{align*}
+    F(u) = \max_a\; \sum_{i=1}^mp_ia_i\;\text{s.t.}\; \sum_{i=1}^mw_ia_i \leq u,\; a \in\mathbb Z_+^m
+    &&F(u)=\begin{cases}
+        0 & u < \min_iw_i\\
+        \max_{i\in[m]}\{p_i + F(u - w_i)\}&\text{else}
+    \end{cases}
+\end{align*}
+
+
+
+
+
+
+\section{Network flows}
+\paragraph{A tree} is an undirected graph with no cycles. Properties: i) An undirected graph is a tree $\iff$ it is connected and has $|\mathcal N|-1$ arcs. ii) For any distinct nodes $i,j$ in a tree, $\exists$ a unique path from $i\leftrightarrow j$. \emph{Proofs involve deleting leaves and arcs in cycles}
+
+\paragraph{A spanning tree} of an undirected graph $G=(\mathcal N,\mathcal E)$ is a tree, $T=(\mathcal N, \mathcal E_1)$, such that $\mathcal E_1 \subseteq \mathcal E$. Properties: i) Let $\mathcal E_0\subseteq \mathcal E$ without any cycles $\Longrightarrow \mathcal E_0$ can be augmented to $\mathcal E_1 \supseteq \mathcal E_0$ so that $(\mathcal N, \mathcal E_1)$ is a spanning tree 
+
+\paragraph{Network flow.} Directed graph, $G=(\mathcal N, \mathcal A)$ with nodal supply $b_i$, arc capacity $u_{ij}$, and flow cost $c_{ij}$
+\begin{align*}
+    \min_{f_{ij}} \sum_{(i,j)\in\mathcal A}c_{ij}f_{ij}, \quad \text{s.t.}\; b_i + \sum_{j\in I(i)}f_{ji} = \sum_{j\in O(i)}f_{ij}\; \forall\ i\in \mathcal N, \quad 0 \leq f_{ij} \leq u_{ij}\;\forall\ (i,j)\in \mathcal A
+\end{align*} 
+Every network flow problem can be reduced to i) one with exactly one source and one sink [new outgoing (incoming) node connected to each source (sink); zero cost arcs; arc capacity equal to nodal supply], ii) one without sources or sinks [connect $t\rightarrow s$ with $u_{ts}=b_s,\ c_{ts}=-M$]
+
+\paragraph{Transportation problem} (\textbf{Assignment problem} sets $s_i=1,\ d_j=1,\ |\mathcal N_d| = |\mathcal N_s|$)
+{\footnotesize
+\begin{align*}
+    \min_{f_{ij}} \sum_{i=1}^m\sum_{j=1}^nc_{ij}f_{ij}, \quad \text{s.t.}\; \sum_{i=1}^mf_{ij} = d_j\; \forall\ j\in\mathcal N_d, \quad \sum_{j=1}^jf_{ij} = s_i\; \forall\ i\in\mathcal N_s,\quad f_{ij}\geq 0\;\forall\ (i,j)\in \mathcal A
+\end{align*}
+}
+
+
+\paragraph{Shortest path.} Minimum length path to target node $t$ from source node(s) $s\in S\subseteq \mathcal N\setminus\{t\}$. Formulated as a network flow problem by redefining $b_i$. Dual lends itself to Bellman equation and Dijkstra's algorithm.
+{\footnotesize
+\begin{align*}
+    b_i = \begin{cases*}
+        |S| & $i=t$\\
+        +1 & $i\in S$\\
+        0 & else
+    \end{cases*}
+    && (D): \max_{\{p_i \leq c_{ij} + p_j,\;\forall\ (i,j)\in\mathcal A\}}\; \sum_{i\in \mathcal N}b_ip_i
+    &&(D'): \max_{\{p_i \leq c_{ij} + p_j,\;\forall\ (i,j)\in\mathcal A,\:S=\mathcal N\setminus\{t\},\; p_t=0\}}\; \sum_{i\neq t}p_i
+\end{align*}
+}
+Properties: i) if $\exists$ negative length cycle, optimal cost is $-\infty$. ii) if all cycles have nonnegative length and a feasible tree solution is optimal, then the tree is a tree of shortest paths. ii) if all cycles have nonnegative length and we fix $p_n=0$, then $p^*$ unique and $p^*_i$ is shortest path length from node $i\rightarrow t$.
+
+\paragraph{Maximum flow.} Largest possible flow sent through the network from $s\rightarrow t$.
+{\footnotesize
+\begin{align*}
+    &\max\; b_s \quad \text{s.t.}\; Af = b,\; b_t = -b_s,\; b_i = 0\ \forall\ i\notin\{s,t\},\;
+    0\leq f_{ij}\leq u_{ij}\ \forall\ (i,j)\in \mathcal A\\
+    &\text{Reformulate as network flow: }
+    \mathcal A' = \mathcal A\cup\{(t,s)\},\
+    c_{ij} = \begin{cases*}
+        -1 & \text{$(i,j)=(t,s)$}\\
+        0 & \text{else}
+    \end{cases*},\ u_{ts} = \infty,\ b_i = 0\\
+    &\text{Dual: }\min\ \sum_{(i,j)\in \mathcal A} u_{ij}\theta_{ij}
+    \quad\text{s.t.}\ p_i - p_j + \theta_{ij}\geq0\ \forall\ (i,j)\in\mathcal A,\
+    p_t - p_s \geq 1,\ \theta_{ij}\geq 1\ \forall\ (i,j)\in\mathcal A
+\end{align*}
+}
+
+\paragraph{Minimum cut.} Global cut problem creates $S\subset\mathcal N$ such that minimum capacity passes from $S \to S^C$. The value of the cut is $C(S) = \sum_{\{(i,j)\in\delta(S)\}}u_{ij},\ \delta(S)=\{(i,j)\mid i\in S,\ j\notin S\}$. Add constraint $(x_s,x_t)=(1,0)$ to make Minimum s-t cut problem. Can be proved the $s\to t$ cut is the dual of the $s\to t$ Max Flow problem
+{\footnotesize
+\begin{align*}
+    \min_{\emptyset \subset S \subset \mathcal N} \sum_{(i,j)\in\delta(S)}u_{ij} \Longrightarrow && 
+    \min_{x,z}\;\sum_{(i,j)\in\mathcal A}u_{ij}z_{ij}\quad \text{s.t.}\;z_{ij} \geq x_i - x_j\;\forall\ (i,j)\in\mathcal A,\; 0\leq x_i,z_{ij}\leq 1 &&
+    x_i=\mathbb I\{i\in S\},\ z_{ij}=\mathbb I\{i\in S,\ j\notin S\}
+\end{align*}
+}
+
+\paragraph{Matrix notation.} $A: a_{ik}=1\ (-1)$ if $i$ starts (ends) arc $k$ and $a_{ik}=0$ otherwise. When $Af=0$ we have a \textbf{circulation}.
+The rows of $A$ are not linearly independent, so we define $\tilde A = A_{[:n-1,:]}$
+$\tilde A$ has linearly independent rows if $G$ connected \textbf{(Proof)} $G$ connected $\implies \exists$ spanning tree $T\subset \mathcal A$. Form $\tilde A_T$ and use unique tree solution result (below) to show $\tilde A_T$ singular. 
+
+\paragraph{A tree solution} is a flow vector, $f$, constructed by (a) picking $T\subset A$ of $n-1$ arcs forming a \emph{spanning} tree when direction is ignored, (b) setting $f_{ij} = 0 \;\forall\ (i,j)\notin T$, (c) solving $\tilde Af = \tilde b$ to determine $f_{ij}\; \forall\ (i,j)\in T$. \textbf{A feasible tree solution} is a tree solution satisfying $f\geq 0$ (or $d\preceq f \preceq u$ if capacitated). \textbf{A tree solution is a unique solution:} \textbf{(Proof sketch)} suffice to show that $\tilde A_T$ is nonsingular: reorder its rows and columns to show $\tilde A_T$ is lower triangular with nonzero diagonals, hence nonsingular. 
+
+\paragraph{A flow vector is a basic solution $\iff$ it is a tree solution.} \textbf{(Proof $\Leftarrow$)} follows immediately from above \textbf{(Proof $\Rightarrow$)} Contrapositive: Suppose not $f$ not a tree solution and consider case when $Af=b$ (if not equal, not basic by definition). Let $S = \{(i,j)\in\mathcal A\mid f_{ij}\neq 0\}$. If no cycles, $\exists T\supset S$ forming a spanning tree and $f$ is the tree solution associated with $T$, contradiction. If cycles, let $h^C$ be a circulation and we have $A(f + h^C) = b$ and we observe whenever $f_{ij} = 0 \Rightarrow h^C_{ij}=0$ and constraints active at $f$ and $f + h^C$, so no unique solution and $f$ not basic.   
+
+\paragraph{Simplex change of basis and reduced costs.} For spanning tree, $T$, pick arc $(i,j)\notin T$ and identify cycle that is formed. Let $F,B$ be forward and backward arcs in cycle relative to $(i,j)$ forward. In capacitated case, assume $d_{ij}\leq f_{ij} \leq u_{ij}$.
+{\footnotesize\begin{align*}
+    \hat f_{k\ell} &= 
+    \begin{cases*}
+        f_{k\ell} + \theta & \text{if $(k,\ell) \in F$}\\
+        f_{k\ell} - \theta &\text{if $(k,\ell) \in B$}\\
+        f_{k\ell} & \text{otherwise}
+    \end{cases*}
+    && \theta^* = \begin{cases}
+        (\text{uncap.})& \min_{(k,\ell)\in B} f_{k\ell}\\
+        (\text{cap.})& \min\{\min_{(k,\ell)\in B} f_{k\ell} - d_{k\ell}, 
+        \min_{(k,\ell)\in F} u_{k\ell} - f_{k\ell}\}
+    \end{cases}
+    && \bar c_{ij} &= \left(\sum_{(k,\ell)\in F}c_{k\ell} - \sum_{(k,\ell)\in B}c_{k\ell}\right)
+    = c_{ij} - (p_i - p_j)
+\end{align*}}
+For $p^\top = c_T^\top \tilde A_T^{-1},\ p_n=0$. Since $\bar c_T = 0$, we solve for $p$ given the system of equations
+$p_i - p_j = c_{ij}\;\forall\ (i,j)\in T, p_n = 0$. Without fixing $p_n$, we can add a constant to all $p$ without changing the results.
+
+
+\paragraph{Network simplex iteration.}
+(1) Start with BFS flow $f$ and spanning tree $T$ (add artificial arcs with cost M if needed). For capacitated problems, define D (at lower bound) and U (at upper bound).
+(2) Compute node potentials $p$ by fixing $p_n=0$ and enforcing $p_i - p_j = c_ij\ \forall\ (i,j)\in T$.
+(3) Compute reduced costs $\bar c_{ij} = c_{ij} - (p_i - p_j)\;\forall\ (i,j)\notin T$. If $\bar c \geq 0 \Rightarrow x$ optimal and terminate. Else choose $(i,j): \bar c_{ij} < 0$. Capacitated: $\bar c_{ij} \geq 0\ \forall(i,j)\in D$ and $\bar c_{ij} \leq 0\ \forall(i,j)\in U$. For selected $(i,j)$, if $(i,j)\in D$, forward is $i\rightarrow j$ and if $(i,j)\in U$, forward is $j\rightarrow i$.
+(4) Adding $(i,j)$ to $T$ creates a unique cycle. If $B=\emptyset\Longrightarrow \theta^*=\infty$ and terminate with optimal cost $-\infty$. Else choose $\theta^*$ defined above.
+(5) Push $\theta^*$ units of flow around the cycle and remove the arc whose flow hits a bound.
+
+
+\paragraph{Integrality.} $A$ integers $\Rightarrow B,B^{-1}$ integers. $B^{-1}$ integer since $B$ integer and lower triangular with diagonal entries $\in\{1, -1\}$. $b_i$ ($c_{ij}$) integers, $\Rightarrow$ basic solution (dual basic solution) integers
+
+
+\section{Ellipsoid and interior point methods}
+\subsection{Ellipsoid method}
+% Developed to place provable polynomial bounds on linear programming problems. The original proof is for empty or full dimensional, bounded $P$.  
+
+\paragraph{Algorithm.} \textbf{(Inputs)} $P=\{Ax \geq b\}$, $t^*=t(v)$ such that $Vol(P) < v \Rightarrow P=\emptyset$, $P \supset E_0 = E(x_0, r^2I)$ \textbf{(Iteration)} (1) If $t=t^*$, $P=\emptyset$. If $x_t\in P$, $P\neq \emptyset$. Else, find $i$ such that $a_i^\top x_t  < b_i$. (2) Let $H_t = \{x \mid a_i^\top x \geq a_i^\top x_t\}$, build $E_{t+1} \supseteq H_t \cap E_t$, set $x_{t+1} \leftarrow \text{center}(E_{t+1})$ \textbf{(Polynomial time)} Each cut reduces ellipsoid volume by a fixed multiplicative factor $e^{-1/(2(n+1))}$
+
+\paragraph{Relaxing requirement on boundedness.} All extreme points $x^{(i)}$ of $P$ are contained in a bounded polyhedron, $P_B$. If $\text{rank}(A)=n,\ P$ nonempty $\Longrightarrow P$ has at least one extreme point and the algorithm can be applied to $P_B$. 
+
+\paragraph{Relaxing requirement on empty or full-dimensional.} Define $P_e = \{x\mid Ax \geq b - \epsilon \mathbf{1}\}$ for special $\epsilon$ and show $P$ empty (nonempty) $\Rightarrow P_e$ empty (full-dimensional) and the algorithm can be applied to $P_e$. 
+
+\paragraph{For linear programs.} Find feasible $(x,p)\in\mathcal O = \{(x,p)\in \mathbb R^{n+m}\mid Ax=b,\ x\geq0,\ c^\top x = p^\top b, p^\top A \leq c^\top\}$. Can check feasibility of $P=\{x\mid Ax\geq b\}$ for primal feasibility. Can check feasibility of $P=\{d\mid Ad\geq 0, c^\top d = -1\}$ for unboundedness. \textbf{(Bisection)} To solve $\min_{x\in P} c^\top x$, maintain an interval $[L,U$] known to contain the optimal value, $c^\top x^*$. At each iteration, query feasibility of $P(p) = \{x \mid Ax \ge b,\ c^\top x \le p\}$ at midpoint $p=(L+U)/2$. If P(p) is feasible, set $U \leftarrow p$, else set $L \leftarrow p$.
+
+\paragraph{Separation problem.} If we can solve a separation problem (decide $x\in P$ or produce $d$ such that $d^\top x < d^\top y\ \forall\ y\in P$) for $P$ polynomial time, we can solve an optimization problem over $P$ in polynomial time. The converse is also true: Define $P^o = \{y \mid y^\top x \leq 1\ \forall \ x \in P\}$ and assume $0\in P$. For $OPT(P) = \max_{x\in P}c^\top x$, (i) if $c^\top x^* \leq 1 \Longrightarrow c^\top x \leq 1\ \forall x\in P \Longrightarrow c\in P^o$. (ii) if $c^\top x^* > 1 \Longrightarrow \exists x^o\in P$ such that $c^\top x^o > 1$ and note $z^\top x^o \leq 1\ \forall z \in P^o$ so $x^o$ separates $c$ and $P^o$. Finally, $P = P^{oo}$, so $OPT(P) \iff SEP(P^o) \iff OPT(P^o) \iff SEP(P^{oo}) = SEP(P)$. (\textcolor{red}{Can also use Farka's lemma for separating hyperplane})
+
+\paragraph{E.g., Traveling salesman.} Separation problem for a given $\tilde x$ is the min-cut problem with $u_e = \tilde x_e$ and $\mathcal A=\{\mathcal E_\rightarrow, \mathcal E_\leftarrow\}$. Let $S_0$ be the minimum cut. Then if $\sum_{e\in\delta(S_0)}x_e = \sum_{e\in \mathcal E}\tilde x_e z_e < 2$, $\tilde x_e$ infeasible and $S_0$ is the violated constraint.  
+\begin{align*}
+    \min_{x_e} \sum_{e\in\mathcal E}c_ex_e
+    &&\text{s.t.} \sum_{e\in\delta(\{i\})} x_e = 2\ \forall\ i\in\mathcal N,\; x_e\in[0,1]\ \forall\ e\in \mathcal E,\;
+    \sum_{e\in\delta(S)} x_e \geq 2\ \forall\ S\subset \mathcal N\setminus\{\emptyset\} 
+    && (\delta(S)=\{(i,j)\mid i\in S,\ j\notin S\})
+\end{align*}
+
+\paragraph{E.g., Min-weight edge set to intersect every $s\rightarrow t$ path.} Separation problem for a given $\tilde x$ is the shortest path problem with $l_{ij} = \tilde x_{ij}$ and  $\mathcal A=\{\mathcal E_\rightarrow, \mathcal E_\leftarrow\}$. Let $K_0$ be the shortest path. Then if $\sum_{e\in K_0}\tilde x_e <1$, $\tilde x_e$ infeasible and $K_0$ is the violated constraint. 
+\begin{align*}
+    \min_{x_e} \sum_{e\in\mathcal E}c_ex_e
+    &&\text{s.t.}\sum_{e\in K}x_e \geq 1\ \forall\ K\in\mathcal K,\; 0\leq x_e\leq 1,\; \forall\;e\in\mathcal E
+    &&\text{($\mathcal K$ is the set of all $s\rightarrow t$ paths)}
+\end{align*}
+
+\subsection{Affine scaling}
+\paragraph{Approach}
+For $P=\{x\mid Ax=b,\ x\ge0\}$, stay strictly in the interior of $P: \text{relint}(P) = \{x\mid Ax=b,\ x>0\}$
+
+
+\paragraph{Dikin ellipsoid and local LP}
+At $x_k>0$, the Dikin ellipsoid, $E_k = \{x \mid (x-x_k)^\top X_k^{-2}(x-x_k) \le 1\},\ X_k=\mathrm{diag}(x_k)$, is the largest ellipsoid centered at $x_k$ satisfying $E_k\subseteq\text{relint}(P)$.  
+Affine scaling computes the next iterate as the minimizer of the linear objective over this ellipsoid: $x_{k+1} = \arg\min\{c^\top x \mid x\in E_k \cap \{x\mid Ax=b\}\}$.
+Since the boundary of $E_k$ is strictly interior to $P$, $x_{k+1}$ remains feasible and strictly positive.
+
+\paragraph{Direction computation.} For $d = x^{k+1} - x^k,\ x^{k+1}\in P$, we equivalently solve $\min_{\{d\mid Ad=0,\ d^\top X_k^{-1}d \leq 1\}}c^\top d$, which has an analytical solution. Further, $c^\top d = c^\top (x^{k+1} - x^k) < 0$ so objective strictly improves. \textbf{(Interpretation)} $d_k = x_{k+1}-x_k$ is the direction of steepest feasible descent after scaling the geometry of $P$ by the current point. The scaling $X_k^{-1}$ normalizes coordinates so the step is “round” in the interior; this is why $E_k$ always fits inside $\text{relint}(P)$.
+
+\paragraph{Algorithm} \textbf{(Iteration)} (i) Compute $X_k = \text{diag}(x^k),\ p^k = (AX_k^2A^\top)^{-1}AX_K^2c,\ r^k = c - A^\top p^k$. (ii) if $r^k\geq 0,\ x^{k\top}r^k < \epsilon$, then $\epsilon$-optimal $x^k$ found. (iii) If $X^{2}_kr^k \geq 0$, then optimal cost is unbounded. (iv) $x^{k+1} = x^k - \beta X_k^2r^k / ||X_kr^k||_2$. Longstep variants update $||X_kr^k||_2$ with $||X_kr^k||_\infty$ or $\max_{\{X_{ki}r^k_i > 0\}}X_{ki}r^k_i$. \textbf{(Initialize)} Want $x_0 > 0$. Can be done with $\min_{\{Ax + (b - A\mathbf{1})x_{n+1} = b,\ (x,x_{n+1})\geq 0\}} c^\top x + Mx_{n+1}$ and starting point $(\mathbf{1}, 1)$.
+
+\subsection{Barrier method and central path}
+\paragraph{Setup.}
+Exam questions will focus on (i) taking derivatives of the barrier Lagrangian and
+(ii) using $x^*\odot s^*=\mu$.  
+Affine scaling moves quickly inside $P$ but slows near the boundary.  
+Barrier methods instead pick a path that stays strictly interior for all $\mu>0$.
+Consider primal-dual pair $(P): \min_{\{x\mid Ax=b,\ x\geq 0\}}c^\top x,\ (D): \max_{\{p\mid p^\top A + s = c^\top,\ s\geq 0\}}p^\top b$. Note the duality gap identity $c^\top x - p^\top b = (s^\top + p^\top A)x - p^\top Ax = s^\top x$. To implement, consider expressing one variable in terms of the other ones (e.g., $a_2x_2 = b - a_1x_1$)
+
+\paragraph{Barrier problems.} Introduce logarithmic barriers on the nonnegativity constraints:
+{\footnotesize
+\begin{align*}
+    \min_{\{x\mid Ax=b\}}\; B_\mu(x)=c^\top x - \mu\sum_{i=1}^n\log x_i
+    && \max_{\{p,s\mid p^\top A + s^\top = c^\top\}}\; B_\mu(x)=p^\top b - \mu\sum_{j=1}^n\log s_j
+\end{align*}
+}
+For the barrier problems, the necessary and sufficient (KKT) conditions for optimality are
+\begin{align*}
+    Ax(\mu) = b && x(\mu)\geq 0 && A^\top p(\mu) + s(\mu) = c && s(\mu) \geq 0 && x(\mu)\odot s(\mu) = \mu
+\end{align*}
+Any $(x(\mu),\ p(\mu),\ s(\mu))$ satisfying these is optimal for the barrier problems. To check optimality, examine Lagrangian:
+{\footnotesize
+\begin{align*}
+    L(x,p^*) &= c^\top x - p^{*\top}(Ax-b) - \mu\sum_i\log x_i 
+    = (A^\top p^* + s^*)^\top x - p^{*\top}(Ax - b)- \mu\sum_i\log x_i 
+    = \sum_{i=1}^n \left(s^*_ix_i- \mu\log x_i\right) - p^{*\top}b 
+    \quad \left(\tfrac{\partial L(x,p^*)}{\partial x_i} = 0\iff x_i = \tfrac{\mu}{s^*_i}\right)
+\end{align*}
+} So minimizing the Lagrangian gives minimizer $x^* = x(\mu) = \mu / s^*$
+
+\paragraph{Central path.}
+The solutions $(x(\mu),s(\mu))$ parameterized by $\mu>0$ are the \textbf{central path}.  
+As $\mu\to0$, $x(\mu)\to x^*$ and $s(\mu)\to s^*$ for some optimal primal-dual pair.
+
+\paragraph{Exercise.}
+Let $(x_\mu,p_\mu)$ a saddle point of $L(x,p)=c^\top x+p^\top b - p^\top A x - \mu\sum_i\log x_i$. Show $(x_\mu,s_\mu=c-A^\top p_\mu)$ lies on central path:
+
+\begin{align*}
+    \tfrac{\partial L(x,p)}{\partial x} = 0 \iff c_i -p^\top A_i - \tfrac{\mu}{x_i} = 0\ \forall\ i. && \text{Let } s_i := c_i - p^\top A_i\text{ then } s_ix_i = \mu\ \forall\ i \text{ and } s_i> 0\ \forall\ i \text{ since } \mu,x_i > 0 \\
+    \tfrac{\partial L(x,p)}{\partial p} = 0 \iff b - Ax = 0 \iff Ax = b && \text{Together we have } \{x> 0,\ s>0,\ p^\top A + s^\top = c^\top,\ Ax=b,\ s\odot x = \mu\}\ \text{(central path of standard form primal)}
+\end{align*}
+
+\paragraph{Exercise.}
+Suppose for $\mu=1$ the point $x_\mu$ is feasible but not optimal, yet $(x_\mu,s_\mu)$ converge as $\mu\to0$. Show  
+(i) some index $i$ satisfies $x_i^*=0$,  
+(ii) for that $i$, $\lim_{\mu\to0} x_{\mu,i}/\mu >0$.
+\textbf{(Proof i)}  
+If $x_i^*>0\ \forall\ i$, then strict complementarity gives $s_i^*=0\ \forall\ i$.  
+Then any feasible $x$ satisfies $x\odot s^*=0$, so all feasible $x$ are optimal — a contradiction to $x_\mu$ feasible but not optimal.
+\textbf{(Proof ii)}  
+For the index $i$ with $x_i^*=0$, strict complementarity gives $s_i^*>0$.  
+From $x_{\mu,i}s_{\mu,i}=\mu$, $\frac{x_{\mu,i}}{\mu} = \frac{1}{s_{\mu,i}} \to \frac{1}{s_i^*} >0$.
+
+
+
+
+\end{document}

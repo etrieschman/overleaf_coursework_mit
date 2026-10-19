@@ -1,0 +1,279 @@
+\documentclass[12pt]{exam}
+\usepackage{graphicx} % Required for inserting images
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{optidef}
+\usepackage{listings}
+\usepackage{xcolor} % for custom colors
+\usepackage{minted} % for code
+
+\lstset{
+  language=Python,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue},
+  stringstyle=\color{red},
+  commentstyle=\color{gray},
+  showstringspaces=false,
+  frame=single,
+  breaklines=true
+}
+\title{15.081 Mathematical programming, HW3}
+\author{Erich Trieschman}
+\date{2025.10.16}
+\begin{document}
+\maketitle
+
+\begin{questions}
+    \question \textbf{Exercise 4.4:} \textbf{(Given)} $A$ symmetric, square matrix. LP $\min_{Ax \geq c, x \geq 0} c^T x$ \textbf{(Prove)} If $x^*$ satisfies $Ax = c, x \geq 0$ then $x^*$ is an optimal solution
+    \newline\newline \textbf{Proof:} We begin by formulating the primal and dual problems:
+    \begin{align*}
+      (P):\; \min_x \quad & c^T x & (D):\; \max_p \quad & p^Tc \\
+      \text{s.t.} \quad & Ax \geq c & \text{s.t.} \quad & p \geq 0\\
+      & x \geq 0 & & p^T A \leq c 
+    \end{align*}
+    We are given $x^*$ such that $Ax^* = c, x^* \geq 0$. This $x^*$ is feasible for the primal problem, $(P)$. 
+    
+    Now, $A$ symmetric $\Longrightarrow Ax = x^TA$ so $p=x^*$ is also feasible for the dual problem, $(D)$:
+    \begin{itemize}
+      \item $p = x^* \geq 0$
+      \item $p^T A = (x^*)^T A = Ax = c$
+    \end{itemize}
+    What's more, the objective values of the primal and dual problems are equal: $c^Tx^* = c^Tp$ for $p=x^*$. Together, i) $x^*$ primal feasible, ii) $p=x^*$ dual feasible and iii) equal objectives prove that $x^*$ is optimal for the primal problem by weak duality (Corrolary 4.2 in book)
+
+
+
+    \question \textbf{Exercise 4.10: Saddlepoints of the Lagrangian} \newline\textbf{(Given)} Standard form problem $\min_{Ax = b, x\geq 0} c^Tx$ and define Lagrangian 
+    \begin{align*}
+      L(x, p) = c^Tx + p^T(b - Ax)
+    \end{align*}
+    A pair $(x^*, p^*), x^*\geq 0$ is a saddlepoint if
+    \begin{align*}
+        L(x^*, p) \leq L(x^*, p^*) \leq L(x, p^*) \quad \forall x\geq 0, p
+    \end{align*} 
+    \textbf{(Prove)} $(x^*,p^*)$ is a saddlepoint $\iff x^*$ and $p^*$ are primal and dual optimal, respectively
+    \newline\newline \textbf{Proof:} 
+    Begin by stating the primal and dual problems:
+    \begin{align*}
+      (P):\; \min_x \quad & c^T x & (D):\; \max_p \quad & p^Tb \\
+      \text{s.t.} \quad & Ax = b & \text{s.t.} \quad & \\
+      & x \geq 0 & & p^T A \leq c 
+    \end{align*}
+    \begin{parts}
+      \part ($\Rightarrow$) Assume $(x^*, p^*), x^*\geq 0$ is a saddlepoint, then
+      \begin{subparts}
+        \subpart ($p^*$ dual feasible)
+      \begin{align*}
+        L(x^*, p^*) &\leq L(x, p^*) \quad \forall x \geq 0\\
+        c^Tx^* + p^{*T}(b - Ax^*) &\leq c^Tx + p^{*T}(b - Ax) \quad \forall x\geq 0\\
+        c^Tx^* - p^{*T}Ax^* & \leq c^Tx - p^{*T}Ax \quad \forall x\geq 0\\
+        (c^T - p^{*T}A)(x^* - x) & \leq 0 \quad \forall x\geq 0
+      \end{align*}
+      We note that $(c^T - p^{*T}A) \geq 0$ by contradiction: Consider this inequality componentwise
+      \begin{align*}
+        (c_i - p^{*T}A_i)(x_i^* - x_i) & \leq 0 \quad \forall x_i\geq 0
+      \end{align*}
+      and suppose $(c_i - p^{*T}A_i) < 0$, then we can pick feasible $x_i > x^*_i \geq 0$ which would yield a contradiction:
+      \begin{align*}
+        \underbrace{(c_i - p^{*T}A_i)}_{< 0}\underbrace{(x_i^* - x_i)}_{< 0} & > 0
+      \end{align*}
+      and hence $(c^T - p^{*T}A) \geq 0 \Longrightarrow p^{*T}A \leq c^T \Longrightarrow p^*$ dual feasible
+      
+      
+      \subpart ($x^*$ primal feasible)
+      \begin{align*}
+        L(x^*, p) &\leq L(x^*, p^*) \quad \forall p\\
+        c^Tx^* + p^{T}(b - Ax^*) &\leq c^Tx^* + p^{*T}(b - Ax^*) \quad \forall p\\
+        (p - p^{*})^T(b - Ax^*) &\leq 0 \quad \forall p
+      \end{align*}
+      By a similar argument as above, we note that $(b - Ax^*) = 0$ otherwise we could pick a feasible $p_i$ such that $(p_i - p^{*}_i)^T(b_i - A_ix^*) > 0$ (or $<0$) yielding a contradiction. Hence $Ax^* = b,\;x^*\geq 0 \Longrightarrow x^*$ primal feasible
+
+      \subpart ($x^*$ primal optimal, $p^*$ dual optimal)
+      \newline Returning to the saddlepoint inequalities      
+      \begin{align*}
+        L(x^*, p^*) &\leq L(x, p^*) \quad \forall x \geq 0\\
+        c^Tx^* + p^{*T}(b - Ax^*) &\leq c^Tx + p^{*T}(b - Ax) \quad \forall x\geq 0\\
+        c^Tx^* &\leq p^{*T}b + (c^T - p^{*T}A)x \quad \forall x\geq 0, Ax^* = b\\
+        c^Tx^* &\leq p^{*T}b \quad \text{for } x=0, Ax^* = b
+      \end{align*}
+      $x^*$ and $p^*$ primal and dual feasible $\Rightarrow p^{*T}b \leq c^Tx^*$ by weak duality, hence $c^Tx^* = p^{*T}b$. By strong duality, $x^*$ and $p^*$ are primal and dual optimal. 
+
+    \end{subparts}
+      
+      \part ($\Leftarrow$) Assume $x^*$ and $p^*$ are primal and dual optimal, respectively
+      \begin{subparts}
+        \subpart \textbf{Show:} $L(x^*, p^*) \leq L(x, p^*) \quad \forall x \geq 0$
+        \begin{align*}
+          c^Tx^* &= p^{*T}b \tag{strong duality}\\
+          c^Tx^* + p^{*T}(b - Ax^*) &= p^{*T}b \tag{$x^*$ optimal $\Rightarrow (b - Ax^*) = 0$}\\
+          c^Tx^* + p^{*T}(b - Ax^*) &\leq p^{*T}b + (c^T - p^{*T}A) \tag{$p^*$ optimal $\Rightarrow (c^T - p^{*T}A) \geq 0$}\\
+          c^Tx^* + p^{*T}(b - Ax^*) &\leq p^{*T}b + (c^T - p^{*T}A)x \quad \forall x \geq 0\\
+          c^Tx^* + p^{*T}(b - Ax^*) &\leq c^Tx + p^{*T}(b - Ax) \quad \forall x \geq 0\\
+          L(x^*, p^*) &\leq L(x, p^*) \quad \forall x \geq 0
+        \end{align*}
+
+
+        \subpart \textbf{Show:} $L(x^*, p) \leq L(x^*, p^*) \quad \forall p$
+        This is trivially true:
+        \begin{align*}
+          p^T(b - Ax^*) &= p^{*T}(b - Ax^*) \quad \forall p \tag{$x^*$ optimal $\Rightarrow (b - Ax^*) = 0$}\\
+          c^Tx^* + p^T(b - Ax^*) &= c^Tx^* + p^{*T}(b - Ax^*)\\
+          L(x^*, p) &= L(x^*, p^*) \quad \forall p\\
+          L(x^*, p) &\leq L(x^*, p^*) \quad \forall p
+        \end{align*}
+        
+      \end{subparts}
+
+    \end{parts}
+
+    \question \textbf{Exercise 4.20*: Strict complementary slackness}    
+    \begin{parts}
+        \part \textbf{(Given)} Primal problem $(P): \min_{\{x \mid Ax = b, x \geq 0\}} c^Tx$ and Dual problem $(D): \max_{\{p \mid p^TA \leq c\}} p^Tb$, both with optimal solutions. Every optimal solution to $(P)$ has $x_j = 0$\\
+        \textbf{(Show)} $\exists$ optimal $p$ for $(D)$ such that $p^TA_j < c_j$\\ \\
+        Let $(x*, p*)$ be optimal values for $(P),(D)$. Consider new perturbed problems $(P'), (D')$ with $\delta > 0$ sufficiently small
+        \begin{align*}
+          (P')\;\min_x\quad& c^Tx - \delta x_j  & (D')\; \max_p\quad& p^Tb\\
+          \text{s.t.}\quad& Ax=b     & \text{s.t}\quad& p \text{ free}\\
+          & x \geq 0                & & p^TA \leq c^T - \delta e_j
+        \end{align*}
+        \paragraph{Feasibility of $x*$ for $(P')$:} For optimal BFS, $B$, $x* = B^{-1}b$, and is unaffected by the perturbation
+        \paragraph{Optimality of $x*$ for $(P')$:} We claim that for sufficiently small, $\delta$, the optimality condition holds. From the given, we know every optimal $x^*$ for $(P)$ has $x_j = 0$. Any feasible direction that could improve the value of $(P')$ through $\delta x_j$ therefore would reduce the value of $c^Tx^*$. Simply choose $\delta$ such that $\bar c' = (c - \delta e_j) - c_BB^{-1}A \geq 0$. This is possible whenever $c_j - c_BB^{-1}A_j > \delta$ by considering the cost reduction vector for $(P'), \bar c'$:
+        \begin{align*}
+          \bar c' &= (c - \delta e_j) - c_BB^{-1}A \Longrightarrow \delta \leq  c_j - c_BB^{-1}A_j 
+        \end{align*}
+        Note, if for the given BFS, $B$, $c_j = c_BB^{-1}A_j$, we can simply pivot to another BFS where index $j$ is nonbasic. This is possible since all optimal $x^*$ have $x_j = 0$
+
+        \paragraph{Feasible $p$ for $(D')$:} Now by the existence of an optimal in $(P')$, we know $(D')$ has a feasible solution. By construction of $(D')$, for any feasible $p$ of $(D')$, we have 
+        \begin{align*}
+          p^TA \leq c^T - \delta e_j \Longrightarrow \begin{cases}
+            p^TA_i \leq c_i - \delta < c_i & \text{if } i = j\\
+            p^TA_i \leq c_i & \text{otherwise}
+          \end{cases}
+        \end{align*}
+        So all feasible $p$ for $(D')$ satisfy $p^TA_j < c_j$ and $p^TA_i \leq c_i, i\neq j$. This feasible set is contained within the feasible set of our original dual problem, $(D)$.
+        
+        \paragraph{Optimal $p$ for $(D')$:} By strong duality, we have existence of an optimal $p$ for $(D')$. 
+        
+        \paragraph{Connecting $(D')$ to $(D)$:} By strong duality, feasible $p$ of $(D')$ is optimal if $b^Tp = c^Tx^*$. $c^Tx^*$ is the same objective value as our original $(D)$. Furthermore, the feasible set of $(D')$ is contained within the feasible set of $(D)$. Therefore, any $p$ feasible in $(D')$ is feasible in $(D)$, so optimal $p$ in $(D')$ is also optimal in $(D)$. So we've demonstrated that $\exists$ optimal $p$ for $(D)$ such that $p^TA_j < c_j$. 
+        
+
+        \part \textbf{(Show)} There exist optimal solutions $x, p$ to primal and dual problems, $(P), (D)$ respectively such that $\forall j$ we have either $x_j > 0$ or $p^TA_j < c_j$\\
+        \textit{(Hint)} Use part (a) for each $j$, and then take the average of the vectors obtained \\
+        \textbf{(Proof)} Consider the sets of optimal solutions and corresponding sets of indices: 
+        \begin{align*}
+          \mathcal X &= \{x \mid Ax = b, x\geq 0, c^Tx = val(P)\} &\quad \mathcal P &= \{p \mid p^TA \leq c, p^Tb = val(D)\}\\
+          S &= \{j \mid \exists x \in \mathcal X, x_j > 0\} &\quad S^C &= \{j \mid \exists x_j = 0 \;\forall x \in \mathcal X\}
+        \end{align*}
+        From given we know $\exists x \in \mathcal X$. We construct a primal optimal solution as the average of $|S|$ primal optimal solutions. Let $x^{(j)}$ be $x \in \mathcal X$ with $x^{(j)}_j > 0$. Then let
+        \begin{align*}
+          \bar x &= \frac{1}{|S|} \sum_{k \in S} x^{(k)}  \text{, noting }\\
+          \bar x_j &= \frac{1}{|S|} \sum_{k \in S} x^{(k)}_j \geq \frac{x^{(j)}_j}{|S|} > 0 \quad \forall j \in S\\
+          c'\bar x &= \frac{1}{|S|} \sum_{j \in S} c' x^{(j)} = \frac{|S|}{|S|} val(P) = val(P) \text{ so } \bar x \in \mathcal X
+        \end{align*}
+        We also consider a dual optimal solution as the average of $|S^C|$ dual optimal solutions. Using part (a), for any $j\in S^C$ we can let $p^{(j)}$ be $p \in \mathcal P$ with $p^{(j)T}A_j < c_j$.
+        \begin{align*}
+          \bar p &= \frac{1}{|S^C|} \sum_{k \in S^C} p^{(k)}  \text{, noting }\\
+          \bar p^TA_j &= \frac{1}{|S^C|} \sum_{k \in S^C} p^{(k)T}A_j = \frac{1}{|S^C|}\left(p^{(j)T}A_j + \sum_{k \neq j} p^{(k)T}A_j\right) < \frac{1}{|S^C|}\left(c_j + \sum_{k \neq j} c_j\right) = c_j \quad \forall j \in S^C\\
+          \bar p^Tb &= \frac{1}{|S^C|} \sum_{k \in S^C} p^{(k)T}b = \frac{|S^C|}{|S^C|} val(D) = val(D) \text{ so } \bar p \in \mathcal P
+        \end{align*}
+        Now we have new primal dual optimal solutions $\bar x, \bar p$. Now since sets $S, S^C$ partition the index set, we have $\forall j \in [n]$ either $x_j > 0$ or $p^TA_j < c_j$. 
+        
+        \part \textbf{(Given)} Primal problem $(P): \min_{\{x \mid Ax \geq b, x \geq 0\}} c^Tx$ and Dual problem $(D): \max_{\{p \mid p^TA \leq c, p \geq 0\}} p^Tb$, both with optimal solutions. \\
+        \textbf{(Show)} There exist optimal solutions to $(P), (D)$ that satisfy strict complementary slackness. That is,
+        \begin{itemize}
+          \item $\forall\; j$ either $x_j > 0$ or $p^TA_j < c_j$
+          \item $\forall\; i$ either $p_i > 0$ or $a_i^T x > b_i$
+        \end{itemize}
+        \textbf{(Proof)} Following the hint, we convert $(P)$ to an equivalent standard form $(P')$:
+        \begin{align*}
+          (P'):\; \min_x\quad& c^Tx &\Longrightarrow &&  \min_x\quad& \bar c^T \bar x \tag{$\bar c = [c, 0]\in \mathbb R^{n+m}$} \\
+          \text{s.t.}\quad & [A, -I] [x, s]^T = b & && \text{s.t.}\quad & \bar A \bar x = b \tag{$\bar A = [A, -I]\in \mathbb R^{m\times (n+m)}$}\\
+          & x \geq 0, s\geq 0 &     && &  \bar x \geq 0 \tag{$\bar x = [x, s]\in \mathbb R^{n+m}$}           
+        \end{align*}
+        And using the lagrangian,
+        \begin{align*}
+          g(p) = \min_{\bar x \geq 0} L(\bar x,  p) = \min_{\bar x \geq 0} \bar c^T \bar x +  p^T(b - \bar A \bar x) = \bar p^Tb + \min_{\bar x \geq 0} (\bar c^T - \bar p^T\bar A) \bar x
+        \end{align*}
+        We formulate the dual problem 
+        \begin{align*}
+          (D'):\; \max_{ p} \quad& p^T b &\iff &&(D): \max_{ p}\quad& p^Tb \\
+          \text{s.t.}\quad &  p \text{ free} & && \text{s.t.}\quad & p \text{ free} \\
+          & p^T[A, -I] \leq [c, 0]^T  &     && & p^TA \leq c^T, p\geq 0         
+        \end{align*} 
+        We have shown that $(P)$ is equivalent to $(P')$ in standard form, who's dual, $(D')$, is equivalent to $(D)$. By part (b), we know that there exist optimal solutions $\bar x, p$ to $(P'), (D')$ that satisfy strict complementary slackness. The optimal $p$ is the same for $(D), (D')$ and the corresponding $x$ for $(P)$ is just the first $n$ components of $\bar x$.
+    \end{parts}
+
+
+
+    \question \textbf{Exercise 4.27:} \textbf{(Given)} Matrix $A$ \textbf{(Show)} the following are equivalent (iff):
+    \begin{enumerate}
+        \item Any $x \in S = \{x \mid Ax \geq 0, x \geq 0\}$ satisfies $x_1=0$
+        \item $\exists\; p\geq 0$ such that $p^TA \leq 0, \; p^TA_1 < 0$
+    \end{enumerate}
+    \begin{parts}
+      \part ($1 \Rightarrow 2$) Consider the following primal and dual pair of optimization problems
+      \begin{align*}
+        (P):\; \min_x\quad & -e_1^Tx & (D):\; \max_p\quad& 0\\
+        \text{s.t.}\quad& Ax \geq 0 & \text{s.t.}\quad& p \geq 0\\
+        & x\geq 0 &                 & p^TA \leq -e_1^T & 
+      \end{align*}
+      From the givens, we know the only feasible $x$ for $(P)$ are such that $-e_1^Tx = 0$. By strong duality, this means we also achieve an optimum in our dual problem, $(D)$, with feasible $p$. Examining such a $p$ we see:
+      \begin{align*}
+        \begin{aligned}
+        p &\geq 0\\
+        p^TA \leq -e_1^T &\Longrightarrow \begin{cases}
+          p^TA_1 \leq -1\\
+          p^TA_{i>1} \leq 0
+        \end{cases} 
+      \end{aligned} \Longrightarrow \begin{aligned}
+          \begin{cases}
+            p\geq 0\\
+          p^TA_1 < 0\\
+          p^TA \leq 0
+        \end{cases}
+        \end{aligned}
+      \end{align*}
+      These are precisely the $p$ we wanted to prove existed.
+      
+
+      \part($2 \Rightarrow 1$)
+      Start with any $x\geq 0$ such that $Ax \geq 0$. Left-multiply by $p^T \geq 0$: 
+      \begin{align*}
+        0 &\leq p^T(Ax) = \sum_i p^TA_ix_i = p^TA_1x_1 + \sum_{i> 1} p^TA_ix_i\\
+        0 &\leq p^TA_1x_1 + \sum_{i> 1} 0 * x_i  \tag{since $p^TA_i \leq 0$}\\
+      \end{align*}
+      So $0 \leq p^TA_1x_1$ but $p^TA_1 < 0 \Longrightarrow x_1 = 0$ for any $x\geq 0$.
+
+    \end{parts}
+
+
+
+    \question \textbf{Exercise 4.40: Extreme rays of a cone are extreme points of its sections}
+    \newline \textbf{(Given)} Cone $C = \{x\in \mathbb R^n \mid a_i^Tx \geq 0, i \in [m]\}$ with the first $n$ constraint vectors linearly independent. For any nonnegative $r \in \mathbb R$, define polehydron
+    \begin{align*}
+      P_r = \{x \in C \mid \sum_{i=1}^n a_i^Tx = r\}
+    \end{align*}
+    \begin{parts}
+      \part \textbf{(Show)} $P_r$ is a bounded polyhedron for any $r \geq 0$
+      \newline\textbf{(Contradiction)} Assume $P_r$ is unbounded $\Longrightarrow \exists\; d \neq 0$ such that $x + \lambda d \in P_r \;\forall \lambda \geq 0$. Then we have
+      \begin{align*}
+        x + \lambda d \in C:\quad& a_i^T(x + \lambda d) \geq 0 \Longrightarrow a_i^Td \geq 0 &\forall i \in [m]\\
+        x + \lambda d \in P_r:\quad& \sum_{i=1}^n a_i^T(x + \lambda d) = r \Longrightarrow r + \lambda\sum_{i=1}^n a_i^Td = r \Longrightarrow \sum_{i=1}^n a_i^Td = 0
+      \end{align*}
+      The only way we have these two conditions together is for $a_i^Td = 0 \;\forall i \in [n]$. And by the linear independence of the first $n$ constraint vectors, this implies that $d = 0$, which contradicts our assumption. Hence $P_r$ is bounded. 
+      
+
+      
+      \part \textbf{(Show)} For $r > 0, x \in P_r$ is an extreme point of $P_r \iff x$ is an extreme ray of cone $C$
+      \newline \textbf{(Definition) Extreme ray of a cone:} $x \neq 0 \in C$ is an extreme ray if there are n - 1 linearly independent constraints that are active at $x$
+
+      \begin{subparts}
+        \subpart ($\Longrightarrow$) 
+        $x$ an extreme point of $P_r \Longrightarrow n$ linearly independent constraints of $P_r$ active at $x$ (since extreme point $\Rightarrow$ basic solution). By construction, one of these active constraints must be $\sum_{i=1}^n a_i^Tx = r$. The other $n-1$ linearly independent active constraints must come from the requirement that $x\in C$. Therefore, there are $n-1$ linearly independent constraints in $C$ that are active at $x$, proving $x$ is an extreme ray of cone $C$. 
+        \subpart ($\Longleftarrow$) $x$ an extreme ray of cone $C \Longrightarrow$ there are $n-1$ linearly independent constraints in $C$ that are active at $x$. By construction, of $P_r$, $x$ has $n-1$ linearly independent constraints from requirement that $x \in C$, and one from the requirement that $\sum_{i=1}^n a_i^Tx = r$. Therefore, $x$ has $n$ linearly independent constraints in $P_r$ and it is a BFS $\Rightarrow x$ is an extreme point of $P_r$.
+      \end{subparts}
+    \end{parts}
+
+
+\end{questions}
+
+\end{document}
