@@ -1,4 +1,4 @@
-# overleaf_mit
+# overleaf_coursework_mit
 
 One Overleaf project for **all** MIT coursework writeups — one folder per class.
 Replaces the old one-Overleaf-project-per-class setup, so starting a class costs
