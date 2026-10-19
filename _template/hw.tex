@@ -1,5 +1,43 @@
+% Copy this file to start a new writeup:
+%     mkdir 6_7900 && cp _template/hw.tex 6_7900/hw1.tex
+% It is self-contained — edit the preamble freely, it belongs to this file only.
+
 \documentclass[11pt]{exam}
-\input{preamble}
+
+% --- math ---
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathtools}
+\usepackage{optidef}                  % min/max problem environments
+
+% --- layout ---
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage[margin=0.75in]{geometry}
+\usepackage{enumitem}
+\usepackage{hyperref}
+
+% --- code ---
+\usepackage{xcolor}
+\usepackage{listings}
+\lstset{
+  language=Python,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue},
+  stringstyle=\color{red},
+  commentstyle=\color{gray},
+  showstringspaces=false,
+  frame=single,
+  breaklines=true,
+}
+% For nicer code listings, swap lstlisting for minted. Overleaf handles it;
+% locally it needs: latexmk -pdf -shell-escape <file>.tex
+% \usepackage{minted}
+
+% --- macros ---
+\newcommand{\norm}[2]{\left\lVert#1\right\rVert_#2}
+\newcommand{\abs}[1]{\lvert#1\rvert}
+\newcommand{\todo}[1]{\textit{\textcolor{orange}{[#1]}}}
 
 \title{15.081 Mathematical programming, HW1}
 \author{Erich Trieschman}
