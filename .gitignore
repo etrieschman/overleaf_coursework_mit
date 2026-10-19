@@ -1,17 +1,14 @@
-# Ignore all files inside any data folder
-**/data/**
+# ---------------------------------------------------------------------------
+# overleaf_coursework_mit — LaTeX only.
+#
+# This repo is synced to an Overleaf project via git-bridge, so it deliberately
+# carries NO monorepo or Python rules (no **/data/**, no **/.git, no .venv).
+#
+# Compiled PDFs are tracked on purpose — they're the submitted artifacts — so
+# the *.pdf rule in the TeX section below stays commented out.
+# ---------------------------------------------------------------------------
 
-# But keep the folder structure itself
-!**/data/
-!**/data/**/
-
-# ignore hidden files
-.*
-!.gitignore
-!*.gitkeep
-
-# Ignore embedded Overleaf repos
-**/.git
+.DS_Store
 
 ## Core latex/pdflatex auxiliary files:
 *.aux
