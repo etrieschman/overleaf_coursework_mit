@@ -7,6 +7,7 @@
 \usepackage{geometry}
 \usepackage{listings}
 \usepackage{color}
+\usepackage{xcolor}
 \usepackage{amsthm}
 \newcommand*{\vertbar}[1][10ex]{\rule[-1ex]{0.5pt}{#1}}
 \newcommand*{\horzbar}{\rule[.5ex]{2.5ex}{0.5pt}}
@@ -50,6 +51,7 @@
 \definecolor{dkgreen}{rgb}{0,0.6,0}
 \definecolor{gray}{rgb}{0.5,0.5,0.5}
 \definecolor{mauve}{rgb}{0.58,0,0.82}
+\newcommand{\todo}[1]{\textit{\textcolor{orange}{ [#1]}}}
     
 \lstset{frame=tb, language=Python,
     aboveskip=3mm,
@@ -158,10 +160,132 @@ Target: $Q_{src} = P\tan\theta_2$, since $Q = P\tan\theta$ and $P$ is unchanged.
 
 
 \section{Three-phase and per unit}
+\textbf{Definitions.}
+Balanced: phase b is phase a $\angle{-120^\circ}$, phase c is phase a $\angle{+120^\circ}$, for every voltage and current; solve phase a only.
+Balanced line currents sum to zero, so the neutral carries no current and may be omitted.
+$V_{ln}$: phase to neutral, e.g.\ $V_{an}$.
+$V_{ll}$: phase to phase, $V_{ab} = V_{an} - V_{bn} = \sqrt3\,V_{an}\angle{+30^\circ}$.
+Voltage ratings are $V_{ll}$ unless stated. Relationship holds for both connection types.
+Line current: in a conductor between source and load ($I_a$).
+Phase current: in one load element; equals the line current in Y ($I_{ab}$ in $\Delta$).
+
+\textbf{Connections.}
+Y: element between phase and neutral; element voltage $V_{ln}$, element current $I_a = V_{an}/Z_Y$.
+$\Delta$: element between two phases; element voltage $V_{ll}$, element current $I_{ab} = V_{ab}/Z_\Delta$.
+$\Delta$ line current: $I_a = I_{ab} - I_{ca} = \sqrt3\,I_{ab}\angle{-30^\circ}$.
+$\Delta$ to Y: $Z_Y = Z_\Delta/3$ gives the same line currents.
+
+\textbf{Solving.}
+Convert every $\Delta$ to Y and every $V_{ll}$ to $V_{ln} = V_{ll}/\sqrt3\,\angle{-30^\circ}$.
+Draw phase a: source $V_{an}$, series source and line impedances, Y-equivalent load, neutral return (zero impedance, present or not); shunt elements line to neutral.
+A load given as $\abs{S_{3\phi}}$ (or $P$) and a pf at load voltage $V_{ll}$: $S_\phi = \abs{S_{3\phi}}\angle\theta/3 = P/(3\text{pf})\angle\theta$ with $\theta = \pm\arccos(\text{pf})$ positive if lagging; $Z_Y = \tilde V_{ln}^2/S_\phi^*$.
+
+\textbf{Power.}
+$S_{3\phi} = 3V_{an}I_a^* = \sqrt3\,\tilde V_{ll}\tilde I_{line}\angle\theta$.
+Y: $\abs S_{3\phi} = 3\tilde V_{ln}^2/\abs{Z_Y}$. $\Delta$: $\abs S_{3\phi} = 3\tilde V_{ll}^2/\abs{Z_\Delta} = 9\tilde V_{ln}^2/\abs{Z_\Delta}$.
+
+\textbf{Per unit.}
+One base power $S_b$ for the network, three-phase, typically 100 MVA; one base voltage $V_b$ per zone, line-to-line, nominal.
+pu $=$ actual$/$base; scales magnitues only and works in polar and rectangular forms.
+Single-phase $I_b = S_b/V_b$, $Z_b = V_b^2/S_b$.
+Three-phase $V_{b,ln} = V_{b,ll}/\sqrt3$, $I_b = S_b/(\sqrt3 V_{b,ll})$, $Z_b = V_{b,ll}^2/S_b$; 
+Base change: $Z_{pu,new} = Z_{pu,old}\,(V_{b,old}/V_{b,new})^2\,(S_{b,new}/S_{b,old})$.
+In pu, $\abs{V_{ln}} = \abs{V_{ll}}$ and $S_\phi = S_{3\phi}$: the bases carry the $\sqrt3$ and the 3.
+Across a transformer, set the other side's $V_b$ by its line-to-line ratio; then $Z_{pu}$ is the same on both sides and the ideal transformer drops out.
+
+
+
+
 \section{Power flow and admittance matrices}
+\textbf{Admittance matrix.}
+Recipe: number the nodes, ground as reference; generators as Norton current injections $I_k$; impedance loads and line charging as shunt admittances to ground; series impedances as $y_{km} = 1/Z{km}$; KCL at each node in node voltages, $I_k = \sum_m Y_{km}V_m$; so $I = YV$ and solve for $V$ in complex arithmetic; branch current $y_{km}(V_k - V_m)$.
+$Y_{kk}$: sum of all admittances touching node $k$, series and shunt.
+$Y_{km}$: minus the series admittance between $k$ and $m$; zero if none.
+$Y$ is symmetric and is singular without a shunt.
+$Y = A^\top\operatorname{diag}(y_{\rm series})A + \operatorname{diag}(y_{\rm shunt})$, $A$ the branch-to-node incidence matrix.
+
+\textbf{Power flow.}
+$S_k = V_k I_k^* = V_k\sum_m Y_{km}^* V_m^*$, generation minus load.
+With $V_k = \tilde V_k\angle\phi_k$, $Y_{km} = \abs{Y_{km}}\angle\delta_{km}$:
+$P_k = \sum_m \tilde V_k\tilde V_m\abs{Y_{km}}\cos(\phi_k - \phi_m - \delta_{km})$.
+Each bus: $P$, $Q$, $\tilde V$, $\phi$; $2N$ equations, $4N$ unknowns.
+PQ (load): $P$, $Q$ given. PV (generator): $P$, $\tilde V$ given. Slack (one): $\tilde V$, $\phi = 0$ given; supplies remaining $P$ including $P_{loss}$.
+Solve: Newton on $x = [\phi\ \text{(PQ, PV)};\ \tilde V\ \text{(PQ)}]$ with mismatch $f(x) = [P_k(x) - P_k^{given};\ Q_k(x) - Q_k^{given}]$ at those buses: $x \leftarrow x - J^{-1}f(x)$ from $\tilde V = 1$, $\phi = 0$.
+$J = [\partial P/\partial\phi,\; \partial P/\partial\tilde V\; ;\; \partial Q/\partial\phi,\; \partial Q/\partial\tilde V]$, by differentiating the $P_k$, $Q_k$ sums.
+Then slack $P$, $Q$ and PV-bus $Q$ from their equations.
+$P_{loss} = \sum_k P_k = \sum_{(k,m)\in\text{lines}}\abs{I_{km}}^2 R_{km}$, with $I_{km} = y_{km}(V_k - V_m)$.
+
+
+
 \section{Power line models}
+\textbf{Models.}
+Per unit length: series $r$, $x$ [$\Omega$/km]; shunt $b$ [S/km], line charging, capacitive.
+Length $\ell$: $Z = (r + jx)\ell$, $Y = jb\ell$.
+Short line: $Z$ only.
+$\pi$ model: $Z$ in series, $Y/2$ to neutral at each end.
+All values per phase; the line is one branch of the per-phase circuit.
+Ampacity: maximum safe $\abs{I}$.
+
+\textbf{Setup.}
+Sending end $S$ (source), receiving end $R$ (load): $V_S$, $I_S$, $V_R$, $I_R$, all line-to-neutral and line current.
+Rated voltage: $\tilde V_R$ at nominal, given as $V_{ll}$ unless stated.
+Full load: $I_R$ from the rated $\abs{S}$ and pf at $V_R$; no load: $I_R = 0$.
+Solve from $R$ back to $S$.
+Short line: $I_S = I_R$, $V_S = V_R + I_R Z$, $P_{loss} = 3\abs{I_R}^2 R$.
+$\pi$ model: $V_S = V_R + (I_R + V_R Y/2)Z$, $I_S = I_R + V_R Y/2 + V_S Y/2$.
+$P_{loss} = P_S - P_R$, with $P_S = 3\operatorname{Re}(V_S I_S^*)$, $P_R = 3\operatorname{Re}(V_R I_R^*)$.
+$\eta = P_R/P_S$.
+
+
+
+
 \section{Magnetism and magnetic circuits}
+
+\paragraph{Magnetism.}
+Magnetic field intensity $H$ [A/m].
+Permeability $\mu = \mu_r\mu_0$ [H/m]; $\mu_0 = 4\pi\times10^{-7}$ H/m.
+Magnetic flux density $B = \mu H$ [T $=$ Wb/m$^2$].
+Magnetic flux $\Phi = BA$ [Wb] through a cross-section of area $A$ [m$^2$].
+Flux linkage $\lambda = N\Phi$ [Wb$\cdot$turn] for a coil of $N$ turns.
+Faraday: $v = d\lambda/dt = N\,d\Phi/dt$ [V].
+Ampère: $\oint H\,dl = I_{enc}$, the current passing through the loop formed by the path.
+For the mean core path of length $l$ [m] with uniform $H$, and a coil of $N$ turns carrying $i$ [A] threading the loop: $Hl = Ni$.
+$Ni$ is the magnetomotive force (MMF) $F$ [A$\cdot$turn].
+
+\paragraph{Magnetic circuit.}
+Electric $\iff$ Magnetic:
+EMF $V$ [V] $\iff$ MMF $F = Ni$ [A$\cdot$turn];
+current $I$ [A] $\iff$ flux $\Phi$ [Wb];
+resistance $R$ [$\Omega$] $\iff$ reluctance $\mathcal R = l/(\mu A)$ [A/Wb], for a segment of length $l$, area $A$, permeability $\mu$;
+KVL $\iff \sum F - \sum\mathcal R\Phi = 0$ around a loop (Ampère);
+KCL $\iff \sum\Phi = 0$ at a junction (flux continuity);
+Ohm's law $V = IR \iff F = \Phi\mathcal R$; series and parallel combine like resistance.
+Coil $=$ MMF source of value $Ni$, direction by the right-hand rule.
+One $\mathcal R$ per segment of distinct $l$, $\mu$, or $A$.
+Air gap: $\mathcal R_{gap} = l_{gap}/(\mu_0 A)$ dominates, since $\mu_0 \ll \mu_{core}$.
+
+\paragraph{Inductance.}
+Coil of $N$ turns on a single core of length $l$, area $A$:
+$L = \lambda / i = (N\Phi) / i = (N(BA))/i = (N((\mu H)A))/i = (N((\mu (Ni/l))A))/i = N^2/\mathcal R$ [H].
+Several segments: $L = N^2/\mathcal R_{total}$, with $\mathcal R_{total}$ seen by the coil.
+
+\paragraph{Saturation.}
+$B$ cannot exceed $B_{sat}$ anywhere in the core.
+Procedure: $F = Ni_{peak}$; $\Phi$ from the magnetic circuit; $B_k = \Phi_k/A_k$ in each segment $k$; $B_{sat} \ge \max_k B_k$, in the smallest $A_k$ carrying the largest $\Phi_k$.
+
+\paragraph{Losses.}
+Core, eddy: flux induces voltage in the core, voltage drives current, current heats; $\propto f^2B^2$; fix with laminations and silicon steel.
+Core, hysteresis: area of the $B$--$H$ loop per cycle; $\propto f\times$ area; fix by material.
+Winding, skin: AC current crowds to the surface; fix with Litz wire.
+Winding, proximity: one conductor's field induces eddy currents in its neighbors, worse with more layers; fix with fewer or interleaved layers, Litz wire.
+
+
+
 \section{Transformers}
+$VR = (\abs{V_{R,NL}} - \abs{V_{R,FL}})/\abs{V_{R,FL}}$ at fixed $V_S$; short line $V_{R,NL} = V_S$, $\pi$ model $V_{R,NL} = V_S/(1 + ZY/2)$.
+
+
+
 \section{Machines}
 
 
