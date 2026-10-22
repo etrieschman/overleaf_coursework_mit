@@ -235,6 +235,7 @@ Short line: $I_S = I_R$, $V_S = V_R + I_R Z$, $P_{loss} = 3\abs{I_R}^2 R$.
 $\pi$ model: $V_S = V_R + (I_R + V_R Y/2)Z$, $I_S = I_R + V_R Y/2 + V_S Y/2$.
 $P_{loss} = P_S - P_R$, with $P_S = 3\operatorname{Re}(V_S I_S^*)$, $P_R = 3\operatorname{Re}(V_R I_R^*)$.
 $\eta = P_R/P_S$.
+$VR = (\abs{V_{R,NL}} - \abs{V_{R,FL}})/\abs{V_{R,FL}}$ at fixed $V_S$; short line $V_{R,NL} = V_S$, $\pi$ model $V_{R,NL} = V_S/(1 + ZY/2)$.
 
 
 
@@ -243,7 +244,7 @@ $\eta = P_R/P_S$.
 
 \paragraph{Magnetism.}
 Magnetic field intensity $H$ [A/m].
-Permeability $\mu = \mu_r\mu_0$ [H/m]; $\mu_0 = 4\pi\times10^{-7}$ H/m.
+Permeability $\mu = \mu_r\mu_0$ [H/m]; $\mu_0 = 4\pi\times10^{-7}$ H/m (air).
 Magnetic flux density $B = \mu H$ [T $=$ Wb/m$^2$].
 Magnetic flux $\Phi = BA$ [Wb] through a cross-section of area $A$ [m$^2$].
 Flux linkage $\lambda = N\Phi$ [Wb$\cdot$turn] for a coil of $N$ turns.
@@ -282,14 +283,92 @@ Winding, proximity: one conductor's field induces eddy currents in its neighbors
 
 
 \section{Transformers}
-$VR = (\abs{V_{R,NL}} - \abs{V_{R,FL}})/\abs{V_{R,FL}}$ at fixed $V_S$; short line $V_{R,NL} = V_S$, $\pi$ model $V_{R,NL} = V_S/(1 + ZY/2)$.
+Two windings on one core, $N_1$ turns on the primary and $N_2$ on the secondary.
+Faraday on the primary, $V_1 = j\omega N_1 \Phi$, fixes the core flux $\Phi$.
+The same $\Phi$ links the secondary, so $V_2 = j\omega N_2 \Phi$ and $V_1/N_1 = V_2/N_2$, with or without a load.
+A load draws $I_2$; its MMF $N_2 I_2$ would change $\Phi$, so the primary draws the $I_1$ that cancels it.
+Dot: current into the dotted terminal of either winding drives flux the same way around the core.
+Define $I_1$ into the primary dot and $I_2$ out of the secondary dot; then $V_1$, $V_2$ are both $+$ at the dots and MMF balance is $N_1 I_1 - N_2 I_2 = \mathcal R\Phi$.
+Autotransformer: one winding with a tap; primary and secondary share turns.
+Tap changer: moves the tap to change $N_1/N_2$ for voltage control.
+
+\paragraph{Ideal.}
+$\mu\to\infty \implies \mathcal R\to 0 \implies N_1 I_1 = N_2 I_2$.
+Turns ratio $a = N_1/N_2$, so $V_1 = aV_2$, $I_1 = I_2/a$, and $S_1 = V_1 I_1^* = S_2$.
+
+\paragraph{Equivalent circuit (nonideal).}
+Refer an impedance to either side: $Z_{eq2} = (V_1/a)/(aI_1) = Z_{eq1}/a^2$ and $Z_{eq1} = a^2 Z_{eq2}$.
+Shunt branch, on one side: magnetizing inductance $L_m$ (energy stored in core) and core-loss resistance $R_c$ (eddy + hysteresis).
+Series branch, on each side: winding resistance $R_1, R_2$ and leakage reactance $X_1, X_2$.
+Circuit for problems: primary terminals $\to (R_c \parallel jX_m) \to Z_{eq1} \to$ ideal $a{:}1 \to$ secondary terminals.
+Both tests apply a voltage and measure $\tilde V$, $\tilde I$, $P$ at the primary terminals.
+Open-circuit test (secondary open, rated $V_{oc}$ applied at the primary terminals; measure $\tilde V_{oc}$, $\tilde I_{oc}$, $P_{oc}$): $I_2 = 0$, so no current in $Z_{eq1}$ and $V_{oc}$ is across the shunt branch.
+$S_{oc} = \tilde V_{oc}^2 Y_{\rm sh}^*$ with $Y_{\rm sh} = 1/R_c - j/X_m$ gives $R_c = \tilde V_{oc}^2/P_{oc}$ and $X_m = \tilde V_{oc}^2/Q_{oc}$.
+Short-circuit test (secondary shorted, $V_{sc}$ applied at the primary terminals; measure $\tilde V_{sc}$, $\tilde I_{sc}$, $P_{sc}$): the shunt branch is treated as open, so $I_{sc}$ flows in $Z_{eq1}$ alone.
+Refer an impedance to either side: $Z_{eq2} = (V_1/a)/(aI_1) = Z_{eq1}/a^2$ and $Z_{eq1} = a^2 Z_{eq2}$.
+$S_{sc} = \tilde I_{sc}^2 Z_{eq1}$ gives $R_{eq1} = P_{sc}/\tilde I_{sc}^2$, $|Z_{eq1}| = \tilde V_{sc}/\tilde I_{sc}$, $X_{eq1} = \sqrt{|Z_{eq1}|^2 - R_{eq1}^2}$.
+
+\paragraph{Solving.}
+Efficiency $\eta = P_{\rm out}/P_{\rm in} = P_{\rm out}/(P_{\rm out} + P_{\rm core} + P_{\rm copper})$.
+$P_{\rm core} = P_{oc}$, constant at rated voltage.
+$P_{\rm copper} = \tilde I_1^2 R_1 + \tilde I_2^2 R_2 = \tilde I_2^2 R_{eq2}$.
+Voltage regulation $VR = (|V_{2,NL}| - |V_{2,FL}|)/|V_{2,FL}|$ with $V_1$ the same at $NL$ and $FL$; $VR = 0$ for an ideal source.
+$V_{2,NL} = V_1/a$ and $V_{2,FL} = V_1/a - I_2 Z_{eq2}$ at the given load.
+$I_2 = (|S_{\rm load}|/\tilde V_{2,FL}) \angle(\phi_{V2} - \theta)$ with $\theta = \pm\arccos(\mathrm{pf})$.
+Leading pf: the component of $I_2 Z_{eq2}$ along $V_{2,FL}$ can be negative, so $VR$ can be negative.
+
+\paragraph{Three-phase.}
+Three single-phase transformers, each side Y or $\Delta$; bank rating $S_{3\phi} = 3 S_{\rm transformer}$.
+Winding quantities: Y side $V_w = V_{ln}$, $I_w = I_{\rm line}$; $\Delta$ side $V_w = V_{ll}$, $I_w = I_{\rm line}/\sqrt3$.
+Per-transformer turns ratio $a = V_{1,w}/V_{2,w}$; line-to-line ratio $V_{1,ll}/V_{2,ll} = a$ (Y--Y, $\Delta$--$\Delta$), $a/\sqrt3$ ($\Delta$--Y), $\sqrt3 a$ (Y--$\Delta$).
+$\Delta$--Y and Y--$\Delta$ shift voltages and currents by $30^\circ$ between sides; magnitudes and powers unaffected.
+Procedure: convert line to winding quantities and $S_\phi = S_{3\phi}/3$; solve the single-phase problem on one transformer; convert back; add the $30^\circ$ only if a phasor is needed relative to the other side.
+
 
 
 
 \section{Machines}
+Rotor: rotating part. Stator: fixed part.
+Field winding: makes the main flux from DC current $i_f$ or a permanent magnet.
+Armature winding: has the EMF induced in it; its current $i_a$ carries the converted power, from the supply in a motor and to the load in a generator.
+DC: field on the stator, armature on the rotor. Synchronous: field on the rotor, armature on the stator.
+Motor: electrical in, mechanical out. Generator: the reverse.
+$E_{\rm electric} = E_{\rm mech} + E_{\rm field} + E_{\rm loss}$.
+Four facts: current in a wire makes a field (transformer primary); a wire carrying $i$ in field $B$ feels $\vec F = i\,\vec l\times\vec B$ (motor); a changing field makes a voltage in a coil (transformer secondary); a wire moving at $\vec v$ in field $B$ has EMF $e = (\vec v\times\vec B)\cdot\vec l$ (generator).
+Left-hand rule, motor: pointer $B$, middle $i$, thumb $F$.
+
+\paragraph{DC machines.}
+Stator: field, fixed flux from a permanent magnet or DC field winding. Rotor: armature, fed DC through brushes; the commutator reverses each coil's current every half turn so torque keeps one direction.
+(+) cheap drive, stable. ($-$) commutator wear.
+
+Circuit: terminals $\to R_a \to L_a \to$ back EMF $E = k_e\omega$, so $V = R_a i_a + L_a\,di_a/dt + k_e\omega$.
+Steady state ($i_a$ constant) drops the $L_a$ term; everything below assumes it.
+Motor ($i_a$ into the $+$ terminal): $V = R_a i_a + k_e\omega$. 
+Generator ($i_a$ out): $V = k_e\omega - R_a i_a$.
+Back EMF constant $k_e = (V - i_a R_a)/\omega$ [V$\cdot$s/rad], from a no-load test. Torque constant $k_t$ [N$\cdot$m/A] in $T = k_t i_a$.
+Power balance $P_{\rm mech} = E i_a = T\omega \implies k_e = k_t$, so one test gives both.
+$P_{\rm in} = Vi_a = Ei_a + i_a^2 R_a$, $\eta = P_{\rm out}/P_{\rm in}$.
+Torque--speed: $\omega = V/k_e - TR_a/(k_e k_t)$, a line from no-load speed $\omega_0 = V/k_e$ ($T = 0$) to stall torque $T_0 = k_t V/R_a$ ($\omega = 0$).
+Procedure: given $V$, $R_a$, $k_e = k_t$ and either $T$ or $\omega$, the line gives the other; $i_a = T/k_t$; then powers.
 
 
-
+\paragraph{Synchronous machines.}
+Stator: armature, three-phase winding; its currents make a field rotating at $\omega_s$ and carry the AC power.
+Rotor: field winding with DC $i_f$ through slip rings (or a permanent magnet); its flux locks to the rotating field, so the shaft turns at $\omega_s$.
+$p$ pole pairs: $\omega_s = \omega_e/p = 2\pi f_e/p$ [rad/s], $n_s = 60 f_e/p$ [rpm], since the stator field advances one pole pair, $1/p$ of a turn, per electrical cycle.
+Starting: at standstill the torque alternates at $f_e$ and averages zero. A squirrel cage on the rotor gives induction torque to start and carries no current once synchronized (no slip); or a VFD ramps $f_e$ from zero.
+(+) pf set by $i_f$; speed fixed by $f_e$. ($-$) not self-starting; needs a DC field supply.
+Magnetic circuit: $(N_f i_f \to \mathcal R_{\rm gap} \to \mathcal R_{\rm rotor} \to \mathcal R_{\rm gap} \to N_f i_f) \parallel (\mathcal R_{\rm stator} \parallel \mathcal R_{\rm stator})$.
+Per-phase circuit, generator ($I_a$ out of the stator terminals): EMF $E_a \to R_s \to jX_s \to$ terminal $V_a$, so $V_a = E_a - (R_s + jX_s)I_a$.
+Problems set $R_s = 0$; everything below assumes it.
+Motor ($I_a$ into the stator terminals): $V_a = E_a + jX_s I_a$.
+$E_a = k_f i_f\omega_e\angle\delta = (L_f/\sqrt2)\, i_f\omega_e\angle\delta$: magnitude set by $i_f$; power angle $\delta = \phi_{E_a} - \phi_{V_a}$ for a generator, $\phi_{V_a} - \phi_{E_a}$ for a motor, so $\delta > 0$ in both.
+$P_{3\phi} = 3\tilde V_a\tilde E_a\sin\delta/X_s$, $Q_{3\phi} = 3\tilde V_a(\tilde E_a\cos\delta - \tilde V_a)/X_s$; delivered by a generator, absorbed by a motor.
+Procedure, given $|S_{3\phi}|$, pf, $\tilde V_{ll}$, $X_s$: $I_a = (|S_{3\phi}|/(3\tilde V_a))\angle(-\theta)$ with $\theta = \pm\arccos(\mathrm{pf})$; then $E_a = V_a + jX_s I_a$ (generator) gives $\tilde E_a$, so $i_f$, and $\delta$.
+Procedure: given $\tilde E_a$, $P_{3\phi}$, $\tilde V_{ll}$, $X_s$, get $\delta$ from the $P$ equation; then $I_a = (E_a - V_a)/(jX_s)$ and $Q_{3\phi}$.
+Torque--speed: vertical line at $\omega_s$.
+Torque--$\delta$: $T = P_{3\phi}/\omega_s = 3\tilde V_a\tilde E_a\sin\delta/(X_s\omega_s)$, a sine, max at $\delta = 90^\circ$, unstable past it.
+$T = (\pi/2)\,p\,\Phi_r F_f\sin\delta$ with air-gap flux per pole $\Phi_r$ and field MMF $F_f = N_f i_f$; raise $T$ by $\Phi_r$ (limited by $B_{\rm sat}$) or $F_f$ (limited by field heating).
 
 
 
