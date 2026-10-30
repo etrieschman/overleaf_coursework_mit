@@ -1,0 +1,135 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{mathtools,amssymb}
+\usepackage{lipsum}
+\usepackage{hyperref}
+\usepackage{layout}
+\usepackage{geometry}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{xcolor}
+\usepackage{amsthm}
+\usepackage{booktabs}
+\newcommand*{\vertbar}[1][10ex]{\rule[-1ex]{0.5pt}{#1}}
+\newcommand*{\horzbar}{\rule[.5ex]{2.5ex}{0.5pt}}
+\newcommand{\norm}[2]{\left\lVert#1\right\rVert_#2}
+\newcommand{\abs}[1]{\lvert#1\rvert}
+
+\title{6.S974 class notes}
+\author{Erich Trieschman}
+\date{2026 Fall semester}
+
+% compact spacing
+\usepackage{setspace}\setstretch{0.95}
+\usepackage{parskip}\setlength{\parskip}{4pt}
+\setlength{\parindent}{0pt}
+\usepackage{enumitem}
+\setlist[itemize]{topsep=2pt, itemsep=2pt, parsep=0pt, partopsep=0pt}
+\setlist[enumerate]{topsep=2pt, itemsep=2pt, parsep=0pt, partopsep=0pt}
+\usepackage{titlesec}
+\titlespacing*{\section}{0pt}{3.5ex plus 0.3ex minus 0.3ex}{0.5ex}
+\titlespacing*{\subsection}{0pt}{2.5ex plus 0.2ex minus 0.2ex}{0.3ex}
+\titlespacing*{\subsubsection}{0pt}{1.5ex plus 0.2ex minus 0.2ex}{0.2ex}
+
+\newcommand{\userMarginInMm}{15}
+\geometry{
+%  legal,
+ left=\userMarginInMm mm,
+ right=\userMarginInMm mm,
+ top=\userMarginInMm mm,
+ bottom=\userMarginInMm mm,
+ footskip=5mm}
+
+
+ \hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+    pdfpagemode=FullScreen,
+}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+\newcommand{\todo}[1]{\textit{\textcolor{orange}{ [#1]}}}
+    
+\lstset{frame=tb, language=Python,
+    aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=none,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=3}
+
+\begin{document}
+\maketitle
+\tableofcontents
+
+\section*{Games}
+
+\paragraph{Normal-form game.}
+\todo{not covered in HW2}
+
+\paragraph{Static Bayesian game (HW2 P1).}
+Each player has a private type $\theta_i$ drawn from a common prior.
+Players move at the same time.
+A strategy is one action per type, $s_i:\Theta_i\to A_i$.
+The opponent responds to the type-weighted probability of each action, $\alpha = \sum_\theta P(\theta)\,\sigma_i(a\mid\theta)$.
+
+\paragraph{Signaling game (HW2 P2).}
+The sender knows its type and sends a message $m$.
+The receiver sees $m$, not the type, and acts.
+The receiver has one information set per message.
+The sender has one per type.
+
+\section*{Equilibria}
+
+\paragraph{Nash equilibrium.}
+\todo{not covered in HW2}
+
+\paragraph{Bayesian Nash equilibrium (HW2 P1).}
+Object: $\sigma^*$.
+Check, for every player $i$ and type $\theta_i$:
+\begin{align*}
+    \operatorname{supp}\sigma_i^*(\cdot\mid\theta_i) \subseteq BR_i(\sigma_{-i}^*\mid\theta_i).
+\end{align*}
+Pure BNE: candidates are pure profiles; a best-response cycle rules out its members.
+Mixed BNE: a type mixes only if indifferent, and its indifference fixes the opponent's $\alpha$ at a threshold.
+Verification: list the check for every type, both sets written out.
+
+\paragraph{Weak perfect Bayesian equilibrium (HW2 P2).}
+Object: $(\sigma^*,\mu^*)$, including any off-path beliefs you chose.
+Check 1, for every information set $I$:
+\begin{align*}
+    \operatorname{supp}\sigma_i^*(\cdot\mid I) \subseteq BR_i\big(\mu_i^*(\cdot\mid I),\,\sigma_{-i}^*\big|_I\big).
+\end{align*}
+Check 2, for every on-path information set: $\mu^*$ follows from the prior and $\sigma^*$ by Bayes' rule.
+Off-path beliefs are chosen, not derived.
+Verification: both checks at every information set.
+Beliefs feed the receiver; the receiver feeds the sender; fill in that order.
+
+\subparagraph{Separating.}
+Each type sends a different $m$.
+Both receiver sets on-path, beliefs 0 or 1.
+Check each type against the other's message.
+
+\subparagraph{Pooling.}
+Both types send the same $m$.
+Belief after $m$ is the prior.
+The unsent message is off-path; choose its belief so the deterring action is a best response.
+
+\subparagraph{Semi-separating.}
+One type pure, one type mixes with $p$.
+Receiver indifference after $m$ fixes $p$.
+Receiver then mixes with $q$; sender indifference fixes $q$.
+Check the pure type.
+
+\end{document}

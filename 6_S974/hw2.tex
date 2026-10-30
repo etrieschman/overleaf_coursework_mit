@@ -129,7 +129,7 @@
 
     Moreover, for $\pi = 3/4$ the best response of attacker type $\theta_1=8$ is $A$, implying a probability of attack $\alpha \geq 1/2$. 
 
-    For the company to have a mixed strategy and $\alpha \geq 1/2$, it must be that $\alpha = 3/4$ so that the mixed strategy best response can have a support greater than 1: the company mixes best responses $(P,P),(P,U)$.
+    For the company to have a mixed strategy and $\alpha \geq 1/2$, it must be that $\alpha = 3/4$ so that the mixed strategy best response can have a support greater than 1: the company type $\theta_1=3$ is indifferent at $\alpha=3/4$ and type $\theta_1=1$ is not.
 
     This support tells us that company type $\theta_2=1$ has a pure strategy best response of $P$ and $\sigma_2(P\mid 1) = 1$. Plugging this into our equation for $\pi$ above we get $\sigma_2(P\mid 3) = 1/2$.
 
@@ -150,7 +150,7 @@
         \operatorname{supp}(\sigma_2(\cdot\mid\theta_2=1)) = \{P\}   &\subseteq BR_2(\tfrac34\mid\theta_2=1) = \{P\}\\
         \operatorname{supp}(\sigma_2(\cdot\mid\theta_2=3)) = \{P,U\} &\subseteq BR_2(\tfrac34\mid\theta_2=3) = \{P,U\}
     \end{align*}
-    Each condition above was necessary for equilibrium, so it is the unique
+    Each condition above was necessary for equilibrium, so it is the unique BNE.
     \end{parts}
     
 
@@ -166,7 +166,7 @@
         \part \textbf{Does a separating PBE exist?}
         A separating PBE exists if a strategy profile $(s^*, \mu^*)$ satisfies
         \begin{enumerate}
-            \item \emph{Sequential rationality.} At every information set $I$ each player's continuation strategy $s_i^*\big|_I$ maximizes expected payoff given beliefs $\mu_i^*(\cdot \mid I)$ and the other players continuation strategies $s_{-i}^*\big|_I$.
+            \item \emph{Sequential rationality.} At every information set $I$ each player's continuation strategy $s_i^*\big|_I$ maximizes expected payoff given beliefs $\mu_i^*(\cdot \mid I)$ and the other players' continuation strategies $s_{-i}^*\big|_I$.
             \item \emph{Belief consistency.} At information sets $I$ reached with positive probability, beliefs $\mu_i^*(\cdot\mid I)$ are obtained from the prior and equilibrium strategies $s^*$ using Bayes' rule.
             \item \emph{Separating.} Each provider type chooses a different signal.
         \end{enumerate}
@@ -195,7 +195,7 @@
         \part \textbf{Pooling PBE.}
         Now consider a pooling PBE where $s_1(H) = s_1(L) = N$. The operator's beliefs are
         \begin{align*}
-            \mu_2(H\mid N) = \frac{P(N\mid H)P(H)}{P(N\mid H)P(H) + P(N\mid L)P(L)} = \frac{1*1/3}{1*1/3 + 1*2/3} = 1/3, && \mu(L\mid N) = 2/3.
+            \mu_2(H\mid N) = \frac{P(N\mid H)P(H)}{P(N\mid H)P(H) + P(N\mid L)P(L)} = \frac{1*1/3}{1*1/3 + 1*2/3} = 1/3, && \mu_2(L\mid N) = 2/3.
         \end{align*}
         
 
@@ -213,10 +213,74 @@
 
         When $\theta_1=H$, selecting $C$ decreases payoffs from $0\to-1$ and when $\theta_1=L$, selecting $C$ decreases payoff from $0\to-2$. 
 
-        Therefore the profile $s^* = (s_1(H) = s_1(L) = N, s_2(C) = s_2(N)=R)$, together with beliefs $\mu_2(H\mid N) = 1/3$ (from Baye's rule) and $\mu_2(H\mid C) = 0$ (chosen), is a pooling PBE.
+        Therefore the profile $s^* = (s_1(H) = s_1(L) = N, s_2(C) = s_2(N)=R)$, together with beliefs $\mu_2(H\mid N) = 1/3$ (from Bayes' rule) and $\mu_2(H\mid C) = 0$ (chosen), is a pooling PBE.
 
         \part \textbf{Behavioral strategy for a semi-separating equilibrium.}
-        \todo{STILL NEED TO FINISH THIS QUESTION!}
+
+        Suppose $\sigma_1(C\mid H) = 1, \sigma_1(C\mid L) = p\in(0,1)$. 
+        
+        \paragraph{Operator beliefs.}
+        \begin{align*}
+            \mu_2(H\mid C) = \frac{\sigma_1(C\mid H)P(H)}{\sigma_1(C\mid H)P(H) + pP(L)}
+             = \frac{1*1/3}{1*1/3 + 2p/3} = \frac{1}{1+2p}, && \mu_2(L\mid C) = \frac{2p}{1 + 2p}\\
+             \mu_2(H\mid N) = 0,&& \mu_2(L\mid N) = 1.
+        \end{align*}
+        \paragraph{$\mathbf{\sigma_2(\cdot\mid N)}.$}
+        When the provider plays $N$ the operator has a pure best response of $s_2(N) = R$ since 
+        \begin{align*}
+            E_{\theta_1}[u_2(N,D\mid \theta_1)] = 0*2 + 1*(-2) < 0 = E_{\theta_1}[u_2(N,R\mid \theta_1)]
+        \end{align*}
+        So $\sigma_2(R\mid N) = 1 = 1- \sigma_2(D\mid N)$.
+
+        \paragraph{$\mathbf{\sigma_1(\cdot\mid L)}.$}
+        When the provider plays $C$, the operator can play a mixed strategy only if both pure strategies are in its best response. This occurs when
+        \begin{align*}
+            E_{\theta_1\sim\mu_2}[u_2(C,D\mid \theta_1)] &= 0 
+                = E_{\theta_1\sim\mu_2}[u_2(C,R\mid \theta_1)]\\
+             2*\mu_2(H\mid C) + -2*\mu_2(L\mid C) &=0\\
+             2/(1 + 2p) - 4p/(1 + 2p) &= 0\\
+             p &= 1/2
+        \end{align*}
+        So $\sigma_1(C\mid L) = 1/2 = \sigma_1(N\mid L)$.
+
+        \paragraph{$\mathbf{\sigma_2(\cdot\mid C)}$.}
+        Let $\sigma_2(D\mid C) = q$ and recall $\sigma_2(R\mid N) = 1$. For a behavioral strategy equilibrium we must find $q$ such that the provider of type $\theta_1=L$ is indifferent between actions $C$ and $N$:        
+        \begin{align*}
+            E_{\sigma_2}[u_1(C,\sigma_2\mid L)] &= E_{\sigma_2}[u_1(N,\sigma_2\mid L)]\\
+            q*1 + (1-q)(-2) &= 0 = u_1(N,R \mid L)\\
+            q &= 2/3
+        \end{align*}
+        So $\sigma_2(D\mid C) = 2/3 = 1 - \sigma_2(R\mid C)$.
+
+        \paragraph{$\mathbf{\sigma_1(\cdot\mid H)}$}
+        It suffices to show $\sigma_1(C\mid H) = 1 = 1-\sigma_1(N\mid H)$ is a best response:
+        \begin{align*}
+            E_{\sigma_2}[u_1(C, \sigma_2\mid H)] &= 2/3 * 2 + 1/3(-1) = 1
+            \ge 0 = E_{\sigma_2}[u_1(N, \sigma_2\mid H)]
+        \end{align*}
+        So $s_1(H) = C$ is a pure strategy best response confirming the check.  
+
+        \paragraph{Equilibrium.}
+        Therefore the following strategy profile
+        \begin{align*}
+            \sigma_1(C\mid H) = 1, \quad \sigma_1(N\mid H) = 0,\quad \sigma_1(C\mid L) = 1/2,\quad \sigma_1(N\mid L) = 1/2.\\
+            \sigma_2(D\mid C) = 2/3, \quad \sigma_2(R\mid C) = 1/3,\quad \sigma_2(D\mid N) = 0,\quad \sigma_2(R\mid N) = 1.
+        \end{align*}
+        with beliefs
+        \begin{align*}
+            \mu_2(H\mid C) = 1/2, && \mu_2(L\mid C) = 1/2\\
+             \mu_2(H\mid N) = 0,&& \mu_2(L\mid N) = 1.
+        \end{align*}
+        is a PBE in behavioral strategies.
+
+        \paragraph{Probability of unreliable and deployed.}
+        \begin{align*}
+            P(D, L) &= P(D\mid L)P(L)\\
+            & = \big[P(D\mid L,C)P(C\mid L) + P(D\mid L,N)P(N\mid L)\big]P(L) \tag{law of total probability}\\
+            &= \big[\sigma_2(D\mid C)\sigma_1(C\mid L) + \sigma_2(D\mid N)\sigma_1(N\mid L)\big]P(L) \tag{plugging in strategy profiles}\\
+            &= \big[\tfrac23\cdot \tfrac12 + 0\cdot\tfrac12\big]\tfrac23\\
+            &=\tfrac{2}{9}
+        \end{align*}
     \end{parts}
 
     \titledquestion{Traffic routing problem}
