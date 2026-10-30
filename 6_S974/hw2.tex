@@ -171,7 +171,9 @@
             \item \emph{Separating.} Each provider type chooses a different signal.
         \end{enumerate}
         Candidate provider strategy profiles are $s_1(H,L) \in \{(C,N), (N,C)\}$. 
-        Begin with profile $(C,N)$. Under belief consistency the operator's beliefs $\mu_2(\cdot\mid m_1)$ are
+        
+        \paragraph{Profile $(C,N)$.}
+        Under belief consistency the operator's beliefs $\mu_2(\cdot\mid m_1)$ are
         \begin{align*}
             \mu_2(H\mid C) = \frac{P(C\mid H)P(H)}{P(C\mid H)P(H) + P(C\mid L)P(L)} 
             = \frac{1*1/3}{1*1/3 + 0} = 1, && \mu_2(L\mid C) = 0,\\
@@ -181,7 +183,8 @@
         
         In equilibrium, the provider should not have an incentive to deviate. When $\theta_1 = H$, selecting $N$ decreases provider payoff from $2\to 0$. When $\theta_1 = L$, selecting $C$ increases provider payoff from $0\to1$. So $(C,N)$ is not a separating PBE.
 
-        Consider profile $(N,C)$. Operator beliefs are
+        \paragraph{Profile $(N,C)$.}
+        Operator beliefs are
         \begin{align*}
             \mu_2(H\mid C) = 0, && \mu_2(L\mid C) = 1, &&
             \mu_2(H\mid N) = 1, && \mu_2(L \mid N) = 0.
@@ -193,12 +196,13 @@
 
 
         \part \textbf{Pooling PBE.}
-        Now consider a pooling PBE where $s_1(H) = s_1(L) = N$. The operator's beliefs are
+        Now consider a pooling PBE where $s_1(H) = s_1(L) = N$. 
+        
+        The operator's beliefs are
         \begin{align*}
             \mu_2(H\mid N) = \frac{P(N\mid H)P(H)}{P(N\mid H)P(H) + P(N\mid L)P(L)} = \frac{1*1/3}{1*1/3 + 1*2/3} = 1/3, && \mu_2(L\mid N) = 2/3.
         \end{align*}
         
-
         The operator's strategy is based on expected payoffs
         \begin{align*}
             E_{\theta_1}[u_2(N,R\mid\theta_1)] = 0, && E_{\theta_1}[u_2(N,D\mid\theta_1)] = 1/3 * 2 + 2/3 * (-2) = -2/3
@@ -217,7 +221,7 @@
 
         \part \textbf{Behavioral strategy for a semi-separating equilibrium.}
 
-        Suppose $\sigma_1(C\mid H) = 1, \sigma_1(C\mid L) = p\in(0,1)$. 
+        Suppose $\sigma_1(C\mid H) = 1,\; \sigma_1(C\mid L) = p\in(0,1)$. 
         
         \paragraph{Operator beliefs.}
         \begin{align*}
