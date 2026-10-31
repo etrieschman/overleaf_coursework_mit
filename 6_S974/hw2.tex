@@ -289,7 +289,18 @@
 
     \titledquestion{Traffic routing problem}
     \begin{parts}
-        \part \textbf{Waldrop equilibrium.}
+        \part \textbf{Waldrop equilibrium.} For signal $s$ all paths must have same expected latency, which happens at
+        \begin{align*}
+            \mu_s = 1/3 + 2x^W(\mu) \iff x^W(\mu) = \frac{\mu_s - 1/3}{2}
+        \end{align*}
+        Equilibrium flow is a linear function of $\mu_s$ and therefore is an injective function where each unique input corresponds to a unique output. 
+
+        At this $x^W(\mu)$, the conditional expected total latency is
+        \begin{align*}
+            C(\mu) &= \left(1 - \frac{\mu_s - \tfrac13}{2}\right)\mu_s + \frac{\mu_s - \tfrac13}{2}\left(\tfrac13 + 2\frac{\mu_s - \tfrac13}{2}\right)\\
+            &= \tfrac12 \left(\tfrac53\mu_s - \mu_s^2\right) + \tfrac12\left(\tfrac13\mu_s - \tfrac19 + \mu_s^2 - \tfrac23\mu_s + \tfrac19\right)\\
+            &= \tfrac23\mu_s
+        \end{align*}
         \part \textbf{Mean-posterior identity.}
         \part \textbf{Public signal rule.}
         \part \todo{update}
