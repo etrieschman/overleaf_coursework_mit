@@ -7,6 +7,7 @@
 \usepackage{xcolor} % for custom colors
 \usepackage{minted} % for code
 \usepackage[T1]{fontenc}
+\usepackage{booktabs}
 
 % === Make things tighter ===
 \usepackage[margin=0.75in]{geometry} % <- widen/narrow by changing 1.25in
@@ -370,20 +371,137 @@
             P(\theta=1\mid r=2) &= \frac{P(r=2\mid\theta=1)p}{P(r=2)} = \frac{q_1p}{q_1p + q_0(1-p)}\\
             P(\theta=1\mid r=1) &= \frac{P(r=1\mid\theta=1)p}{P(r=1)} = \frac{(1-q_1)p}{(1-q_1)p + (1-q_0)(1-p)}
         \end{align*}
-        Recommendations are incentive compatible for a driver if following the recommendation has expected latency at most as high as deviating. Written below without conditional probability denominators
+        Recommendations are incentive compatible for a driver if following the recommendation has expected latency at most as high as deviating. Written below without conditional probability denominators (which cancel as shown in $r=2$)
         \begin{align*}
             r=2:&& E_{\theta\mid r=2}[\tfrac13 + 2q_\theta] &\leq E_{\theta\mid r=2}[\theta]\\
             &&(\tfrac13 + 2q_1)P(\theta=1\mid r=2) + (\tfrac13 + 2q_0)(P(\theta=0\mid r=2)) &\leq P(\theta=1\mid r=2)\\
             && \left(\tfrac13 + 2q_1\right)\frac{q_1p}{q_1p + q_0(1-p)} + \left(\tfrac13 + 2q_0\right)\frac{q_0(1-p)}{q_1p + q_0(1-p)} & \leq \frac{q_1p}{q_1p + q_0(1-p)}\\
             && (\tfrac13 + 2q_1)q_1p + (\tfrac13 + 2q_0)(1-p)q_0 & \leq q_1p\\[1em]
-            r=1:&& E_{\theta\mid r=1}[\tfrac13 + 2q_\theta] &\leq E_{\theta\mid r=1}[\theta]\\
-            &&(\tfrac13 + 2(1-q_1))P(\theta=1\mid r=1) + (\tfrac13 + 2(1-q_0))(P(\theta=0\mid r=1)) &\leq P(\theta=1\mid r=1)\\
-            && (\tfrac13 + 2q_1)(1-q_1)p + (\tfrac13 + 2q_0)(1-q_0)(1-p) & \leq (1-q_1)p\\
+            r=1:&& E_{\theta\mid r=1}[\tfrac13 + 2q_\theta] &\geq E_{\theta\mid r=1}[\theta]\\
+            &&(\tfrac13 + 2q_1)P(\theta=1\mid r=1) + (\tfrac13 + 2q_0)P(\theta=0\mid r=1) &\geq P(\theta=1\mid r=1)\\
+            && (\tfrac13 + 2q_1)(1-q_1)p + (\tfrac13 + 2q_0)(1-q_0)(1-p) & \geq (1-q_1)p
         \end{align*}
-        \todo{explain treatment of 0-prob recommendations}
-        \todo{Expected costs when recommendations are followed}
-        \part \todo{update}
-        \part \todo{update}
+        Bayes rule places $P(r)$ in the denominator of the posterior expectation, so zero-probability recommendations have undefined posterior expectations of $\theta=1$. These recommendations can safely be dropped from the set of recommendations as are all $s:\lambda_s = 0$ in part (c) since for $p\in(0,1)$ and $P(r) = 0$
+        \begin{align*}
+            0 = P(r) = pP(r\mid \theta=1) + (1-p)P(r\mid\theta=0)\implies P(r\mid \theta=1) = 0.
+        \end{align*}
+        Expected platform costs is
+        \begin{align*}
+            E_{\theta}\left[C(q_\theta,\theta)\right] = J(q_0,q_1)  &= (1-p)(C(q_0,0)) + p(C(q_1,1))\\
+            &= (1-p)\left[(1-q_0)0 + q_0\left(\tfrac13 + 2q_0\right)\right] + p\left[(1-q_1)1 + q_1\left(\tfrac13 + 2q_1\right)\right]\\
+            &= (1-p)\left[2q_0^2 + \tfrac13 q_0\right] + p\left[2q_1^2 - \tfrac23 q_1 + 1 \right]
+        \end{align*}
+        \part \textbf{Socially optimal flow, costs, and IC compatibility.}
+        \paragraph{Socially optimal flow.}
+        \begin{align*}
+            \theta=1:&& C(x,1) &= 1-x + \tfrac{x}{3} + 2x^2 = 2x^2 - \tfrac{2x}{3} + 1\\
+            && \tfrac{dC(x,1)}{dx} &= 0 \implies 0 = 4x - \tfrac23 \implies x = \tfrac16\tag{This is a minimum since second derivative is positive}\\[1em]
+            \theta=0:&& C(x,0) &= \tfrac{x}{3} + 2x^2\\
+            &&\tfrac{dC(x,0)}{dx} &= 0 \implies 0= \tfrac13 + 4x \implies x = -\tfrac{1}{12} \tag{no critical point on $(0,1)$ so minimum is on the boundary}\\
+            &&C(0,0) &= 0,\quad C(1,0) = \tfrac13 + 2 = \tfrac73 \tag{so x=0 at the boundary achieves minimum}
+        \end{align*}
+        So the optima are $(x^S_0,x^S_1) = (0, 1/6)$.
+        \paragraph{Ex ante expected cost.}
+        \begin{align*}
+            E_\theta[C(x,\theta)] =  p\cdot(\tfrac56 + \tfrac16 (\tfrac13 + \tfrac26)) + (1-p) 0 = p(\tfrac{15}{18} + \tfrac{2}{18}) = \tfrac{17}{18}p
+        \end{align*}
+        \paragraph{Private recommendation rule.}
+        Plugging in socially optimal flows $(q_0,q_1) = (0,1/6)$ into the inequalities from part (d)
+        \begin{align*}
+            r=2:&& (1/3 + 1/3)(p/6) + (1/3 + 2\cdot 0)(1-p)\cdot 0 &\leq p/6 
+            \implies 2p/18 \leq p/6 
+            \implies 2p \leq 3p \tag{$r=2$ is incentive compatible $\forall\;p\in(0,1)$}\\[1em]
+            r=1:&& (1/3 + 1/3)(5p/6) + (1/3 + 0)(1-p) &\geq 5p/6 
+            \implies 11p/18 \leq 1/3 \implies p \leq 6/11
+        \end{align*}
+        so recommendations $r$ are incentive compatible for $p\leq 6/11$, determined by $r=1$. 
+        
+        \paragraph{Compare to public information rules.}
+        We've just shown that for $p \leq 6/11$, a private information rule can achieve the ex ante social optimum latency at $17p/18$, which for $p\in(0,1)$ is lower than the public rule ex ante social optimum latency from part (c) of $p$.  
+
+        A private rule can give different drivers different posteriors, depending on which recommendation they receive. Knowing the $(q_0,q_1)$ that achieve the social optimum, we see posteriors are 
+        \begin{align*}
+            P(\theta=1\mid r=2) &= \tfrac{p}{6} / (\tfrac{p}{6} + 0) = 1,\\
+            P(\theta=1\mid r=1) &= \tfrac{5p}{6} / (\tfrac{5p}{6} + (1-p)).
+        \end{align*}
+        Drivers told $r=2$ know with certainty $\theta=1$ and follow the recommendation. Drivers told $r=1$ remain uncertain enough that the recommendation path looks no worse than the deviation. So with these posteriors on the recommendations, the planner can hold the socially optimal flows. 
+
+
+        \part \textbf{Cost minimization.}
+        \begin{align*}
+            \min_{q_0,q_1}\quad& 
+                (1-p)\left[2q_0^2 + \tfrac13 q_0\right] + p\left[2q_1^2 - \tfrac23 q_1 + 1 \right] \tag{$J(q_0,q_1)$}\\
+            \text{s.t.}\quad& 
+                (\tfrac13 + 2q_1)q_1p + (\tfrac13 + 2q_0)(1-p)q_0 \leq q_1p \tag{$r=2$ IC}\\
+                & (\tfrac13 + 2q_1)(1-q_1)p + (\tfrac13 + 2q_0)(1-q_0)(1-p) \geq (1-q_1)p \tag{$r=1$ IC}\\
+                &(q_0,q_1)\in[0,1]^2
+        \end{align*}
+
+        \begin{lstlisting}[language=Python]
+# %%
+import numpy as np
+import cvxpy as cp
+import polars as pl
+
+pl.Config.set_tbl_cols(-1)
+
+# %%
+# =======================
+# Problem 3 Part (f)
+# =======================
+def private_recs(p):
+    # variables
+    q0 = cp.Variable()
+    q1 = cp.Variable()
+    # constraints
+    const = [
+        q0 >= 0,
+        q0 <= 1,
+        q1 >= 0,
+        q1 <= 1,
+    ]
+    const += [
+        (q1 / 3 + 2 * cp.square(q1)) * p + (q0 / 3 + 2 * cp.square(q0)) * (1 - p)
+        <= q1 * p
+    ]
+    const += [
+        (1 / 3 + 5 * q1 / 3 - 2 * cp.square(q1)) * p
+        + (1 / 3 + 5 * q0 / 3 - 2 * cp.square(q0)) * (1 - p)
+        >= (1 - q1) * p,
+    ]
+    # objective
+    obj = (1 - p) * (2 * cp.square(q0) + q0 / 3) + p * (
+        2 * cp.square(q1) - 2 * q1 / 3 + 1
+    )
+    # problem
+    prob = cp.Problem(cp.Minimize(obj), const)
+    prob.solve()
+    return float(q0.value), float(q1.value), float(prob.value), prob.status
+
+
+results = []
+for p in np.arange(1, 11):
+    q0, q1, obj, status = private_recs(p / 11)
+    public_cost = p / 11
+    soc_opt_cost = (p / 11) * (17 / 18)
+    public_gain = public_cost - obj
+    soc_opt_gap = obj - soc_opt_cost
+    results.append(
+        (
+            f"{p}/11",
+            round(q0, 4),
+            round(q1, 4),
+            round(obj, 4),
+            round(public_cost, 4),
+            round(public_gain, 4),
+            round(soc_opt_cost, 4),
+            round(soc_opt_gap, 4),
+        )
+    )
+        \end{lstlisting}
+    {\small
+    \input{hw2_problem3_partf.tex}
+    }
     \end{parts}
 
     \titledquestion{Employment recommendations}
@@ -393,12 +511,6 @@
         \part \todo{update}
         \part \todo{update}
     \end{parts}
-
-    
-
-
-    
-
     
 \end{questions}
 \end{document}
