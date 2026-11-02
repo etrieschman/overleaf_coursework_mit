@@ -289,18 +289,36 @@
 
     \titledquestion{Traffic routing problem}
     \begin{parts}
-        \part \textbf{Waldrop equilibrium.} For signal $s$ all paths must have same expected latency, which happens at
+        \part \textbf{Wardrop equilibrium.} For signal $s$ all paths that carry positive flow must have same expected latency:
         \begin{align*}
-            \mu_s = 1/3 + 2x^W(\mu) \iff x^W(\mu) = \frac{\mu_s - 1/3}{2}
+            x^W(\mu) = \begin{cases}
+                0 & \mu \in [0, \tfrac13] \quad \big(\mu \leq \tfrac13 + 2*0\big)\\
+                \frac{\mu - 1/3}{2} & \mu \in [\tfrac13,1]\\
+                1 & \mu \geq \tfrac13 + 2 = \tfrac73 \;\;\text{(not possible)}\\
+            \end{cases}
         \end{align*}
-        Equilibrium flow is a linear function of $\mu_s$ and therefore is an injective function where each unique input corresponds to a unique output. 
+        Conditional expected total latency for $\mu \in [\tfrac13,1]$ is
+        \begin{align*}
+            C(\mu) &=  \left(1 - \frac{\mu - 1/3}{2}\right)\mu + \left(\frac{\mu - 1/3}{2}\right)\left(\tfrac13 + 2\frac{\mu - 1/3}{2}\right)\\
+            &= \mu - \frac{\mu^2 - \mu/3}{2} + \frac{\mu^2 - \mu/3}{2} = \mu
+        \end{align*}
+        For $\mu \in [0,\tfrac13]$ it's 
+        \begin{align*}
+            C(\mu) = (1 - 0)\mu + 0(\tfrac13 + 2*0) = \mu
+        \end{align*}
+        So $C(\mu) = \mu,\;\forall\mu\in[0,1]$.
 
-        At this $x^W(\mu)$, the conditional expected total latency is
+        \paragraph{Uniqueness.} Fix $\mu$ and suppose the Wardrop equilibrium is not unique. Then there exists $0\leq x < x' \leq 1$ such that both flows satisfy the Wardrop condition.
+
+        $0 < x' \implies$ path 2 latency is no worse than path 1 latency: $\mu \geq \tfrac13 + 2x'$.
+
+        $x < 1\implies$ path 1 latency is no worse than path 2 latency: $\mu \leq \tfrac13 + 2x$.
+        So
         \begin{align*}
-            C(\mu) &= \left(1 - \frac{\mu_s - \tfrac13}{2}\right)\mu_s + \frac{\mu_s - \tfrac13}{2}\left(\tfrac13 + 2\frac{\mu_s - \tfrac13}{2}\right)\\
-            &= \tfrac12 \left(\tfrac53\mu_s - \mu_s^2\right) + \tfrac12\left(\tfrac13\mu_s - \tfrac19 + \mu_s^2 - \tfrac23\mu_s + \tfrac19\right)\\
-            &= \tfrac23\mu_s
+            \tfrac13 + 2x' \leq \mu \leq \tfrac13 + 2x \implies x' \leq \frac{\mu - \tfrac13}{2}\leq x 
         \end{align*}
+        which contradicts $x < x'$. Therefore the equilibrium is unique. 
+
         \part \textbf{Mean-posterior identity.}
         \part \textbf{Public signal rule.}
         \part \todo{update}
