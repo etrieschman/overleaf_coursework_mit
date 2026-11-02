@@ -320,8 +320,68 @@
         which contradicts $x < x'$. Therefore the equilibrium is unique. 
 
         \part \textbf{Mean-posterior identity.}
+        \begin{align*}
+            \sum_{\{s\in S:\lambda_s > 0\}}\lambda_s\mu_s &= \sum_{\{s\in S:P(s) > 0\}} P(s)P(\theta = 1\mid s)\tag{definition}\\
+            &= \sum_{\{s\in S:P(s) > 0\}} P(\theta = 1, s) = \sum_{\{s\in S:P(s) > 0\}} P(s\mid\theta=1)P(\theta=1)\tag{Bayes}\\
+            &= p\sum_{\{s\in S:P(s) > 0\}} \pi(s\mid \theta=1)\tag{law of total probability}\\
+            &= p \cdot 1
+        \end{align*}
+        Where the final step holds for $P(s)>0$ since for $p\in(0,1)$ and every $P(s)=0$,
+        \begin{align*}
+            0 = P(s) = p\pi(s\mid\theta=1) + (1-p)\pi(s\mid\theta=0) \implies \pi(s\mid\theta=1)= 0
+        \end{align*} 
+        
+        
         \part \textbf{Public signal rule.}
-        \part \todo{update}
+        \begin{align*}
+            C(\mu_s) &= \sum_\theta P(\theta\mid s)\cdot C(x^W(\mu_s),\theta) = \mu_s \tag{conditional expected cost from part (a)}\\
+            E_s[C(\mu_s)] &= \sum_s P(s) C(\mu_s) \tag{ex ante expected cost}\\
+            &= \sum_s \lambda_s \mu_s \tag{from part (b)}\\
+            &= p \tag{from part (c)}
+        \end{align*}
+        So ex ante expected total latency does not depend on the public signal rule $\pi(s\mid\theta)$ hence any public signal rule gives the same value. 
+
+        \paragraph{Full revelation.} For $s\in\{0,1\},\; \pi(s\mid\theta) = 1$ for $s=\theta$ and $0$ otherwise. Then
+        \begin{align*}
+            \mu(\theta=1\mid s) &= \frac{\pi(s\mid\theta=1)p}{\pi(s\mid\theta=1)p + 0} = 1\\
+            \mu(\theta=0\mid s) &= \frac{\pi(s\mid\theta=0)(1-p)}{\pi(s\mid\theta=0)(1-p) + 0} = 1
+        \end{align*}        
+        From part (a), $x^W(\mu_s=1) = (1 - \tfrac13)/2 =  \tfrac13$.  
+
+        \paragraph{No information.} For $s\in\{0\}$, $\pi(s\mid\theta) = 1$ for $\theta\in\{0,1\}$. Then
+        \begin{align*}
+            \mu(\theta=1\mid s) = \frac{\pi(s\mid\theta=1)p}{\pi(s\mid\theta=1)p + \pi(s\mid\theta=0)(1-p)} = p
+        \end{align*}
+        From part (a),
+        \begin{align*}
+            x^W(\mu_s=p) = \begin{cases}
+                0 & p\in[0,\tfrac13]\\
+                \frac{p-1/3}{2} & p\in[\tfrac13, 1]
+            \end{cases}
+        \end{align*}
+
+        \part \textbf{Private information general rule.} Recommendation probabilities are
+        \begin{align*}
+            P(r=2) &= P(r=2\mid\theta=1)P(\theta=1) + P(r=2\mid\theta=0)P(\theta=0) = q_1p + q_0(1-p)\\
+            P(r=1) &= P(r=1\mid\theta=1)P(\theta=1) + P(r=1\mid\theta=0)P(\theta=0) = (1-q_1)p + (1-q_0)(1-p)                        
+        \end{align*}
+        The posterior probabilities of $\theta=1$ are
+        \begin{align*}
+            P(\theta=1\mid r=2) &= \frac{P(r=2\mid\theta=1)p}{P(r=2)} = \frac{q_1p}{q_1p + q_0(1-p)}\\
+            P(\theta=1\mid r=1) &= \frac{P(r=1\mid\theta=1)p}{P(r=1)} = \frac{(1-q_1)p}{(1-q_1)p + (1-q_0)(1-p)}
+        \end{align*}
+        Recommendations are incentive compatible for a driver if following the recommendation has expected latency at most as high as deviating. Written below without conditional probability denominators
+        \begin{align*}
+            r=2:&& E_{\theta\mid r=2}[\tfrac13 + 2q_\theta] &\leq E_{\theta\mid r=2}[\theta]\\
+            &&(\tfrac13 + 2q_1)P(\theta=1\mid r=2) + (\tfrac13 + 2q_0)(P(\theta=0\mid r=2)) &\leq P(\theta=1\mid r=2)\\
+            && \left(\tfrac13 + 2q_1\right)\frac{q_1p}{q_1p + q_0(1-p)} + \left(\tfrac13 + 2q_0\right)\frac{q_0(1-p)}{q_1p + q_0(1-p)} & \leq \frac{q_1p}{q_1p + q_0(1-p)}\\
+            && (\tfrac13 + 2q_1)q_1p + (\tfrac13 + 2q_0)(1-p)q_0 & \leq q_1p\\[1em]
+            r=1:&& E_{\theta\mid r=1}[\tfrac13 + 2q_\theta] &\leq E_{\theta\mid r=1}[\theta]\\
+            &&(\tfrac13 + 2(1-q_1))P(\theta=1\mid r=1) + (\tfrac13 + 2(1-q_0))(P(\theta=0\mid r=1)) &\leq P(\theta=1\mid r=1)\\
+            && (\tfrac13 + 2q_1)(1-q_1)p + (\tfrac13 + 2q_0)(1-q_0)(1-p) & \leq (1-q_1)p\\
+        \end{align*}
+        \todo{explain treatment of 0-prob recommendations}
+        \todo{Expected costs when recommendations are followed}
         \part \todo{update}
         \part \todo{update}
     \end{parts}
