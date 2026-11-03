@@ -432,8 +432,8 @@
             \min_{q_0,q_1}\quad& 
                 (1-p)\left[2q_0^2 + \tfrac13 q_0\right] + p\left[2q_1^2 - \tfrac23 q_1 + 1 \right] \tag{$J(q_0,q_1)$}\\
             \text{s.t.}\quad& 
-                (\tfrac13 + 2q_1)q_1p + (\tfrac13 + 2q_0)(1-p)q_0 \leq q_1p \tag{$r=2$ IC}\\
-                & (\tfrac13 + 2q_1)(1-q_1)p + (\tfrac13 + 2q_0)(1-q_0)(1-p) \geq (1-q_1)p \tag{$r=1$ IC}\\
+                (\tfrac13 + 2q_1)q_1p + (\tfrac13 + 2q_0)(1-p)q_0 \leq q_1p \tag{$r=2$ incentive compatibility}\\
+                & (\tfrac13 + 2q_1)(1-q_1)p + (\tfrac13 + 2q_0)(1-q_0)(1-p) \geq (1-q_1)p \tag{$r=1$ incentive compatibility}\\
                 &(q_0,q_1)\in[0,1]^2
         \end{align*}
 
@@ -506,7 +506,7 @@ for p in np.arange(1, 11):
 
     \titledquestion{Employment recommendations}
     \begin{parts}
-        \part \textbf{Payoff maximizing company actions} Let $\mu := P(\omega=G\mid i)\in [0,1]$ be the posterior belief of $G$ given information $i$. Expected payoffs under the posterior are
+        \part \textbf{Payoff maximizing company actions.} Let $\mu := P(\omega=G\mid i)\in [0,1]$ be the posterior belief of $G$ given information $i$. Expected payoffs under the posterior are
         \begin{align*}
             E_\mu[u(F,\mu)] = 2\mu - 4(1-\mu) = 6\mu - 4, &&
             E_\mu[u(I,\mu)] = \mu - (1-\mu) = 2\mu - 1, && 
@@ -515,12 +515,12 @@ for p in np.arange(1, 11):
         Then payoff-maximizing actions $a^{*}$ are
         \begin{align*}
             a^{*} = \begin{cases}
-                F & 6\mu - 4 \geq 2\mu - 1 \implies 3/4 \leq \mu \leq 1\\
-                I & 2\mu - 1 \geq 0 \implies 1/2 \leq \mu\leq 3/4\\
-                R & 0 \leq \mu \leq 1/2
+                F & 6\mu - 4 \geq 2\mu - 1 \implies \mu \in [3/4,1]\\
+                I & 2\mu - 1 \geq 0 \implies \mu\in[1/2,3/4]\\
+                R & \mu\in[0,1/2]
             \end{cases}
         \end{align*}
-        Note at the seams $\{1/2,3/4\}$ either action is maximizing.
+        Where at the seams $\{1/2,3/4\}$ either action is maximizing.
 
         Under full revelation, the company's payoff-maximizing actions are
         \begin{align*}
@@ -536,12 +536,80 @@ for p in np.arange(1, 11):
             && E_\omega[u(I,\omega)] = (2/3) - (1/3) = 1/3,
             && E_\omega[u(R,\omega)] = 0,
         \end{align*}
-        So the company's payoff maximizing action under no information is $a^{NI*} = I$ and the school's expected payoffs are therefore $E_\omega[v(I,\omega)] = 3/2$, higher than the full-revelation expected payoffs. 
+        So the company's payoff maximizing action under no information is $a^{NI*} = I$ and the school's expected payoffs are $E_\omega[v(I,\omega)] = 3/2$, which is higher than the full-revelation expected payoffs. 
 
 
-        \part \todo{update}
-        \part \todo{update}
-        \part \todo{update}
+        \part \textbf{Recommendation.}
+        The recommendations' probabilities are
+        \begin{align*}
+            P(I) = P(I\mid G)P(G) + P(I\mid M)P(M) = 2x/3 + y/3, && P(F) = 1 - P(I) = 1 - 2x/3 - y/3.
+        \end{align*}
+        Posterior beliefs are
+        \begin{align*}
+            \mu_I:= P(G\mid I) &= \frac{P(I\mid G)P(G)}{P(I)} = \frac{2x/3}{2x/3 + y/3} = \frac{2x}{2x + y},\\
+            \mu_F:=P(G\mid F) &=  \frac{P(F\mid G)P(G)}{P(F)} = \frac{2(1-x)/3}{2(1-x)/3 + (1-y)/3} = \frac{2 - 2x}{3 - 2x - y},
+        \end{align*}
+        and $\mu_r(M\mid r) = 1-\mu_r$ for $r\in\{I,F\}$.
+
+        Incentive compatibility conditions require following the recommendation to yield expected payoffs at least ass good as any deviation:
+        \begin{align*}
+            r=I:&& E_{\omega\sim\mu_I}[u(I,\omega)] &\geq E_{\omega\sim\mu_I}[u(F,\omega)]\\
+            && \mu_Iu(I,G) + (1 - \mu_I)u(I,M) &\geq \mu_Iu(F,G) + (1 - \mu_I)u(F,M)\\
+            && \mu_I -1 + \mu_I &\geq 2\mu_I -4 + 4\mu_I \implies \mu_I\leq 3/4 \\
+            && 2x &\leq 3x/2 + 3y/4 \implies x \leq 3y/2\\[1em]
+            && E_{\omega\sim\mu_I}[u(I,\omega)] &\geq E_{\omega\sim\mu_I}[u(R,\omega)]\\
+            && \mu_I - 1 + \mu_I &\geq 0 \implies \mu_I \geq 1/2\\
+            && 2x &\geq x + y/2 \implies x\ge y/2\\[2em]
+            r=F:&& E_{\omega\sim\mu_F}[u(F,\omega)] &\geq E_{\omega\sim\mu_F}[u(I,\omega)]\\
+            && 2\mu_F - 4 + 4\mu_F &\ge \mu_F - 1 + \mu_F \implies \mu_F \geq 3/4\\
+            && 2 - 2x &\geq 9/4 - 3x/2 - 3y/4 \implies x \leq 3y/2 - 1/2\\[1em]
+            && E_{\omega\sim\mu_F}[u(F,\omega)] &\geq E_{\omega\sim\mu_F}[u(R,\omega)]\\
+            && 2\mu_F - 4 + 4\mu_F & \ge 0 \implies \mu_F \ge 2/3\\
+            && 2 - 2x &\ge 2 - 4x/3 - 2y/3 \implies x \le y
+        \end{align*}
+        Note $\mu_I,\mu_F$ are only defined through Bayes rule when $P(I),P(F)$ are positive. When $r: P(r)=0$, we have $0 = 2P(r\mid G)/3 + P(r\mid M)/3\implies P(r\mid \omega) = 0$, so the conditional recommendations also have zero probability and can be safely dropped. 
+
+
+        \part \textbf{School's optimization.}
+        Maximize recommendation payoffs, constrained by incentive compatibility:
+        \begin{align*}
+            \max_{x,y}\quad& E_{\omega, x,y}[v(r(x,y),\omega)] \\
+            \text{s.t.}\quad
+            & E_{\omega\sim\mu_I}[u(I,\omega)] \geq E_{\omega\sim\mu_I}[u(F,\omega)],
+            \qquad E_{\omega\sim\mu_I}[u(I,\omega)] \geq E_{\omega\sim\mu_I}[u(R,\omega)],\\
+            &E_{\omega\sim\mu_F}[u(F,\omega)] \geq E_{\omega\sim\mu_F}[u(I,\omega)],
+            \qquad E_{\omega\sim\mu_F}[u(F,\omega)] \geq E_{\omega\sim\mu_F}[u(R,\omega)],\\
+            &(x,y)\in [0,1]^2.
+        \end{align*}
+        Written in terms of $x,y$ from part (b) this problem is
+        \begin{align*}
+            \max_{x,y}\quad& \tfrac23(3x/2 + 2\cdot(1-x)) + \tfrac13(3y/2 + 2\cdot(1-y)) = 2 -x/3 -y/6\\
+            \text{s.t.}\quad& x\ge y/2, 
+            \qquad x \leq 3y/2 - 1/2,
+            \qquad (x,y)\in [0,1]^2,
+        \end{align*}
+        where the constraints are simplified since $x\leq 3y/2 - 1/2$ implies $x\leq y$ and $x\leq 3y/3$ on $(x,y)\in [0,1]^2$.
+
+        \todo{Codeblock, optimal rule, and optimal expected payoff}
+
+
+        \part \textbf{Optimal rule posterior beliefs.}
+        At $(x,y) = $\todo{placeholder}, posterior beliefs are
+        \begin{align*}
+            \mu_I = \frac{2x}{2x+y} = ..., && \mu_F = \frac{2 - 2x}{3 - 2x - y} = ... .
+        \end{align*}
+        The company's ex ante payoff under this rule is
+        \begin{align*}
+            E_r[E_{\omega \sim \mu_r}[u(r,\omega)]] &= 
+                P(I)\big[\mu_Iu(I,G) + (1 - \mu_I)u(I,M)\big] + \big(1-P(I)\big)\big[\mu_Fu(F,G) + (1 - \mu_F)u(F,M)\big]\\
+                &=(2x/3 + y/3)(4x/(2x+y) - 1) + (1 - 2x/3 - y/3)((12 - 12x)/(3-2x-y) - 4)\\
+                &= ...
+        \end{align*}
+        From part (a), the company's payoff maximizing action under no information is $a^{NI*} = I$ and its ex ante expected payoffs is $E_\omega[u(I,\omega)] = 1/3$. 
+
+        Also from part (a), teh company's payoff maximizing action under full revelation is $a^{FR*} = F$ if $\omega=G$ else $R$ and its ex ante expected payoffs is $E_\omega[u(a^{FR*},\omega)] = 2/3\cdot 2 + 0 = 4/3$. 
+
+        \todo{The company's preferred policy is XX. The school's is YY. These need not coincide because ZZ.}
     \end{parts}
     
 \end{questions}
