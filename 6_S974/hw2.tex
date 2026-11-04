@@ -337,8 +337,8 @@
         \begin{align*}
             C(\mu_s) &= \sum_\theta P(\theta\mid s)\cdot C(x^W(\mu_s),\theta) = \mu_s \tag{conditional expected cost from part (a)}\\
             E_s[C(\mu_s)] &= \sum_s P(s) C(\mu_s) \tag{ex ante expected cost}\\
-            &= \sum_s \lambda_s \mu_s \tag{from part (b)}\\
-            &= p \tag{from part (c)}
+            &= \sum_s \lambda_s \mu_s \tag{from part (a)}\\
+            &= p \tag{from part (b)}
         \end{align*}
         So ex ante expected total latency does not depend on the public signal rule $\pi(s\mid\theta)$ hence any public signal rule gives the same value. 
 
@@ -417,7 +417,7 @@
         so recommendations $r$ are incentive compatible for $p\leq 6/11$, determined by $r=1$. 
         
         \paragraph{Compare to public information rules.}
-        We've just shown that for $p \leq 6/11$, a private information rule can achieve the ex ante social optimum latency at $17p/18$, which for $p\in(0,1)$ is lower than the public rule ex ante social optimum latency from part (c) of $p$.  
+        We've just shown that for $p \leq 6/11$, a private information rule can achieve the ex ante expected latency at $17p/18$, which for $p\in(0,1)$ is lower than the public rule ex ante expected latency from part (c) of $p$.  
 
         A private rule can give different drivers different posteriors, depending on which recommendation they receive. Knowing the $(q_0,q_1)$ that achieve the social optimum, we see posteriors are 
         \begin{align*}
@@ -425,6 +425,8 @@
             P(\theta=1\mid r=1) &= \tfrac{5p}{6} / (\tfrac{5p}{6} + (1-p)).
         \end{align*}
         Drivers told $r=2$ know with certainty $\theta=1$ and follow the recommendation. Drivers told $r=1$ remain uncertain enough that the recommendation path looks no worse than the deviation. So with these posteriors on the recommendations, the planner can hold the socially optimal flows. 
+
+        Under any public rule all drivers hold the same $\mu_s$, the cost is $C(\mu_s) = \mu_s$, and the ex ante average is $p$ by part (b).
 
 
         \part \textbf{Cost minimization.}
@@ -551,7 +553,7 @@ for p in np.arange(1, 11):
         \end{align*}
         and $\mu_r(M\mid r) = 1-\mu_r$ for $r\in\{I,F\}$.
 
-        Incentive compatibility conditions require following the recommendation to yield expected payoffs at least ass good as any deviation:
+        Incentive compatibility conditions require following the recommendation to yield expected payoffs at least as good as any deviation:
         \begin{align*}
             r=I:&& E_{\omega\sim\mu_I}[u(I,\omega)] &\geq E_{\omega\sim\mu_I}[u(F,\omega)]\\
             && \mu_Iu(I,G) + (1 - \mu_I)u(I,M) &\geq \mu_Iu(F,G) + (1 - \mu_I)u(F,M)\\
@@ -588,28 +590,54 @@ for p in np.arange(1, 11):
             \qquad x \leq 3y/2 - 1/2,
             \qquad (x,y)\in [0,1]^2,
         \end{align*}
-        where the constraints are simplified since $x\leq 3y/2 - 1/2$ implies $x\leq y$ and $x\leq 3y/3$ on $(x,y)\in [0,1]^2$.
+        where the constraints are simplified since $x\leq 3y/2 - 1/2$ implies $x\leq y$ and $x\leq 3y/2$ on $(x,y)\in [0,1]^2$.
 
-        \todo{Codeblock, optimal rule, and optimal expected payoff}
+        The codeblock below computes the school's optimal rule $(x,y)=(1/4,1/2)$ and optimal expected payoff of $1.833 = 11/6$. 
+
+        \begin{lstlisting}[language=Python]
+# =======================
+# Problem 4 Part (c)
+# =======================
+x = cp.Variable()
+y = cp.Variable()
+const = [
+    x >= 0,
+    x <= 1,
+    y >= 0,
+    y <= 1,
+]
+const += [x >= y / 2]
+const += [x <= 3 * y / 2 - 1 / 2]
+obj = 2 - x / 3 - y / 6
+prob = cp.Problem(cp.Maximize(obj), const)
+prob.solve()
+print("x:\t\t", np.round(x.value, 4))
+print("y:\t\t", np.round(y.value, 4))
+print("optimal payoff:\t", np.round(obj.value, 4))
+
+# rule_x: 0.25
+# rule_y: 0.5
+# optimal payoff: 1.8333            
+        \end{lstlisting}
 
 
         \part \textbf{Optimal rule posterior beliefs.}
-        At $(x,y) = $\todo{placeholder}, posterior beliefs are
+        At $(x,y) = (1/4,1/2)$, posterior beliefs are
         \begin{align*}
-            \mu_I = \frac{2x}{2x+y} = ..., && \mu_F = \frac{2 - 2x}{3 - 2x - y} = ... .
+            \mu_I = \frac{2x}{2x+y} = \frac{1/2}{1/2 + 1/2} = 1/2, && \mu_F = \frac{2 - 2x}{3 - 2x - y} = \frac{2 - 1/2}{3 - 1/2 - 1/2} = 3/4.
         \end{align*}
         The company's ex ante payoff under this rule is
         \begin{align*}
             E_r[E_{\omega \sim \mu_r}[u(r,\omega)]] &= 
                 P(I)\big[\mu_Iu(I,G) + (1 - \mu_I)u(I,M)\big] + \big(1-P(I)\big)\big[\mu_Fu(F,G) + (1 - \mu_F)u(F,M)\big]\\
                 &=(2x/3 + y/3)(4x/(2x+y) - 1) + (1 - 2x/3 - y/3)((12 - 12x)/(3-2x-y) - 4)\\
-                &= ...
+                &= 1/3 \cdot 0 + 2/3 \cdot 1/2 = 1/3.
         \end{align*}
-        From part (a), the company's payoff maximizing action under no information is $a^{NI*} = I$ and its ex ante expected payoffs is $E_\omega[u(I,\omega)] = 1/3$. 
+        From part (a), the company's payoff maximizing action under no information is $a^{NI*} = I$ and its ex ante expected payoff is $E_\omega[u(I,\omega)] = 1/3$. 
 
-        Also from part (a), teh company's payoff maximizing action under full revelation is $a^{FR*} = F$ if $\omega=G$ else $R$ and its ex ante expected payoffs is $E_\omega[u(a^{FR*},\omega)] = 2/3\cdot 2 + 0 = 4/3$. 
+        Also from part (a), the company's payoff maximizing action under full revelation is $a^{FR*} = F$ if $\omega=G$ else $R$ and its ex ante expected payoff is $E_\omega[u(a^{FR*},\omega)] = 2/3\cdot 2 + 0 = 4/3$. 
 
-        \todo{The company's preferred policy is XX. The school's is YY. These need not coincide because ZZ.}
+        The company's preferred policy is full information, where its expected payoff is 4/3. The school's preferred policy is the messaging policy, where its expected payoff is 11/6. These need not coincide because the school's payoffs are independent of the state $\omega$ so it has a different optimal policy that performs best under partial information, while the company's payoffs are a direct mapping to state $\omega$ and it does best under full information.
     \end{parts}
     
 \end{questions}
