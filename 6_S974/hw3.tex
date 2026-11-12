@@ -1,0 +1,109 @@
+\documentclass[11pt]{exam}
+\usepackage{graphicx} % Required for inserting images
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{optidef}
+\usepackage{listings}
+\usepackage{xcolor} % for custom colors
+\usepackage{minted} % for code
+\usepackage[T1]{fontenc}
+\usepackage{booktabs}
+
+% === Make things tighter ===
+\usepackage[margin=0.75in]{geometry} % <- widen/narrow by changing 1.25in
+\usepackage{setspace}
+% \setstretch{0.95} % line spacing
+\usepackage{enumitem}
+% \setlist{nosep}  % removes vertical space around lists
+% \setlist[itemize]{topsep=3pt, itemsep=3pt, parsep=1pt, partopsep=0pt}
+% \setlist[enumerate]{topsep=3pt, itemsep=3pt, parsep=1pt, partopsep=0pt}
+\usepackage{titlesec}
+% \titlespacing*{\section}{0pt}{4.0ex plus 0.5ex minus 0.5ex}{0.8ex}
+% \titlespacing*{\subsection}{0pt}{3.0ex plus 0.3ex minus 0.3ex}{0.6ex}
+% \titlespacing*{\subsubsection}{0pt}{2.0ex plus 0.2ex minus 0.2ex}{0.4ex}
+% \titlespacing*{\paragraph}{0pt}{1.5ex plus 0.2ex minus 0.2ex}{0.4ex}
+\newcommand{\todo}[1]{\textit{\textcolor{orange}{ [#1]}}}
+\qformat{\textbf{Problem \thequestion\ (\thequestiontitle)}\hfill}
+
+
+\lstset{
+  language=Python,
+  basicstyle=\ttfamily\scriptsize,
+  keywordstyle=\color{blue},
+  stringstyle=\color{red},
+  commentstyle=\color{gray},
+  showstringspaces=false,
+  frame=single,
+  breaklines=true
+}
+\title{6.S974 Games, Learning, and Security\\\large HW3}
+\author{Erich Trieschman}
+\date{\today}
+\begin{document}
+\maketitle
+
+\begin{questions}
+    \titledquestion{Fictitious play in a battlefield simulator}
+    \begin{parts}
+        \part \textbf{Solve for Nash Equilibria.}
+        \part \textbf{Prove Nash Equilibrium.}
+        \part \textbf{Implement fictitious play.}
+        \part \textbf{Experiment I convergence.}
+        \part \textbf{Experiment II and III convergence.}
+    \end{parts}
+
+
+    \titledquestion{Beliefs and their failures}
+    \begin{parts}
+        \part \textbf{The model and its rest points.}
+        \begin{subparts}
+            \subpart
+            \subpart
+            \subpart 
+        \end{subparts}
+
+
+        \part \textbf{The trap.}
+        \begin{subparts}
+            \subpart
+            \subpart
+            \subpart
+        \end{subparts}
+
+
+        \part \textbf{A committed experiment.}
+
+
+        \part \textbf{Exploration rules.}
+        \begin{subparts}
+            \subpart
+            \subpart
+            \subpart
+        \end{subparts}
+
+
+        \part \textbf{The hit rate falls.}
+    \end{parts}
+
+
+    \titledquestion{Planning with a model}
+    \begin{parts}
+        \part \textbf{Two missiles.}
+        \part \textbf{The state.}
+        \part \textbf{Exact values.}
+        \begin{subparts}
+            \subpart
+            \subpart
+            \subpart
+            \subpart
+        \end{subparts}
+        \part \textbf{Rollout and policy iteration.}
+        \begin{subparts}
+            \subpart
+            \subpart
+            \subpart
+        \end{subparts}
+    \end{parts}
+
+\end{questions}
+\end{document}
