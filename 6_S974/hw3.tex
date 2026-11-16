@@ -46,10 +46,88 @@
     \titledquestion{Fictitious play in a battlefield simulator}
     \begin{parts}
         \part \textbf{Solve for Nash Equilibria.}
+        Set $v=1/2$ and subtract $1/2$ from all entries. The resulting game is zero-sum. 
+        \begin{table}[h!]
+        \centering
+        \begin{tabular}{c|ccc}
+        Commander 1 $\backslash$ Commander 2 & Attack & Defend & Grow \\ \hline
+        Attack & $(0,\ 0)$ & $(-1/2,\ 1/2)$ & $(1/2,\ -1/2)$ \\
+        Defend & $(1/2,\ -1/2)$ & $(0,\ 0)$ & $(-1/2,\ 1/2)$ \\
+        Grow & $(-1/2,\ 1/2)$ & $(1/2,\ -1/2)$ & $(0,\ 0)$ \\
+        \end{tabular}
+    \end{table}
+        We now have that $u_1(_1, s_2) = -u_2(s_1, s_2)$. Suppose both commanders adopt a mixed strategy with strategy profile $(\sigma_1,\sigma_2)$. von Neumann's minmax theorem gives for any finite, two-player, zero-sum game
+        \begin{align*}
+            \max_{\sigma_1}\min_{\sigma_2}u_1(\sigma_1, \sigma_2) = \min_{\sigma_2}\max_{\sigma_1}u_1(\sigma_1,\sigma_2).
+        \end{align*}
+        A lecture theorem states that a strategy profile $(\sigma_1^*,\sigma_2^*)$ is a Nash Equilibrium iff it is in the argmin of commander 1's problem and argmax of commander 2's.
+        The lecture notes give a tractable pair of linear programs that characterize Nash equilibria of this game:
+        \begin{align*}
+            \max_{\sigma_1,z}\quad&z 
+            && &\min_{\sigma_2,z}\quad&z\\
+            \text{s.t.}\quad& z\leq\sum_{s_1}\sigma_1(s_1)\cdot u_1(s_1, s_2)\;\forall\;s_2\in S_2
+            && &\text{s.t.}\quad& z\geq\sum_{s_2}\sigma_2(s_2)\cdot u_1(s_1, s_2)\;\forall\;s_1\in S_1\\
+            &\sum_{s_1}\sigma_1(s_1)=1,\;\sigma_1(s_1) \geq 0\;\forall\;s_1\in S_1
+            && &&\sum_{s_2}\sigma_2(s_2)=1,\;\sigma_2(s_2) \geq 0\;\forall\;s_2\in S_2
+        \end{align*}
+        Where $s_i\in\{\text{Attack, Defend, Grow}\}$ and $u_1(\cdot)$ is drawn from the table above. This is instantiated in the accompanying code. The Nash Equilibrium is
+        \begin{align*}
+            \sigma_1(\text{Attack, Defend, Grow}) = \sigma_2(\text{Attack, Defend, Grow}) = (0.\overline{33}, 0.\overline{33}, 0.\overline{33})
+        \end{align*}
+
+
+
         \part \textbf{Prove Nash Equilibrium.}
+        Set $v = 0$. 
+        Suffice to verify that $\sigma^*_i = (1/3,1/3,1/3)$ is a best response to $\sigma^*_{-i} = (1/3,1/3,1/3)$. We are told this NE is unique so we do not need to search and check other candidates. Since the payoffs are symmetric for each commander and combination of actions, we can apply the argument for Commander 1 to Commander 2. 
+
+        \paragraph{By contradiction.} Consider the expected payoff of Commander 1. Suppose $\exists\;\hat\sigma_1\neq \sigma^*_1$ with strictly higher expected payoffs under Commander 2's strategy $\sigma_2^* = (1/3,1/3,1/3)$. 
+        
+        Note for general $\sigma_1$ we have
+        \begin{align*}
+            E_{s_1\sim\sigma_1}\big[E_{s_2\sim\sigma_2^*}[u_1(s_1,s_2)]\big] &= 
+            E_{s_1\sim\sigma_1}\big[1/3 \left(u_1(s_1,A) + u_1(s_1,D) + u_1(s_1,G)\right)\big]\\
+            &= \sigma_1(A)\cdot 1/3 \left(0 + 0 + 1\right) + \sigma_1(D)\cdot 1/3 \left(1 + 0 + 0\right) + \sigma_1(G)\cdot 1/3 \left(0 + 1 + 0\right)\\
+            &= 1/3 (\sigma_1(A) + \sigma_1(D) +\sigma_1(G)).
+        \end{align*}
+        
+        Then under our supposition
+        \begin{align*}
+            E_{s_1\sim\hat\sigma_1}\big[E_{s_2\sim\sigma_2^*}[u_1(s_1,s_2)]\big] & > E_{s_1\sim\sigma^*_1}\big[E_{s_2\sim\sigma_2^*}[u_1(s_1,s_2)]\big]\\
+            1/3 (\hat\sigma_1(A) + \hat\sigma_1(D) +\hat\sigma_1(G)) &> 1/3 (1/3 + 1/3 + 1/3) = 1/3.
+        \end{align*}
+        But for any $\sigma_1$, $\sum_{s_1}\sigma_1(s_1) = 1$ so we have $\hat\sigma_1(A) + \hat\sigma_1(D) +\hat\sigma_1(G) = 1$ and $1/3 > 1/3$, a contradiction. 
+
+
+
         \part \textbf{Implement fictitious play.}
+        \begin{figure}[h!]
+            \centering
+            \includegraphics[width=0.8\textwidth]{hw3_problem1_partc_Experiment_I.png}
+            \includegraphics[width=0.8\textwidth]{hw3_problem1_partc_Experiment_II.png}
+            \includegraphics[width=0.8\textwidth]{hw3_problem1_partc_Experiment_III.png}
+        \end{figure}
+
+
+
         \part \textbf{Experiment I convergence.}
+        Yes, in Experiment I fictitious play converges in the time-average sense to the Nash Equilibrium found in part (a) with $\sigma_i = (1/3,1/3,1/3)$.
+        And yes this would hold for any valid initial histories $(\eta^0_1,\eta^0_2)$.
+        This is given by lecture theorem [Robinson 51], which states that fictitious play converges in the time-average sense to a Nash Equilibrium of the game $G$, for any initial beliefs, if $G$ is a two-player zero-sum game.
+        In part (a) we subtracted $1/2$ from all payoffs to get a two-player zero-sum game, and we are given in part (a) that this preserves the Nash equilibria.
+        The time averages in Experiment I are therefore the same as in the zero-sum game, and they converge to a Nash Equilibrium.
+
         \part \textbf{Experiment II and III convergence.}
+        Experiment II does not converge: With $v=0$, the payoff matrix is the same payoff matrix as the modified rock-paper-scissors payoff matrix used by Shapley to prove that fictitious play does not converge. 
+        In his game, the first action profile was off-diagonal, which is also the conditions for Experiment II. 
+        From lecture: Shapley showed that play cycles among 6 (off-diagonal) profiles with periods of ever-increasing length, thus non-convergence.
+
+        Experiment III does converge: The game is symmetric, the histories are identical, and the tie-break rule is the same. In each stage of play, both commanders choose the same action and their histories stay equal. 
+        Each commander's best response continues in a deterministic cycle of $A,D,D,G,G,A$. 
+        At the start, and after one complete block, all fractions are the same and tie-breaking goes to action $A$ for both commanders. 
+        Then beliefs lead expected payoffs to be highest for $D$ for two iterations (the second through tie-break rules). Following this, expected payoffs are highest for $G$ for two iterations before tie-break rules lead to a best response of $A$.
+        Each action is played twice in every 6 stages, so in a time-average sense the empirical proportions converge to the mixed Nash Equilibrium from part (b). We use the same logic here as was presented in lecture for the heads/tails example that converges.  
+        
     \end{parts}
 
 
@@ -57,17 +135,85 @@
     \begin{parts}
         \part \textbf{The model and its rest points.}
         \begin{subparts}
-            \subpart
-            \subpart
-            \subpart 
+            \subpart \emph{Expected costs and regret.} 
+            \begin{align*}
+                c(S) < c(L) \iff 8 + 20q < 13 \iff 20q < 5 \iff q < 1/4
+            \end{align*}
+            From this, we know that the optimal route for $q=0.05$ is $S$ and for $q=0.35$ is $L$.
+
+            We define the regret of trip $i$ under probability $q$ and optimal choice $i^*$ as
+            \begin{align*}
+                \operatorname{Regret}^{(i)}_q = E[c(i)] - E[c(i^*)]
+            \end{align*}
+            So we have
+            \begin{align*}
+                \operatorname{Regret}^{(S)}_{q=0.05} = 0,\quad
+                \operatorname{Regret}^{(L)}_{q=0.05} = 4,\qquad\text{and}\qquad
+                \operatorname{Regret}^{(S)}_{q=0.35} = 2, \quad
+                \operatorname{Regret}^{(L)}_{q=0.35} = 0.
+            \end{align*}
+
+            \subpart \emph{Pessimistic operator.}
+            The pessimistic operator has belief Beta$(2,4)$ with mean $\hat q = 1/3$. From part (i), route $L$ has lower expected cost under this belief. In a myopic strategy the operator then sails $L$. Since the operator sees only what happens on the route it sails, it cannot update its belief after this trip, but continues to make the same myopic decision where lower expected costs $L$. We call this a trap. 
+
+            \subpart \emph{Self confirming equilibria.}
+            A pair $(\sigma, \hat{\mathcal Q})$ is a self confirming equilibrium if i) every action is optimal under its prediction and ii) predictions are correct for every action used. 
+
+            The operator only observes hits on $S$, so ii) requires $\hat q = q$ whenever $\sigma > 0$, but otherwise does not place a restriction on $\hat q$. 
+            \begin{itemize}
+                    \item ($q=0.05$) If $\sigma > 0$, a correct prediction requires $\hat q = 0.05$. Under this prediction the best response is $\sigma = 1$. If $\sigma = 0$, the prediction is never tested, and $\sigma = 0$ is optimal for any $\hat q \geq 1/4$. The self-confirming equilibria are $(1, 0.05)$ and $(0,\hat q)$ for all $\hat q \geq 1/4$.
+                    \item ($q=0.35$) If $\sigma > 0$, a correct prediction requires $\hat q = 0.35$. Under this prediction the best response is $\sigma = 0$, a contradiction. If $\sigma = 0$, the prediction is never tested, and $\sigma = 0$ is optimal for any $\hat q \geq 1/4$. The self-confirming equilibria are $(0,\hat q)$ for all $\hat q \geq 1/4$.
+            \end{itemize}
+            No equilibria use both routes through the above logic ($\sigma \notin (0,1)$).
         \end{subparts}
 
 
         \part \textbf{The trap.}
         \begin{subparts}
-            \subpart
-            \subpart
-            \subpart
+            \subpart \emph{Trapping frontier.} We know the expectation of a beta distribution is $\hat q = \alpha / (\alpha + \beta)$. After $n$ $S$ trips with $h$ hits, the posterior Beta's expectation is $\hat q_n = (\alpha + h) / (\alpha + \beta + n)$. 
+
+            From part (a), we also know that whenever $\hat q \geq 1/4$, the operator sails $L$ for good. 
+
+            Therefore, the operator sails $L$ for good when 
+            \begin{align*}
+                8 + 20 \cdot \frac{1 + h}{6 + n} &\geq 13 \tag{setting $\alpha=1,\beta=5$; sailing $L$ on tie-break}\\
+                h&\geq \tfrac14\cdot (6 + n) - 1
+            \end{align*}
+            The smallest whole number of hits that make a permanent switch to $L$ for various $n$ are
+            \begin{align*}
+                n=1:\quad& h\geq \left\lceil\tfrac14\cdot (6 + 1) - 1\right\rceil = \left\lceil\tfrac34\right\rceil = 1\\
+                n=2:\quad& h\geq \left\lceil\tfrac14\cdot (6 + 2) - 1\right\rceil = \left\lceil1\right\rceil = 1\\
+                n=3:\quad& h\geq \left\lceil\tfrac14\cdot (6 + 3) - 1\right\rceil = \left\lceil\tfrac54\right\rceil = 2\\
+                n=6:\quad& h\geq \left\lceil\tfrac14\cdot (6 + 6) - 1\right\rceil = \left\lceil2\right\rceil = 2
+            \end{align*}
+            \subpart \emph{Trapping probability in first two trips.}
+            Suffices to see in subpart (i) that the smallest whole number of hits that make a permanent switch to L for $n\in \{1,2\}$ is $h\geq 1$. Therefore a hit on either of the first two trips makes the operator switch to $L$. 
+
+            The probability of a hit on either of the first two trips can be written as
+            \begin{align*}
+                P(\text{hit on trip 1 or 2}) &= P(\text{hit on trip 1}) + P(\text{miss on trip 1 and hit on trip 2})\\
+                &= 0.05 + (1-0.05)\cdot 0.05 = 0.0975
+            \end{align*}
+
+            \subpart \emph{Recursion and simulation.}
+\begin{lstlisting}[language=python]
+    Problem 2 - Beliefs and failures
+    Part 2.b.iii - Probability of switching
+    Computed P(tau <= 400) =	 0.1136
+    Simulated P(tau <= 400) =	 0.1165
+    Standard error =		 0.0032
+    Confidence interval:	 ( 0.1102 , 0.1228 )
+\end{lstlisting}
+            \begin{figure}[h!]
+                \centering
+                \includegraphics[width=0.75\textwidth]{hw3_problem2_partb.png}
+            \end{figure}
+            Roughly 12\% of operators get trapped taking route $L$. The cumulative risk levels off after about 10 trips.           
+            From part (ii) we see that 9.75\% of the cumulative risk comes in the first two trips. Trips 3-7 contribute roughly 2\% to the cumulative risk.
+
+            From condition $h\geq c(n) = 0.25(6 + n) - 1$ we see that trapping requires roughly one hit per four trips on $S$. 
+            In expectation there is one hit per twenty trips on $S$. 
+            As the number of trips $n$ grows under the true rate of hits $q=0.05$, the likelihood of having this ~1/4 hit rate becomes less likely: this gap $c(n) - 0.05n = 0.5 + 0.2n$ grows in $n$. 
         \end{subparts}
 
 
