@@ -118,15 +118,19 @@
         The time averages in Experiment I are therefore the same as in the zero-sum game, and they converge to a Nash Equilibrium.
 
         \part \textbf{Experiment II and III convergence.}
-        Experiment II does not converge: With $v=0$, the payoff matrix is the same payoff matrix as the modified rock-paper-scissors payoff matrix used by Shapley to prove that fictitious play does not converge. 
-        In his game, the first action profile was off-diagonal, which is also the conditions for Experiment II. 
-        From lecture: Shapley showed that play cycles among 6 (off-diagonal) profiles with periods of ever-increasing length, thus non-convergence.
+        \begin{itemize}
+            \item \emph{Experiment II does not converge:} With $v=0$, the payoff matrix is the same payoff matrix as the modified rock-paper-scissors payoff matrix used by Shapley to prove that fictitious play does not converge. 
+            In his game, the first action profile was off-diagonal, which is also the conditions for Experiment II. 
+            From lecture: Shapley showed that play cycles among 6 (off-diagonal) profiles with periods of ever-increasing length, thus non-convergence.
+            \item \emph{Experiment III does converge:} The game is symmetric, the histories are identical, and the tie-break rule is the same. In each stage of play, both commanders choose the same action and their histories stay equal. 
+            Each commander's best response continues in a deterministic cycle of $A,D,D,G,G,A$. 
+            At the start, and after one complete block, all fractions are the same and tie-breaking goes to action $A$ for both commanders. 
+            Then beliefs lead expected payoffs to be highest for $D$ for two iterations (the second through tie-break rules). Following this, expected payoffs are highest for $G$ for two iterations before tie-break rules lead to a best response of $A$.
+            Each action is played twice in every 6 stages, so in a time-average sense the empirical proportions converge to the mixed Nash Equilibrium from part (b). We use the same logic here as was presented in lecture for the heads/tails example that converges.  
+        \end{itemize}
+        
 
-        Experiment III does converge: The game is symmetric, the histories are identical, and the tie-break rule is the same. In each stage of play, both commanders choose the same action and their histories stay equal. 
-        Each commander's best response continues in a deterministic cycle of $A,D,D,G,G,A$. 
-        At the start, and after one complete block, all fractions are the same and tie-breaking goes to action $A$ for both commanders. 
-        Then beliefs lead expected payoffs to be highest for $D$ for two iterations (the second through tie-break rules). Following this, expected payoffs are highest for $G$ for two iterations before tie-break rules lead to a best response of $A$.
-        Each action is played twice in every 6 stages, so in a time-average sense the empirical proportions converge to the mixed Nash Equilibrium from part (b). We use the same logic here as was presented in lecture for the heads/tails example that converges.  
+        
         
     \end{parts}
 
@@ -222,9 +226,13 @@
 
         \part \textbf{Exploration rules.}
         \begin{subparts}
-            \subpart
-            \subpart
-            \subpart
+            \subpart See accompanying code for \texttt{Thompson} and \texttt{Optimism}. .
+            \subpart Simulated and exact regret over trips $T = 1000$ by exploration rule.
+
+            \input{hw3_problem2_partd.tex}
+
+
+            \subpart \todo{i am here}
         \end{subparts}
 
 
