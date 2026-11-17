@@ -222,6 +222,20 @@
 
 
         \part \textbf{A committed experiment.}
+\begin{lstlisting}[language=python]
+    Part 2.c - A committed experiment
+    Smallest m such that tbT < 0.02: 15
+    P(tau <= 400) for that m:        0.0119
+    P(take L on m+1):                0.0055
+\end{lstlisting}
+After $m$ forced trips with $h$ hits, the posterior mean is $\hat q = (2+h)/(6+m)$.
+The operator sails $S$ on trip $m+1$ when $\hat q < 1/4 \implies h < (m-2)/4$.
+
+Using \texttt{experiment} with $q=0.05$ and 400 $S$ trips, $m=15$ is the smallest $m$ for which $P(\tau\leq400) < 2\%$. It equals 1.19\%. 
+The probability of sailing $L$ on trip $m+1$ is $P(\tau = m) = 0.0055$, which is the probability of $h \geq \lceil \tfrac{13}{4}\rceil = 4$ hits in 15 trips.
+
+The latter number represents the probability of sailing $L$ on trip 16, while the former represents that probability \emph{plus} the probability of switching on a later trip. This second component of the probability is nonzero since after $m$ trips, the operator follows the myopic rule and can still push $\hat q \geq 1/4$ with positive probability.
+
 
 
         \part \textbf{Exploration rules.}
