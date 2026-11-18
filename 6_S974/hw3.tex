@@ -254,22 +254,49 @@ The latter number represents the probability of sailing $L$ on trip 16, while th
 
 
             \subpart 
-            Figure~\ref{fig:prob2_part2_subpartiii} shows cumulative regret plots using \texttt{plot\_regret}. 
-            The Myopic and Experiment rules grow linearly with $t$ under $q=0.05$ because these rules get trapped on the supoptimal route $L$. They also get trapped under $q=0.35$, but under that strike probability, route $L$ is the least-cost route to take so regret does not grow. 
+            Figure~\ref{fig:prob2_partd_subpartiii} shows cumulative regret from \texttt{plot\_regret}.
+            The trip number is on a log scale, so $\log T$ growth is a straight line and linear growth curves upward.
 
-            Optimism and Thompson rules grow with $t$ under $q=0.035$, but at a sub-linear rate (sublinear throughout for Thompson, and sublinear after approximately 2,000 trips for Optimism). In this case, while the least-cost route is $L$, these rules always choose to sail $S$ with positive probability, but this probability decreases with time. 
+            The Myopic and Experiment rules can have regret that grows linearly in $T$.
+            Under $q=0.05$, a run that switches to $L$ never sails $S$ again and has regret 4 on every trip.
+            This happens with probability ~12\% for Myopic and ~1.2\% for Experiment, so average regret grows at about 0.48 and 0.05 per trip.
+            Under $q=0.35$ these rules also end up on $L$, but $L$ is the least-cost route, so their regret stops growing.
+
+            The Thompson and Optimism rules have the $\log T$ guarantee from lecture, for both values of $q$.
+            Under $q=0.35$, Thompson regret is sublinear throughout.
+            Thompson sails $S$ with positive probability on every trip, and this probability decreases as the posterior narrows.
+            Optimism regret grows at 2 per trip until approximately trip 2,000, because the bonus exceeds $0.10$.
+            After that, Optimism returns to $S$ only when the bonus has grown enough, and its regret is sublinear.
             \begin{figure}[h!]
                 \centering
                 \includegraphics[width=0.49\textwidth]{hw3_problem2_partd_q5.png}%
                 \hfill
                 \includegraphics[width=0.49\textwidth]{hw3_problem2_partd_q35.png}
-            \caption{\label{fig:prob2_part2_subpartiii} Problem 2, Part d, Subpart iii. Cumulative regret by exploration rule and true strike probability}
+            \caption{\label{fig:prob2_partd_subpartiii} Problem 2, Part d, Subpart iii. Cumulative regret by exploration rule and true strike probability}
             \end{figure}
 
         \end{subparts}
 
 
-        \part \textbf{The hit rate falls.} \todo{I AM HERE}
+        \part \textbf{The hit rate falls.} 
+        Figure~\ref{fig:prob2_parte} shows share of runs on route $S$ by exploration rule for a $q$ that decreases from $0.5$ to $0.05$ after trip 300. 
+
+        The Myopic rule does not return to $S$.
+        Its posterior mean reaches $1/4$ early in trips 1 to 300, it switches to $L$, and it does not update its belief after that.
+        
+        The Thompson rule returns to $S$, reaching 80\% by trip 1000.
+        By trip 300 its posterior is concentrated near $0.5$, so a draw below $0.25$ has low probability and it rarely sails $S$.
+        After trip 300, any $S$ trip has a hit probability of 0.05. Each miss lowers the posterior, which makes the next draw below $0.25$ more likely and the share of runs on $S$ increases, but slowly at first.
+
+        The Optimism rule returns to $S$ very quickly, reaching 100\% by trip 500. 
+        By trip 300 it sailed $S$ only frequently enough to keep the bonus near $0.25$ --- gap between observed hit rate (0.5) and break even (0.25). 
+        The bonus grows with $\ln T$ while the rule sails $L$, so with a bonus near $0.25$ the operator sails $S$ soon after trip 300 but faces a much lower hit rate. 
+        The lower hit rate lowers $h/n$ while the bonus continues to grow, further decreasing its decision value. Both together keep the rule below $0.25$ so the operator continues to sail $S$.
+        \begin{figure}[h!]
+                \centering
+                \includegraphics[width=0.75\textwidth]{hw3_problem2_parte.png}
+            \caption{\label{fig:prob2_parte} Problem 2, Part e. Share of routes on $S$ with changing hit rate}
+            \end{figure}
     \end{parts}
 
 
