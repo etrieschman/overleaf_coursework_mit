@@ -282,10 +282,10 @@ The latter number represents the probability of sailing $L$ on trip 16, while th
         Figure~\ref{fig:prob2_parte} shows share of runs on route $S$ by exploration rule for a $q$ that decreases from $0.5$ to $0.05$ after trip 300. 
 
         The Myopic rule does not return to $S$.
-        Its posterior mean reaches $1/4$ early in trips 1 to 300, it switches to $L$, and it does not update its belief after that.
+        Its posterior mean reaches $1/4$ early in trips 1 to 300, it switches to $L$, and the exploration rule does not have a mechanism to update its belief.
         
         The Thompson rule returns to $S$, reaching 80\% by trip 1000.
-        By trip 300 its posterior is concentrated near $0.5$, so a draw below $0.25$ has low probability and it rarely sails $S$.
+        By trip 300 its posterior is concentrated near $0.5$, so a draw below $0.25$ has low probability and hence a low probability of sailing $S$.
         After trip 300, any $S$ trip has a hit probability of 0.05. Each miss lowers the posterior, which makes the next draw below $0.25$ more likely and the share of runs on $S$ increases, but slowly at first.
 
         The Optimism rule returns to $S$ very quickly, reaching 100\% by trip 500. 
@@ -303,6 +303,19 @@ The latter number represents the probability of sailing $L$ on trip 16, while th
     \titledquestion{Planning with a model}
     \begin{parts}
         \part \textbf{Two missiles.}
+        \paragraph{State space.} Define the state $z$ by the number of missiles remaining of each type $n_t\in\{0,1\}$, the number of remaining interceptors $s\in\{0,1,2\}$, and number of remaining salvos $k\in\{0,1,2\}$, and define the action as the number of interceptors assigned to each type $x_t\in\{0,1,2\}$
+        \begin{align*}
+            z \in \{n_H, n_M\}\times\{s\}\times\{k\},
+            \qquad a \in \{x_H, x_M, x_L\}.
+        \end{align*}
+        
+        \paragraph{Salvo 0.} In salvo 0 there are $2\times2\times3\times1$ states. No actions can be taken and the cost is the number of active missiles times their value
+        \begin{align}
+            V_0(z) = \sum_t w_tn_t = 10n_H + 3n_M + 1n_L.
+        \end{align}
+
+        \paragraph{Salvo 1.}
+
         \part \textbf{The state.}
         \part \textbf{Exact values.}
         \begin{subparts}
