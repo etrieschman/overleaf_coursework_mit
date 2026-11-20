@@ -303,20 +303,80 @@ The latter number represents the probability of sailing $L$ on trip 16, while th
     \titledquestion{Planning with a model}
     \begin{parts}
         \part \textbf{Two missiles.}
-        \paragraph{State space.} Define the state $z$ by the number of missiles remaining of each type $n_t\in\{0,1\}$, the number of remaining interceptors $s\in\{0,1,2\}$, and number of remaining salvos $k\in\{0,1,2\}$, and define the action as the number of interceptors assigned to each type $x_t\in\{0,1,2\}$
+        \paragraph{State space.} Define the state $z$ by the number of missiles remaining of each type $n_t\in\{0,1\}$ and the number of remaining interceptors $s\in\{0,1,2\}$. The stage is the number of remaining salvos $k\in\{0,1,2\}$. Define the action as the number of interceptors assigned to each type $x_t\in\{0,1,2\}$
         \begin{align*}
-            z \in \{n_H, n_M\}\times\{s\}\times\{k\},
-            \qquad a \in \{x_H, x_M, x_L\}.
+            z =(n_H, n_M, s) \in \{0,1\}^2\times\{0,1,2\},
+            \qquad a = (x_H, x_M) \in \{0,1,2\}^2.
         \end{align*}
         
-        \paragraph{Salvo 0.} In salvo 0 there are $2\times2\times3\times1$ states. No actions can be taken and the cost is the number of active missiles times their value
-        \begin{align}
-            V_0(z) = \sum_t w_tn_t = 10n_H + 3n_M + 1n_L.
-        \end{align}
+        \paragraph{Stage 0.} In stage 0, there are $2\times2\times3$ states. No actions can be taken and the value is the negative of the active missile counts times their respective costs:
+        \begin{align*}
+            V_0(z) = V(n_H,n_M,s) = -\sum_t w_tn_{t} = -(10n_{H} + 3n_{M})\;\forall\;s.
+        \end{align*}
 
-        \paragraph{Salvo 1.}
+        \paragraph{Stage 1.} There are only costs in stage 0 so $c(x,a) = 0$ for $k > 0$. Value in this stage is the value from each action in stage 0, times the likelihood of reaching that state. Assume $\delta=1$.
+        \begin{align*}
+            V_1(z) &= \max_a\; \sum_{z'}P(z'\mid z,a)\,V_0(z')\\
+            &= \max_a\; \sum_{z'}P(z'\mid z,a)\Big(-\sum_t w_t\, n'_t\Big)\\
+            &= \max_a\; -\sum_t w_t \sum_{z'}P(z'\mid z,a)\, n'_t\\
+            &= \max_{x_t}\;\Big\{ -\sum_t w_t\, n_t\,(1-p_t)^{x_t}\;:\; \sum_{t}x_t \leq s\Big\}\\
+            V(n_H, n_M, s) &= -\min_{x_H,x_M}\;\left\{10 \cdot n_{H} \cdot (0.5)^{x_H}+ 3\cdot n_{M}\cdot (0.3)^{x_M} :x_H + x_M \leq s \right\}
+        \end{align*}
+        Solving for each state $z$ we have
+        \begin{align*}
+            V_1(n_H,n_M,0) &= -(10\cdot n_H + 3\cdot n_M)\\
+            V_1(0,1,1) &= -\min\{3.0, 0.9\} = -0.9\\
+            V_1(1,0,1) &= -\min\{5.0, 10.0\} = -5.0\\
+            V_1(1,1,1) &= -\min\{8.0, 10.9\} = -8.0\\
+            V_1(1,1,2) &= -\min\{5.5, 5.9, 10.27\} = -5.5
+        \end{align*}
+        Note $V_1(0,0,2),\; V_1(0,0,1),\; V_1(1,0,2),\; V_1(0,1,2)$ are unreachable states in stage 1 since they are states with downed missles but a full stock of interceptors.
+
+        \paragraph{Stage 2.} In stage 2 our state is $z = (1,1,2)$. We have six actions $a\in\{(0,0), (0,1), (1,0), (1,1), (0,2), (2,0)\}$. 
+        Running through these actions, we have
+        \begin{align*}
+            a=(0,0):&\quad V_1(1,1,2) &&= -5.5\\
+            a=(1,0):&\quad 0.5\,V_1(0,1,1) + 0.5\,V_1(1,1,1) &&= -4.45\\
+            a=(0,1):&\quad 0.7\,V_1(1,0,1) + 0.3\,V_1(1,1,1) &&= -5.9\\
+            a=(2,0):&\quad 0.75\,V_1(0,1,0) + 0.25\,V_1(1,1,0) &&= -5.5\\
+            a=(1,1):&\quad 0.15\,V_1(0,1,0) + 0.35\,V_1(1,0,0) + 0.15\,V_1(1,1,0) + 0.35\,V_1(0,0,0) &&= -5.9\\
+            a=(0,2):&\quad 0.91\,V_1(1,0,0) + 0.09\,V_1(1,1,0) &&= -10.27\\
+        \end{align*}
+        And $V_2(1,1,2) = -4.45$ with action $a=(1,0)$. The optimal policy is $(1,0)$ in stage 2 and $(0,1)$ in stage 1 if missile $H$ is intercepted else $(1,0)$
+        The best way to fire both interceptors at once is $a=(2,0)$, two at the $H$ missile. The optimal policy saves $1.05$ in expectation. 
+
+        \paragraph{Only H.}
+        With only missile $H$, the defender's optimal policy is indifferent between firing both interceptors in stage 2, both in stage 1, or one in each. This is from the givens: i) interception probability is independent, ii) there is no value to saved missiles, and iii) the only cost is un-intercepted missiles in stage 0. $V_2(1,2) = -10\;(1-0.5)^2=-2.5$ under each policy. 
+
+        \paragraph{Observing.} Observing helps with H and M because with non-zero probability missile $H$ is intercepted in stage 2, which would allow the defender to divert its remaining interceptor toward missile $M$ and, with a nonzero probability, further reducing its cost. With only missile $H$ there is no other target to defend and no value to remaining interceptors, so there is no additional gain from observing the outcome of its first shot and possibly diverting its second. 
 
         \part \textbf{The state.}
+        From lecture, a valid state is a summary of the history such that any two histories with the same summary give the same expected cost and transition probability, for every action.
+        To justify that the number of live missiles of each type, the interceptors left, and the salvos left form a state, I first show they are necessary, then sufficient.
+        
+        \emph{Necessary.} 
+        Costs are assessed after the final salvo and are a function of the number of live missiles of each type. There is no way to calculate the expected cost without this information so it must be in the state.
+        The number of interceptors left determines which actions are possible for the defender. There is no way to determine which states are reachable without this information.
+        The number of salvos left determines when costs are assessed -- only after the final one. There is no way to assess costs or end the finite-horizon game without this information.
+        
+        \emph{Sufficient.}
+        Costs are calculated only after there are no salvos remaining, on the number of live missiles of each type. This is determined by information in the proposed state.
+        Transition probabilities are calculated from the number of live missiles of each type and the action taken. Actions are only limited by the number of remaining interceptors and all strike probabilities are iid by missile type so only the number of remaining interceptors is needed.
+        
+        Hence the proposed summary of the game is necessary and sufficient for a state.
+
+        \paragraph{Number of states in large raid.}
+        There are $1,056=(5+1)\times(10+1)\times(15+1)$ possible combinations of counts of live missiles by type.
+        There are $37=36+1$ possible counts of remaining interceptors.
+        And there are $4=3+1$ possible remaining salvos.
+        Together, the size of the state space is $156,288=1,056\times37\times4$ unique combinations. 
+
+        If instead of the count of missiles by type, each missile is tracked as alive or dead, we'd have $2^{(5+10+15)} = 2^{30}$ possible combinations of missile state leading to a state space that is $148 \times 2^{30}$ unique combinations. 
+
+        If two of the $M$ missiles carried a different probability, then these missile subtypes would need to be counted separately in order to determine the proper transition probabilities. The state space could split the $M$ missile types into type $M1$ and type $M2$ which would have equal costs, but different hit probabilities. 
+
+
+
         \part \textbf{Exact values.}
         \begin{subparts}
             \subpart
