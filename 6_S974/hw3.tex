@@ -379,16 +379,51 @@ The latter number represents the probability of sailing $L$ on trip 16, while th
 
         \part \textbf{Exact values.}
         \begin{subparts}
-            \subpart
-            \subpart
-            \subpart
-            \subpart
+            \subpart \emph{Ranked.}
+            \begin{enumerate}
+                \item Equal share, concentrated --- Per the placement rule, within each salvo every interceptor for that salvo $\lfloor s/k \rfloor$ is assigned to where it saves the most. Because interceptions are independent, proportioning interceptors across salvos lets us observe whether missiles were struck before reassigning interceptors in each salvo.
+                \item Equal share, spread --- This doctrine is at best as good as the above doctrine because interceptors must be assigned equally  when an interceptor could be moved to a higher value target: $w_t(1-p_t)^{\lfloor s/k\rfloor + 1} > w_{t'}(1-p_{t'})^{\lfloor s/k \rfloor -1}$.
+                \item One per missile per salvo --- This doctrine is at best as good as the above doctrine. For the given $S,K$ of the large raid, it is equivalent to the above. 
+                \item Fire everything now --- In part (A) we showed that observing has value because remaining interceptors can be reassigned between salvos away from intercepted missiles. All other doctrines include observation, my guess is that they perform better. 
+            \end{enumerate}
+
+
+            \subpart \emph{Expected cost of each doctrine.} 
+            % In Table~\ref{tab:prob3_partc_subpartii}
+            \begin{table}[h!]
+                \centering
+                \input{hw3_problem3_partc_subpartii.tex}
+                \caption{\label{tab:prob3_partc_subpartii}Problem 3, Part c, Subpart ii}
+            \end{table}
+
+
+            \subpart \emph{The recursion.}
+            Let $n = (n_H, n_M, n_L)$, $a = (x_H, x_M, X_L)$
+            We start with the stage after the final salvo (no salvos left),
+            \begin{align*}
+                V_0(n, s) = 10\;n_H + 3\;n_M + 1\;n_L
+            \end{align*}
+            Moving one stage back, we get our recursive step. For any $k\in[1,K)$
+            \begin{align*}
+                V_k(n, s) &= \min_{a} \sum_{n'} P(n' \mid n, a) \, V_{k-1}(n', s') && \text{(best policy)} \\
+                V_k(n, s) &= \sum_{n'} P(n' \mid n, a) \, V_{k-1}(n', s'), \quad a = \pi(n, s, k) && \text{(doctrine $\pi$)}
+            \end{align*}
+            And stage $K$ is the above step, but only at the initial state of the raid. 
+
+            Backward induction gives exact values after $K$ steps because it is a finite horizon game of $K$ steps. This recursive loop is the complete value of the expected cost. 
+
+            \subpart My ranking was close but not correct. I predicted that equal share, concentrated would beat equal share, spread, but the reverse was true. 
+            My reaoning was that an incremental interceptor may be of higher value as a second shot to an already-targeted missile rather than as a first shot to an untargeted missile. 
+
+            In practice this was not the case. With $S/K < \sum_t n_t$, there are more starting missiles than intercepters per round. Any interceptor fired at an already-targeted interceptor has some probability of being wasted, while that is not the case when spread. I would expect that this ranking would not hold with either $S/K < \sum_t n_t$, or a much larger difference in asset values $w_t$.
         \end{subparts}
+
+
         \part \textbf{Rollout and policy iteration.}
         \begin{subparts}
-            \subpart
-            \subpart
-            \subpart
+            \subpart \emph{Expected costs from doctrine rollout.}
+            \subpart \emph{Expected costs from fire everything rollout.}
+            \subpart \emph{Exact vs. expected.}
         \end{subparts}
     \end{parts}
 
