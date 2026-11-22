@@ -25,6 +25,10 @@
 \newcommand{\todo}[1]{\textit{\textcolor{orange}{ [#1]}}}
 \qformat{\textbf{Problem \thequestion\ (\thequestiontitle)}\hfill}
 
+\graphicspath{{../tabs_and_figs/}{tabs_and_figs/}}
+\makeatletter
+\def\input@path{{../tabs_and_figs/}{tabs_and_figs/}}
+
 
 \lstset{
   language=Python,
@@ -215,7 +219,7 @@
                 \includegraphics[width=0.75\textwidth]{hw3_problem2_partb.png}
                 \caption{\label{fig:prob2_partb_subpartiii} Problem 2, Part b, Subpart iii. Trapping probability over number of trips sailed on S.}
             \end{figure}
-            Roughly 12\% of operators get trapped taking route $L$. The cumulative risk levels off after about 10 trips.           
+            Roughly 11\% of operators get trapped taking route $L$. The cumulative risk levels off after about 10 trips.           
             From part (ii) we see that 9.75\% of the cumulative risk comes in the first two trips. Trips 3-7 contribute roughly 2\% to the cumulative risk.
 
             From condition $h\geq c(n) = 0.25(6 + n) - 1$ we see that trapping requires roughly one hit per four trips on $S$. 
@@ -243,7 +247,7 @@ The latter number represents the probability of sailing $L$ on trip 16, while th
 
         \part \textbf{Exploration rules.}
         \begin{subparts}
-            \subpart See accompanying code for \texttt{Thompson} and \texttt{Optimism}. .
+            \subpart See accompanying code for \texttt{Thompson} and \texttt{Optimism}.
             \subpart Table~\ref{tab:prob2_partd_subpartii} shows simulated and exact regret over trips $T = 1000$ by exploration rule.
             \begin{table}[h!]
                 \centering
@@ -259,7 +263,7 @@ The latter number represents the probability of sailing $L$ on trip 16, while th
 
             The Myopic and Experiment rules can have regret that grows linearly in $T$.
             Under $q=0.05$, a run that switches to $L$ never sails $S$ again and has regret 4 on every trip.
-            This happens with probability ~12\% for Myopic and ~1.2\% for Experiment, so average regret grows at about 0.48 and 0.05 per trip.
+            This happens with probability ~11\% for Myopic and ~1.2\% for Experiment.
             Under $q=0.35$ these rules also end up on $L$, but $L$ is the least-cost route, so their regret stops growing.
 
             The Thompson and Optimism rules have the $\log T$ guarantee from lecture, for both values of $q$.
@@ -389,7 +393,7 @@ The latter number represents the probability of sailing $L$ on trip 16, while th
 
 
             \subpart \emph{Expected cost of each doctrine.} 
-            % In Table~\ref{tab:prob3_partc_subpartii}
+            See Table~\ref{tab:prob3_partc_subpartii}.
             \begin{table}[h!]
                 \centering
                 \input{hw3_problem3_partc_subpartii.tex}
@@ -415,15 +419,46 @@ The latter number represents the probability of sailing $L$ on trip 16, while th
             \subpart My ranking was close but not correct. I predicted that equal share, concentrated would beat equal share, spread, but the reverse was true. 
             My reaoning was that an incremental interceptor may be of higher value as a second shot to an already-targeted missile rather than as a first shot to an untargeted missile. 
 
-            In practice this was not the case. With $S/K < \sum_t n_t$, there are more starting missiles than intercepters per round. Any interceptor fired at an already-targeted interceptor has some probability of being wasted, while that is not the case when spread. I would expect that this ranking would not hold with either $S/K < \sum_t n_t$, or a much larger difference in asset values $w_t$.
+            In practice this was not the case. With $S/K < \sum_t n_t$, there are more starting missiles than intercepters per round. Any interceptor fired at an already-targeted interceptor has some probability of being wasted, while that is not the case when spread. I would expect that this ranking would not hold with either $S/K > \sum_t n_t$, or a much larger difference in asset values $w_t$.
         \end{subparts}
 
 
         \part \textbf{Rollout and policy iteration.}
         \begin{subparts}
             \subpart \emph{Expected costs from doctrine rollout.}
-            \subpart \emph{Expected costs from fire everything rollout.}
-            \subpart \emph{Exact vs. expected.}
+            See Table~\ref{tab:prob3_partd_subparti}.
+            \begin{table}[h!]
+                \centering
+                \input{hw3_problem3_partd_subparti.tex}
+                \caption{\label{tab:prob3_partd_subparti}Problem 3, Part d, Subpart i}
+            \end{table}
+
+            No, rollout can never do worse than base. A rollout policy is at least as good as base because in each salvo the policy is allowed to scan the value of all one-salvo actions followed by the base policy at the next salvo, and choose the best one. The same comparison holds at every later salvo, so by induction, the cost of the rollout policy is at most the cost of the base from every state.
+
+            The result from lecture only promises that the rollout policy does at least as good as the base policy, because the base policy action is among the set of available choices. There is no guarantee that it does strictly better, this would depend on the base policy and raid. In our rollout calculations, we do see that rollout does strictly better than our selected doctrines on both raids. 
+
+            \subpart \emph{Expected costs from fire-everything rollout.}
+            See Table~\ref{tab:prob3_partd_subpartii}.
+            \begin{table}[h!]
+                \centering
+                \input{hw3_problem3_partd_subpartii.tex}
+                \caption{\label{tab:prob3_partd_subpartii}Problem 3, Part d, Subpart ii}
+            \end{table}
+
+            This general iterated rollout method is policy iteration. In every iteration we are defining a new policy: the best one-step action plus the cost to go of the previous policy. At the next iteration, any incremental value added from the current action's step gets incorporated into the cost-to-go. 
+
+            In our finite-horizon game, this iterative approach needs at most $K-1$ rounds. In our final salvo, the optimal policy is the base policy: fire everything now. Moving one salvo back, our rollout allows us to identify an optimal two-salvo policy by taking the optimal one-salvo action followed by fire-everything now. By round $K-1$, we have iterated into the optimal policy and no more improvement can be had. 
+
+            This strategy cannot do better than the best policy over salvo plans by definition. That policy is optimal. Both the rollout and best policies choose the plan from the set \texttt{salvo\_plans}, the latter of which is optimal over every stage.  
+
+
+            \subpart \emph{Exact vs. expected.} 
+            In class the expected cost from rollout of ``equal share, spread'' on the large raid was 8.04 (se=0.09). From part (d.i) we get the exact cost is 7.984. The difference between simulated and exact is less than one standard error. 
+
+            Simulation is a proxy for true transition probabilities. The expected cost from simulation can have error and the plan with the lowest simulated score has an exact score at least as high as the lowest exact score.
+            Rollout takes the plan with the lowest expected score and with simulation a simulated lowest score may be lower than the exact lowest score, leading to a suboptimal policy action and higher expected policy cost. 
+            
+            By the law of large numbers, an infinite number of simulations would recover the true expected cost and the best policy. We could reduce rollout from simulation errors by increasing the number of simulations toward infinity. 
         \end{subparts}
     \end{parts}
 
