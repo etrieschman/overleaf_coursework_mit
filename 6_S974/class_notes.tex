@@ -10,6 +10,7 @@
 \usepackage{xcolor}
 \usepackage{amsthm}
 \usepackage{booktabs}
+\usepackage{array}
 \newcommand*{\vertbar}[1][10ex]{\rule[-1ex]{0.5pt}{#1}}
 \newcommand*{\horzbar}{\rule[.5ex]{2.5ex}{0.5pt}}
 \newcommand{\norm}[2]{\left\lVert#1\right\rVert_#2}
@@ -44,7 +45,7 @@
  \hypersetup{
     colorlinks=true,
     linkcolor=blue,
-    filecolor=magenta,      
+    filecolor=magenta,
     urlcolor=cyan,
     pdfpagemode=FullScreen,
 }
@@ -53,7 +54,13 @@
 \definecolor{gray}{rgb}{0.5,0.5,0.5}
 \definecolor{mauve}{rgb}{0.58,0,0.82}
 \newcommand{\todo}[1]{\textit{\textcolor{orange}{ [#1]}}}
-    
+
+% \new marks a correction to a statement in the first version of these notes.
+% To remove the color: \renewcommand{\new}[1]{#1}
+\newcommand{\new}[1]{\textcolor{blue}{#1}}
+% \res labels a named result.
+\newcommand{\res}[1]{\textbf{#1.}}
+
 \lstset{frame=tb, language=Python,
     aboveskip=3mm,
   belowskip=3mm,
@@ -85,63 +92,533 @@ The exam will contain 4-5 problems, which will be much shorter than in the probl
 
 Cheatsheet: 1 page, two-sided.
 
-\section*{Games}
+%======================================================================
+\section{Background}
+%======================================================================
 
-\paragraph{Normal-form game.}
-\todo{not covered in HW2}
+\paragraph{Reformulations.}
+$\max_{j\in\mathcal J} g_j(x)\le b \iff g_j(x)\le b\;\;\forall j\in\mathcal J$.
 
-\paragraph{Static Bayesian game (HW2 P1).}
-Each player has a private type $\theta_i$ drawn from a common prior.
-Players move at the same time.
-A strategy is one action per type, $s_i:\Theta_i\to A_i$.
-The opponent responds to the type-weighted probability of each action, $\alpha = \sum_\theta P(\theta)\,\sigma_i(a\mid\theta)$.
+$\min_{x\in\mathcal X}\max_{j\in\mathcal J} g_j(x)=\min_{x\in\mathcal X,\,z}\, z$ s.t. $z\ge g_j(x)\;\;\forall j\in\mathcal J$.
 
-\paragraph{Signaling game (HW2 P2).}
-The sender knows its type and sends a message $m$.
-The receiver sees $m$, not the type, and acts.
-The receiver has one information set per message.
-The sender has one per type.
+\paragraph{Min-cost flow.}
+$\min_{f}\ \sum_{(i,j)\in\mathcal E} c_{ij}f_{ij}$ s.t. $\sum_{j\in\delta^+(i)} f_{ij}-\sum_{j\in\delta^-(i)} f_{ji}=b_i\;\;\forall i\in\mathcal V$, $\;0\le f_{ij}\le u_{ij}\;\;\forall (i,j)\in\mathcal E$.
 
-\section*{Equilibria}
+Theorem (integrality): If $b\in\mathbb Z^{\mathcal V}$ and $u\in\mathbb Z^{\mathcal E}$, then at least one optimal solution $f^*$ has integer coordinates.
 
-\paragraph{Nash equilibrium.}
-\todo{not covered in HW2}
+Shortest $s$--$t$ path: $c_{ij}$ is the length of $(i,j)$, $b_s=1$, $b_t=-1$, $b_i=0$ otherwise, $u_{ij}=+\infty$.
 
-\paragraph{Bayesian Nash equilibrium (HW2 P1).}
-Object: $\sigma^*$.
-Check, for every player $i$ and type $\theta_i$:
+Max $s$--$t$ flow: add edge $(t,s)$ with $c_{ts}=-1$, $u_{ts}=+\infty$, and set $c_{ij}=0\;\forall(i,j)\in\mathcal E$, $b_i=0\;\forall i\in\mathcal V$.
+
+\paragraph{Bayes' rule.}
+$q(y\mid x)=\dfrac{q(x,y)}{q(x)} = \dfrac{q(x\mid y)\,q(y)}{\sum_{\hat y\in Y} q(x\mid \hat y)\,q(\hat y)}$.
+$\quad q(x) = \sum_{y\in Y}q(x\mid y)q(y)$. 
+$\quad q(x,y) = q(x\mid y)q(y)$. 
+
+\paragraph{Geometric series.}
+$\sum_{t=0}^{+\infty}\delta^{t}=\dfrac{1}{1-\delta}$ and $\sum_{t=k}^{+\infty}\delta^{t}=\dfrac{\delta^{k}}{1-\delta}$ for $\delta\in[0,1)$.
+
+%======================================================================
+\section{Lookup}
+%======================================================================
+
+Action $a_i\in A_i$: one move.
+Strategy $s_i$: a rule that gives an action for every type, history, or information set of player $i$, so $s_i(\theta_i)$ and $s_i(h)$ are actions.
+
+\begin{center}
+\begin{tabular}{@{}p{18mm}>{\raggedright\arraybackslash}p{74mm}>{\raggedright\arraybackslash}p{74mm}@{}}
+\toprule
+ & Complete information, moves observed & Private types or unobserved moves \\
+\midrule
+Static & Strategic form game: NE & Bayesian game: BNE \\
+Dynamic & Extensive form game with perfect information, repeated game: SPE & Extensive form game with information sets: weak PBE \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{center}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{25mm}>{\raggedright\arraybackslash}p{19mm}>{\raggedright\arraybackslash}p{76mm}>{\raggedright\arraybackslash}p{27mm}>{\raggedright\arraybackslash}p{27mm}@{}}
+\toprule
+Game & Equilibrium & Equilibrium payoff $\ge$ deviation payoff & Payoff conditioned on & For all \\
+\midrule
+Strategic form & NE $\sigma^*$ &
+$u_i(\sigma_i^*,\sigma_{-i}^*)\ \ge\ u_i(\sigma_i,\sigma_{-i}^*)$ &
+--- &
+$\sigma_i\in\Sigma_i$, $i\in\mathcal I$ \\
+Strategic form, correlated & CE $\pi^*$ &
+$\sum_{s_{-i}\in S_{-i}}\pi^*(s_i,s_{-i})\,[u_i(s_i,s_{-i})-u_i(s_i',s_{-i})]\ \ge\ 0$ &
+$s_i$, with $\pi^*(s_{-i}\mid s_i)$ &
+$s_i,s_i'\in S_i$, $i\in\mathcal I$ \\
+Bayesian & BNE $s^*$ &
+$u_i(s_i^*(\theta_i),s_{-i}^*\mid\theta_i)\ \ge\ u_i(a_i,s_{-i}^*\mid\theta_i)$ &
+$\theta_i$, with $p(\theta_{-i}\mid\theta_i)$ &
+$a_i\in A_i$, $\theta_i\in\Theta_i$, $i\in\mathcal I$ \\
+Extensive form, repeated & SPE $s^*$ &
+$u_i(s_i^*\vert_h,s_{-i}^*\vert_h)\ \ge\ u_i(s_i,s_{-i}^*\vert_h)$ in $\Gamma(h)$ &
+$h$ &
+$s_i$ in $\Gamma(h)$, $h\in H$, $i\in\mathcal I$ \\
+Extensive form, information sets & weak PBE $(s^*,\mu^*)$ &
+$E_{\mu_i^*(\cdot\mid I)}[u_i(s_i^*\vert_I,s_{-i}^*\vert_I)]\ \ge\ E_{\mu_i^*(\cdot\mid I)}[u_i(s_i,s_{-i}^*\vert_I)]$ &
+$I$, with $\mu_i^*(h\mid I)$ &
+$s_i$, $I$ of player $i$, $i\in\mathcal I$ \\
+Routing, nonatomic & WE $f$ &
+$l_{p_1}(f)\ \le\ l_{p_2}(f)$, latency is a cost &
+--- &
+$p_1,p_2\in P_i$ with $f_{p_1}>0$, pair $i$ \\
+Information design & IC signal $q$ &
+$\sum_{\omega\in\Omega}q(a,\omega)\,[u(a,\omega)-u(a',\omega)]\ \ge\ 0$ &
+recommendation $a$, with $\mu_a$ &
+$a,a'\in A$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+%======================================================================
+\section{Strategic form game}
+%======================================================================
+
+\paragraph{Notation.}
+$\Gamma = \langle\mathcal I, (S_i)_{i\in\mathcal I}, (u_i)_{i\in\mathcal I}\rangle$. $S=\prod_i S_i$. $s=(s_i,s_{-i})\in S$.
+Strategy profile $\sigma=(\sigma_i)_{i\in\mathcal I}$: one distribution over $S_i$ per player. A pure profile $s$ is one action per player.
+
+Mixed strategy $\sigma_i\in\Sigma_i = \{\sigma_i \in [0,1]^{S_i} : \sum_{s_i\in S_i}\sigma_i(s_i) = 1\}$.
+Support $\operatorname{supp}(\sigma_i) = \{s_i\in S_i : \sigma_i(s_i) > 0\}$.
+$u_i(\sigma) = E_{s\sim\sigma}[u_i(s)]$, with each $s_i\sim\sigma_i$ drawn independently.
+
+Best response $BR_i(\sigma_{-i}) = \arg\max_{\sigma_i\in\Sigma_i} u_i(\sigma_i,\sigma_{-i})$.
+$s_i$ is strictly dominated by $\hat s_i$ if $u_i(\hat s_i,s_{-i}) > u_i(s_i,s_{-i})\;\forall s_{-i}\in S_{-i}$.
+
+Zero-sum game: $\mathcal I=\{1,2\}$ and $u_1(s_1,s_2) = -u_2(s_1,s_2)\;\forall(s_1,s_2)\in S_1\times S_2$.
+
+Correlated strategy \new{$\pi\in\Delta(S)$}: a mediator draws $s\sim\pi$ and tells player $i$ only its recommendation $s_i$.
+
+\paragraph{Properties.}
+\begin{itemize}
+    \item Equilibrium: No profitable unilateral \new{deviation}. Mutual consistency. Self-enforcement.
+    \item \res{Lemma} Given $\sigma_{-i}$, at least one pure strategy is in $BR_i(\sigma_{-i})$. And $\sigma_i\in BR_i(\sigma_{-i}) \iff s_{i}\in BR_i(\sigma_{-i})\;\forall s_i\in\operatorname{supp}(\sigma_i)$.
+    \item \res{Proposition} $\sigma^*$ is a Nash equilibrium \new{iff} $u_i(\sigma^*_i, \sigma^*_{-i}) \geq u_i(s_i,\sigma^*_{-i})\;\forall s_i\in S_i,\;\forall i\in\mathcal I$. Check pure deviations only.
+    \item \res{Proposition} $\sigma^*$ is a Nash equilibrium \new{iff} $s_i\in BR_i(\sigma^*_{-i})\;\forall s_i\in\operatorname{supp}(\sigma^*_i),\;\forall i\in\mathcal I$. Then $u_i(s_i,\sigma^*_{-i})$ is equal across $s_i\in\operatorname{supp}(\sigma_i^*)$.
+    \item \res{Theorem (Nash)} Every finite strategic-form game has at least one Nash equilibrium in mixed strategies.
+    \item Strictly dominated strategies receive zero probability in every Nash Equilibrium. A pure strategy may be strictly dominated by a mixed strategy.
+    \item Zero-sum. \res{Lemma} $(\sigma^*_1,\sigma^*_2)$ \new{is a Nash equilibrium iff} $\min_{\sigma_2\in\Sigma_2}u_1(\sigma^*_1,\sigma_2) = u_1(\sigma^*_1,\sigma^*_2) = \max_{\sigma_1\in\Sigma_1}\new{u_1}(\sigma_1,\sigma^*_2)$.
+    \item Zero-sum. \res{Theorem (Von Neumann minmax)} $\max_{\sigma_1\in\Sigma_1}\min_{\sigma_2\in\Sigma_2}u_1(\sigma_1,\sigma_2) = \new{\min_{\sigma_2\in\Sigma_2}\max_{\sigma_1\in\Sigma_1}}u_1(\sigma_1,\sigma_2)$.
+    \item Zero-sum. \res{Proposition} $(\sigma^*_1,\sigma^*_2)$ Nash Equilibrium $\iff \sigma^*_1\in\arg\max_{\sigma_1\in\Sigma_1}\min_{\sigma_2\in\Sigma_2}u_1(\sigma_1,\sigma_2)$ and $\sigma^*_2\in\new{\arg\min_{\sigma_2\in\Sigma_2}\max_{\sigma_1\in\Sigma_1}}u_1(\sigma_1,\sigma_2)$. The common optimal value $z^*=u_1(\sigma_1^*,\sigma_2^*)$ is the value of the game.
+    \item Zero-sum. \res{Proposition} $(\sigma_1^*,z^*)$ and $(\sigma_2^*,z^*)$ optimally solve
+    \begin{align*}
+        \max_{\sigma_1\in\Sigma_1,\,z}\ z
+        \;\;\text{s.t.}\;\; z\le\sum_{s_1\in S_1}\sigma_1(s_1)\,u_1(s_1,s_2)\;\;\forall s_2\in S_2
+        \qquad\text{and}\qquad
+        \min_{\sigma_2\in\Sigma_2,\,z}\ z
+        \;\;\text{s.t.}\;\; z\ge\sum_{s_2\in S_2}\sigma_2(s_2)\,u_1(s_1,s_2)\;\;\forall s_1\in S_1.
+    \end{align*}
+    \item Correlated. Every mixed Nash equilibrium is a correlated equilibrium with $\pi(s)=\prod_{i\in\mathcal I}\sigma_i^*(s_i)$. A correlated equilibrium that is not a product is not a Nash equilibrium.
+    \item Correlated. LP for a correlated equilibrium, with any linear objective:
+    \begin{align*}
+        \max_{\pi\in\Delta(S)}\ \sum_{s\in S}\pi(s)\sum_{i\in\mathcal I}u_i(s)
+        \;\;\text{s.t.}\;\;
+        \sum_{s_{-i}\in S_{-i}}\pi(s_i,s_{-i})\,[u_i(s_i,s_{-i})-u_i(s_i',s_{-i})]\ge 0\;\;\forall s_i,s_i'\in S_i,\;\forall i\in\mathcal I.
+    \end{align*}
+\end{itemize}
+
+\paragraph{Problem format.}
+Rows are player 1, columns are player 2, cells are $(u_1,u_2)$. Let $p=\sigma_1(C)$ and $q=\sigma_2(C)$.
+\begin{center}
+\begin{tabular}{c|cc}
+ & $C$ & $A$ \\
+\hline
+$C$ & $6,6$ & $2,7$ \\
+$A$ & $7,2$ & $0,0$ \\
+\end{tabular}
+\end{center}
+
+\textbf{Strictly dominated actions.} An action is deleted if another action gives more against every action of the other player.
 \begin{align*}
-    \operatorname{supp}\sigma_i^*(\cdot\mid\theta_i) \subseteq BR_i(\sigma_{-i}^*\mid\theta_i).
+    u_1(A,C)=7>u_1(C,C)=6 \quad\text{but}\quad u_1(A,A)=0<u_1(C,A)=2.
 \end{align*}
-Pure BNE: candidates are pure profiles; a best-response cycle rules out its members.
-Mixed BNE: a type mixes only if indifferent, and its indifference fixes the opponent's $\alpha$ at a threshold.
-Verification: list the check for every type, both sets written out.
+Neither row is strictly dominated. The same comparison holds for the columns.
 
-\paragraph{Weak perfect Bayesian equilibrium (HW2 P2).}
-Object: $(\sigma^*,\mu^*)$, including any off-path beliefs you chose.
-Check 1, for every information set $I$:
+\textbf{Pure NE.} $s_1^*\in BR_1(s_2^*)$ and $s_2^*\in BR_2(s_1^*)$.
 \begin{align*}
-    \operatorname{supp}\sigma_i^*(\cdot\mid I) \subseteq BR_i\big(\mu_i^*(\cdot\mid I),\,\sigma_{-i}^*\big|_I\big).
+    BR_1(C)=\{A\}\;\;(7>6),\qquad BR_1(A)=\{C\}\;\;(2>0),\qquad BR_2(C)=\{A\}\;\;(7>6),\qquad BR_2(A)=\{C\}\;\;(2>0).
 \end{align*}
-Check 2, for every on-path information set: $\mu^*$ follows from the prior and $\sigma^*$ by Bayes' rule.
-Off-path beliefs are chosen, not derived.
-Verification: both checks at every information set.
-Beliefs feed the receiver; the receiver feeds the sender; fill in that order.
+NE: $(C,A)$ and $(A,C)$.
 
-\subparagraph{Separating.}
-Each type sends a different $m$.
-Both receiver sets on-path, beliefs 0 or 1.
-Check each type against the other's message.
+\textbf{Mixed NE.} Each player is indifferent across its support.
+\begin{align*}
+    u_1(C,\sigma_2)=u_1(A,\sigma_2):&\quad 6q+2(1-q)=7q+0(1-q)\;\Rightarrow\;q=\tfrac23,\\
+    u_2(\sigma_1,C)=u_2(\sigma_1,A):&\quad 6p+2(1-p)=7p+0(1-p)\;\Rightarrow\;p=\tfrac23,\\
+    u_1(\sigma^*)=u_1(A,\sigma_2^*):&\quad 7q=\tfrac{14}{3}.
+\end{align*}
 
-\subparagraph{Pooling.}
-Both types send the same $m$.
-Belief after $m$ is the prior.
-The unsent message is off-path; choose its belief so the deterring action is a best response.
+\textbf{CE check} for $\pi(C,C)=\pi(C,A)=\pi(A,C)=\tfrac13$, $\pi(A,A)=0$, player 1.
+\begin{align*}
+    \text{After }C:&\quad \pi(C\mid C)=\frac{\pi(C,C)}{\pi(C,C)+\pi(C,A)}=\tfrac12,\qquad \tfrac12(6)+\tfrac12(2)=4\ \ge\ \tfrac12(7)+\tfrac12(0)=3.5,\\
+    \text{After }A:&\quad \pi(C\mid A)=\frac{\pi(A,C)}{\pi(A,C)+\pi(A,A)}=1,\qquad 7\ \ge\ 6.
+\end{align*}
+Player 2 is symmetric, so $\pi$ is a CE.
 
-\subparagraph{Semi-separating.}
-One type pure, one type mixes with $p$.
-Receiver indifference after $m$ fixes $p$.
-Receiver then mixes with $q$; sender indifference fixes $q$.
-Check the pure type.
+%======================================================================
+\section{Extensive form game}
+%======================================================================
+
+\paragraph{Notation.}
+History $h^k=(a^1,\dots,a^{k-1})$: the actions played before stage $k$, with $h^1=\emptyset$.
+A history is a node of the tree, named by the path that leads to it.
+$H$ is the set of all histories.
+Strategy profile $s=(s_i)_{i\in\mathcal I}$: one action per player at every nonterminal history where that player moves.
+
+$A_i(h)$: the actions of player $i$ at $h$.
+Pure strategy $s_i$: an action $s_i(h)\in A_i(h)$ at every nonterminal $h$, including $h$ off the outcome path.
+
+Outcome of $s$: the terminal history that $s$ produces. $u_i(s)$ is player $i$'s payoff in the outcome of $s$.
+
+Subgame $\Gamma(h)$: the game played after $h$, with payoffs inherited from $\Gamma$. $s\vert_h$ is the part of $s$ from $h$ onward.
+
+Information set: histories that the moving player cannot distinguish. A subgame contains all of it or none of it.
+
+Repeated game: stage game $\langle\mathcal I,(A_i)_{i\in\mathcal I},(g_i)_{i\in\mathcal I}\rangle$ played in periods $t=1,\dots,T$, with $T<+\infty$ in $\Gamma^T$ and $T=+\infty$ in $\Gamma^\infty$.
+Players observe $h^t=(a^1,\dots,a^{t-1})$ before period $t$.
+Strategy profile $s$: one action per player at every history $h^t$.
+Pure strategy $s_i:H\to A_i$.
+$u_i(s)=\sum_{t=1}^{T}\delta^{t-1}g_i(a^t(s))$ with $\delta\in[0,1)$, where $a^t(s)$ is the action profile that $s$ produces in period $t$.
+
+\paragraph{Properties.}
+\begin{itemize}
+    \item Equivalent strategic form: the matrix whose rows and columns are the pure strategies $s_i$, with entries $u_i(s)$. A Nash equilibrium of $\Gamma$ is a Nash equilibrium of this matrix.
+    \item SPE is a property of the full profile $s^*$: for every $h\in H$, $s^*\vert_h$ is a Nash equilibrium of $\Gamma(h)$.
+    \item \res{One-stage deviation principle} For a finite-horizon game, or an infinite-horizon game with bounded discounted payoffs, $s^*$ is an SPE iff no player can gain by deviating from $s^*$ in a single stage and conforming to $s^*$ thereafter.
+    \item \res{Theorem} Every finite horizon extensive form game with perfect information has a pure strategy SPE. Backward induction finds it.
+    \item Repeated. \res{Theorem} If the stage game has a unique pure Nash equilibrium $a^*$, then $\Gamma^T$ has a unique SPE: $s_i^*(h^t)=a_i^*$ for every $h^t$ and every $i$.
+    \item Repeated. Playing a stage-game Nash equilibrium after every history is an SPE of $\Gamma^T$ and of $\Gamma^\infty$.
+    \item Repeated. Under a trigger strategy, player $i$'s stage payoff is $g_i^c$ in every period if it follows $s^*$. If it deviates once, its stage payoff is $g_i^d$ in that period and $g_i^p$ in every later period. Counting periods from the current one, player $i$ follows 
+    $s^* 
+    \iff\sum_{t=0}^{+\infty}\delta^t g_i^c\ \ge\ g_i^d+\sum_{t=1}^{+\infty}\delta^t g_i^p
+    \quad\iff\quad
+    \frac{g_i^c}{1-\delta}\ \ge\ g_i^d+\frac{\delta}{1-\delta}\,g_i^p.$
+\end{itemize}
+
+\paragraph{Problem format.}
+Game tree. Player 1 chooses $A$ or $B$. After $A$, player 2 chooses $C\to(2,1)$ or $D\to(3,0)$. After $B$, player 2 chooses $E\to(4,2)$ or $F\to(1,3)$.
+
+\textbf{Pure strategies.} One action at every history where the player moves.
+\begin{align*}
+    \text{Player 1 moves at }\emptyset:\ \{A,B\}.\qquad \text{Player 2 moves at }(A)\text{ and }(B):\ \{CE,\,CF,\,DE,\,DF\}.
+\end{align*}
+
+\textbf{Backward induction.} Start with the last subgames. Find the optimal action in each. Replace each solved subgame by its equilibrium payoffs. Continue toward the initial node.
+\begin{align*}
+    \Gamma(A):&\quad u_2(A,C)=1>u_2(A,D)=0\;\Rightarrow\;s_2^*((A))=C,\\
+    \Gamma(B):&\quad u_2(B,F)=3>u_2(B,E)=2\;\Rightarrow\;s_2^*((B))=F,\\
+    \Gamma(\emptyset):&\quad u_1(A,C)=2>u_1(B,F)=1\;\Rightarrow\;s_1^*(\emptyset)=A.
+\end{align*}
+SPE $s^*=(A,CF)$, outcome $(A,C)$, payoffs $(2,1)$.
+A tie at a node gives one SPE per optimal action.
+
+\textbf{Strategic form and pure NE.} Rows are player 1's pure strategies, columns are player 2's, and each cell is the payoff at the outcome.
+\begin{center}
+\begin{tabular}{c|cccc}
+ & $CE$ & $CF$ & $DE$ & $DF$ \\
+\hline
+$A$ & $2,1$ & $2,1$ & $3,0$ & $3,0$ \\
+$B$ & $4,2$ & $1,3$ & $4,2$ & $1,3$ \\
+\end{tabular}
+\end{center}
+\begin{align*}
+    &BR_1(CE)=\{B\},\quad BR_1(CF)=\{A\},\quad BR_1(DE)=\{B\},\quad BR_1(DF)=\{A\},\\
+    &BR_2(A)=\{CE,CF\},\quad BR_2(B)=\{CF,DF\}.
+\end{align*}
+The only pure NE is $(A,CF)$, which is the SPE.
+
+Repeated game. Stage game, rows are player 1.
+\begin{center}
+\begin{tabular}{c|cc}
+ & Share & Withhold \\
+\hline
+Share & $1,1$ & $-1,2$ \\
+Withhold & $2,-1$ & $0,0$ \\
+\end{tabular}
+\end{center}
+
+\textbf{Stage game NE.} Withhold strictly dominates Share, $2>1$ and $0>-1$. NE: (Withhold, Withhold).
+
+\textbf{$\Gamma^T$.} The stage game has a unique pure NE, so the unique SPE is $s_i^*(h^t)=$ Withhold for every $h^t$.
+\begin{align*}
+    u_i(s^*)=\sum_{t=1}^{T}\delta^{t-1}\cdot 0=0.
+\end{align*}
+
+\textbf{$\Gamma^\infty$, grim trigger.} $s_i^*(h^t)=$ Share if no player has withheld before period $t$, and Withhold otherwise.
+Check one deviation in each case, counting periods from the current one.
+\begin{align*}
+    \text{No earlier Withhold}:&\quad \underbrace{\sum_{t=0}^{+\infty}\delta^t\cdot 1}_{\text{follow}}=\frac{1}{1-\delta}\ \ge\ \underbrace{2+\sum_{t=1}^{+\infty}\delta^t\cdot 0}_{\text{Withhold once}}=2\iff\delta\ge\tfrac12,\\
+    \text{After a Withhold}:&\quad \underbrace{\sum_{t=0}^{+\infty}\delta^t\cdot 0}_{\text{follow}}=0\ \ge\ \underbrace{-1+\sum_{t=1}^{+\infty}\delta^t\cdot 0}_{\text{Share once}}=-1.
+\end{align*}
+Grim trigger is an SPE iff $\delta\ge\tfrac12$.
+
+%======================================================================
+\section{Bayesian game}
+%======================================================================
+
+\paragraph{Notation.}
+$\Gamma=\langle\mathcal I,(A_i)_{i\in\mathcal I},(\Theta_i)_{i\in\mathcal I},p,(u_i)_{i\in\mathcal I}\rangle$.
+Strategy profile $s=(s_i)_{i\in\mathcal I}$: one action per player per type.
+
+Type $\theta_i\in\Theta_i$: what player $i$ knows and the other players do not.
+$p$ is the prior over type profiles $\theta=(\theta_i,\theta_{-i})$.
+$u_i(a\mid\theta)$ is player $i$'s payoff for action profile $a$ and type profile $\theta$.
+
+Pure strategy $s_i:\Theta_i\to A_i$: an action for every type of player $i$, including the types that are not drawn.
+Mixed strategy in $\Delta\big(A_i^{\Theta_i}\big)$: a distribution over pure strategies $s_i$.
+Behavioral strategy $\sigma_i:\Theta_i\to\Delta(A_i)$: a distribution over $A_i$ for every type.
+
+Interim payoff: the expected payoff of type $\theta_i$ when it plays the action $a_i$ and each other type $\theta_{-i}$ plays the action $s_{-i}(\theta_{-i})$.
+$u_i(a_i,s_{-i}\mid\theta_i)=\sum_{\theta_{-i}\in\Theta_{-i}}p(\theta_{-i}\mid\theta_i)\cdot u_i\big(a_i,s_{-i}(\theta_{-i})\mid\theta_i,\theta_{-i}\big)$.
+
+\paragraph{Properties.}
+\begin{itemize}
+    \item Timing, which is the equivalent extensive form: Nature draws $\theta\sim p$. Each player $i$ learns $\theta_i$ only. All players then choose $a_i$ at the same time. Payoffs are $u_i(a\mid\theta)$.
+    \item BNE is a property of the full profile $s^*$: for every $i\in\mathcal I$ and every $\theta_i\in\Theta_i$, $s_i^*(\theta_i)\in\arg\max_{a_i\in A_i}u_i(a_i,s_{-i}^*\mid\theta_i)$.
+    \item \res{Assumption} The action spaces, payoff functions, possible types, and the prior are common knowledge.
+    \item \res{Theorem} Every Bayesian game with finitely many players, types, and actions has a Bayesian Nash equilibrium in mixed strategies.
+    \item \res{Proposition (Kuhn)} With perfect recall, every mixed strategy has an outcome-equivalent behavioral strategy, and conversely.
+    \item With mixing: $\operatorname{supp}\sigma_i^*(\cdot\mid\theta_i) \subseteq \arg\max_{a_i\in A_i}u_i(a_i,\sigma_{-i}^*\mid\theta_i)\;\forall\theta_i\in\Theta_i,\;\forall i\in\mathcal I$. A type mixes only if it is indifferent.
+    \item Information can lower equilibrium payoffs by changing others' incentives.
+\end{itemize}
+
+\paragraph{Problem format.}
+Organization 1 is type $T$ or $F$, each with probability $\tfrac12$. Organization 2 has one type. Rows are $a_1$, columns are $a_2$, cells are $(u_1,u_2)$.
+\begin{center}
+\begin{tabular}{c|cc}
+\multicolumn{3}{c}{Type $T$}\\
+ & $R$ & $N$ \\
+\hline
+$R$ & $16,18$ & $6,14$ \\
+$N$ & $14,8$ & $0,0$ \\
+\end{tabular}
+\qquad\qquad
+\begin{tabular}{c|cc}
+\multicolumn{3}{c}{Type $F$}\\
+ & $R$ & $N$ \\
+\hline
+$R$ & $-8,-6$ & $-8,0$ \\
+$N$ & $0,-6$ & $0,0$ \\
+\end{tabular}
+\end{center}
+
+\textbf{Pure strategies.} One action per type.
+\begin{align*}
+    s_1=(s_1(T),s_1(F))\in\{RR,\,RN,\,NR,\,NN\},\qquad s_2\in\{R,N\},\qquad 4\times 2=8\text{ pure profiles}.
+\end{align*}
+
+\textbf{Beliefs.} Organization 1 knows $\theta_1$. Organization 2 has one type, so it uses the prior, $p(T)=p(F)=\tfrac12$.
+
+\textbf{Each type of organization 1.} $s_1^*(\theta_1)\in\arg\max_{a_1}u_1(a_1,s_2^*\mid\theta_1)$.
+\begin{align*}
+    \text{Type }T:&\quad u_1(R,R\mid T)=16>u_1(N,R\mid T)=14,\qquad u_1(R,N\mid T)=6>u_1(N,N\mid T)=0\;\Rightarrow\;s_1^*(T)=R,\\
+    \text{Type }F:&\quad u_1(N,R\mid F)=0>u_1(R,R\mid F)=-8,\qquad u_1(N,N\mid F)=0>u_1(R,N\mid F)=-8\;\Rightarrow\;s_1^*(F)=N.
+\end{align*}
+Each type has a strictly dominant action, so these hold for either $s_2$.
+
+\textbf{Organization 2.} $s_2^*\in\arg\max_{a_2}\sum_{\theta_1}p(\theta_1)\,u_2\big(s_1^*(\theta_1),a_2\mid\theta_1\big)$.
+\begin{align*}
+    a_2=R:&\quad \tfrac12\,u_2(R,R\mid T)+\tfrac12\,u_2(N,R\mid F)=\tfrac12(18)+\tfrac12(-6)=6,\\
+    a_2=N:&\quad \tfrac12\,u_2(R,N\mid T)+\tfrac12\,u_2(N,N\mid F)=\tfrac12(14)+\tfrac12(0)=7\;\Rightarrow\;s_2^*=N.
+\end{align*}
+BNE: $s_1^*(T)=R$, $s_1^*(F)=N$, $s_2^*=N$.
+
+\textbf{Mixed BNE.} As for a mixed NE, type by type. Each type $\theta_i$ that mixes is indifferent: $u_i(a_i,\sigma_{-i}\mid\theta_i)=u_i(a_i',\sigma_{-i}\mid\theta_i)\;\forall a_i,a_i'\in\operatorname{supp}\sigma_i(\cdot\mid\theta_i)$. Solve these equations for $\sigma_{-i}$.
+
+
+%======================================================================
+\section{Extensive form game with information sets}
+%======================================================================
+
+\paragraph{Notation.}
+Information set $I$: a set of histories that the player who moves there cannot tell apart. That player chooses one action for all of $I$.
+Strategy profile $s$: one action per player at every information set of that player.
+
+Belief $\mu_i(h\mid I)$: the probability that player $i$ assigns to being at history $h$, given that $I$ is reached.
+Assessment $(s,\mu)$: a strategy profile $s$ and a belief $\mu_i(\cdot\mid I)$ at every information set.
+
+On-path $I$: $s$ reaches $I$ with positive probability. Off-path $I$: $s$ reaches $I$ with probability $0$.
+
+$s\vert_I$ is the part of $s$ from $I$ onward.
+$E_{\mu_i(\cdot\mid I)}[u_i(s\vert_I)]$ is player $i$'s expected payoff at $I$: draw $h\in I$ from $\mu_i(\cdot\mid I)$, then follow $s$ from $h$.
+
+Signaling game, timing: Nature draws the sender's type $\theta_1\sim p$. The sender (player 1) learns $\theta_1$ and sends a message $m$. The receiver (player 2) sees $m$, not $\theta_1$, and chooses an action $a$. Payoffs are $u_1(m,a\mid\theta_1)$ and $u_2(m,a\mid\theta_1)$.
+Strategy profile $s=(s_1,s_2)$: $s_1(\theta_1)$ is the message of type $\theta_1$, and $s_2(m)$ is the receiver's action after $m$.
+The sender has one information set per type. The receiver has one per message, with belief $\mu_2(\theta_1\mid m)$.
+
+\paragraph{Properties.}
+\begin{itemize}
+    \item Weak PBE is a property of an assessment $(s^*,\mu^*)$. It has two parts, sequential rationality and belief consistency.
+    \item Sequential rationality: at every $I$, on-path or off-path, the player $i$ who moves at $I$ plays a best response given its belief $\mu_i^*(\cdot\mid I)$ and given that all players follow $s^*$ after $I$.
+    $E_{\mu_i^*(\cdot\mid I)}[u_i(s_i^*\vert_I,s_{-i}^*\vert_I)]\ \ge\ E_{\mu_i^*(\cdot\mid I)}[u_i(s_i,s_{-i}^*\vert_I)]\;\;\forall s_i$.
+    \item Belief consistency: at every on-path $I$, $\mu_i^*(\cdot\mid I)$ comes from $p$ and $s^*$ by Bayes' rule. At an off-path $I$, Bayes' rule divides by $0$, so every belief is allowed.
+    \item SPE tests $s^*$ only at a history where a subgame starts, and no subgame starts inside an $I$ with two or more histories. Weak PBE tests $s^*$ at every $I$.
+    \item Signaling. A weak PBE is $(s_1^*,s_2^*,\mu_2^*)$ with three conditions.
+    \begin{align*}
+        \text{Receiver, after every } m:\quad & s_2^*(m)\in\arg\max_{a}\sum_{\theta_1\in\Theta_1}\mu_2^*(\theta_1\mid m)\,u_2(m,a\mid\theta_1).\\
+        \text{Sender, for every } \theta_1:\quad & s_1^*(\theta_1)\in\arg\max_{m}u_1\big(m,s_2^*(m)\mid\theta_1\big).\\
+        \text{Belief, after every sent } m:\quad & \mu_2^*(\theta_1\mid m)=\frac{P(m\mid\theta_1)\,p(\theta_1)}{\sum_{\theta_1'\in\Theta_1}P(m\mid\theta_1')\,p(\theta_1')},\quad P(m\mid\theta_1)=1\text{ if }s_1^*(\theta_1)=m\text{ and }0\text{ otherwise}.
+    \end{align*}
+    \item Separating: each type sends a different $m$, so $\mu_2^*(\theta_1\mid m)\in\{0,1\}$ after every sent $m$. Every $m$ is on-path.
+    \item Pooling: both types send the same $m$, so $\mu_2^*(\theta_1\mid m)=p(\theta_1)$. The unsent message is off-path.
+    \item A signal is credible when producing it is sufficiently more costly for the type that would benefit from the deception.
+\end{itemize}
+
+\paragraph{Problem format.}
+Sender type $H$ or $L$ with $p(H)=\tfrac13$. Rows are the message $m$, columns are the receiver's action $a$, cells are $(u_1,u_2)$.
+\begin{center}
+\begin{tabular}{c|cc}
+\multicolumn{3}{c}{Type $H$}\\
+ & $D$ & $R$ \\
+\hline
+$C$ & $2,2$ & $-1,0$ \\
+$N$ & $3,2$ & $0,0$ \\
+\end{tabular}
+\qquad\qquad
+\begin{tabular}{c|cc}
+\multicolumn{3}{c}{Type $L$}\\
+ & $D$ & $R$ \\
+\hline
+$C$ & $-1,-2$ & $-4,0$ \\
+$N$ & $3,-2$ & $0,0$ \\
+\end{tabular}
+\end{center}
+
+\textbf{Pooling on $N$}, $s_1(H)=s_1(L)=N$.
+\begin{align*}
+    \text{Belief after }N:&\quad \mu_2(H\mid N)=\frac{P(N\mid H)\,p(H)}{P(N\mid H)\,p(H)+P(N\mid L)\,p(L)}=\frac{1\cdot\frac13}{1\cdot\frac13+1\cdot\frac23}=\tfrac13,\\
+    \text{Receiver after }N:&\quad \underbrace{\tfrac13(2)+\tfrac23(-2)}_{D}=-\tfrac23\ <\ \underbrace{0}_{R}\;\Rightarrow\;s_2(N)=R,\\
+    \text{Receiver after }C\text{, off-path}:&\quad \text{with }D\text{ after }C\text{, type }H\text{ gets }u_1(C,D\mid H)=2>u_1(N,R\mid H)=0\text{, so }s_2(C)=R\text{ is needed},\\
+    \text{Belief after }C:&\quad R\text{ is a best response iff }\underbrace{2\mu_2(H\mid C)-2\big(1-\mu_2(H\mid C)\big)}_{D}\le\underbrace{0}_{R}\iff\mu_2(H\mid C)\le\tfrac12,\\
+    \text{Type }H:&\quad u_1(N,R\mid H)=0\ \ge\ u_1(C,R\mid H)=-1,\\
+    \text{Type }L:&\quad u_1(N,R\mid L)=0\ \ge\ u_1(C,R\mid L)=-4.
+\end{align*}
+Weak PBE: $s_1^*(H)=s_1^*(L)=N$, $s_2^*(C)=s_2^*(N)=R$, $\mu_2^*(H\mid N)=\tfrac13$, $\mu_2^*(H\mid C)\le\tfrac12$.
+
+\textbf{Separating}, $s_1(H)=C$, $s_1(L)=N$.
+\begin{align*}
+    \text{Beliefs}:&\quad \mu_2(H\mid C)=\frac{1\cdot\frac13}{1\cdot\frac13+0\cdot\frac23}=1,\qquad \mu_2(H\mid N)=\frac{0\cdot\frac13}{0\cdot\frac13+1\cdot\frac23}=0,\\
+    \text{Receiver after }C:&\quad u_2(C,D\mid H)=2>u_2(C,R\mid H)=0\;\Rightarrow\;s_2(C)=D,\\
+    \text{Receiver after }N:&\quad u_2(N,D\mid L)=-2<u_2(N,R\mid L)=0\;\Rightarrow\;s_2(N)=R,\\
+    \text{Type }H:&\quad u_1(C,D\mid H)=2\ \ge\ u_1(N,R\mid H)=0,\\
+    \text{Type }L:&\quad u_1(N,R\mid L)=0\ \ge\ u_1(C,D\mid L)=-1.
+\end{align*}
+Weak PBE: $s_1^*(H)=C$, $s_1^*(L)=N$, $s_2^*(C)=D$, $s_2^*(N)=R$, $\mu_2^*(H\mid C)=1$, $\mu_2^*(H\mid N)=0$.
+
+\textbf{Semi-separating}. One type sends one message, and the other type mixes with probability $x$. Receiver indifference after $m$ determines $x$. The receiver then mixes with probability $y$, and sender indifference determines $y$. Check the type that does not mix.
+
+
+%======================================================================
+\section{Routing game}
+%======================================================================
+\todo{NEED TO REVIEW}
+\paragraph{Notation.}
+Traffic instance $(G,r,l)$: directed graph $G=(\mathcal V,\mathcal E)$, rate $r_i>0$ for each origin-destination pair $i$, and a nonnegative, nondecreasing latency $l_e(\cdot)$ on each edge.
+Players are nonatomic: each driver is too small to change the flow.
+
+Flow $f$: the mass $f_p$ on each path $p\in P_i$ of each pair $i$, with $\sum_{p\in P_i}f_p=r_i$. It is the strategy profile.
+Edge flow $f_e=\sum_{\{p\,:\,e\in p\}}f_p$.
+
+Path latency $l_p(f)=\sum_{e\in p}l_e(f_e)$.
+Cost $C(f)=\sum_{e\in\mathcal E}l_e(f_e)\,f_e$.
+Marginal cost $l_e^*(f_e)=\frac{d}{df_e}\big[l_e(f_e)\,f_e\big]=l_e(f_e)+l_e'(f_e)\,f_e$, and $l_p^*(f)=\sum_{e\in p}l_e^*(f_e)$.
+
+\paragraph{Properties.}
+\begin{itemize}
+    \item Wardrop equilibrium (WE) is a property of a feasible flow $f$: $l_{p_1}(f)\le l_{p_2}(f)$ for every pair $i$ and every $p_1,p_2\in P_i$ with $f_{p_1}>0$. The used paths of a pair have equal latency. It is the Nash equilibrium of the nonatomic game.
+    \item \res{Lemma} A feasible $f$ is socially optimal, meaning it minimizes $C(f)$, iff $l_{p_1}^*(f)\le l_{p_2}^*(f)$ for every pair $i$ and every $p_1,p_2\in P_i$ with $f_{p_1}>0$.
+    \item \res{Corollary} If $l_e(f_e)\,f_e$ is convex for every $e$, $f$ is socially optimal for $(G,r,l)$ iff it is a WE for $(G,r,l^*)$.
+    \item $l_e'(f_e)\,f_e$ is the externality that one more unit of flow puts on the flow already on $e$. A toll equal to it on each edge makes the WE socially optimal.
+    \item With $l_e$ continuous, $f$ is a WE iff it minimizes $\sum_{e\in\mathcal E}\int_0^{f_e}l_e(z)\,dz$ over feasible flows. A WE exists, and all WE have the same $C(f)$.
+    \item Braess paradox: a new edge never increases the socially optimal cost, and it can increase the WE cost.
+\end{itemize}
+
+\paragraph{Problem format.}
+Pigou network. A unit mass chooses path 1 with $l_1(f_1)=f_1$ or path 2 with $l_2=1$.
+\begin{align*}
+    \textbf{WE}:&\quad l_1(f_1)=f_1<1=l_2\text{ for every }f_1<1\;\Rightarrow\;f_1=1,\qquad C=1\cdot 1=1,\\
+    \textbf{Social optimum}:&\quad l_1^*(f_1)=2f_1=1=l_2^*\;\Rightarrow\;f_1=\tfrac12,\qquad C=\tfrac12\cdot\tfrac12+\tfrac12\cdot 1=\tfrac34.
+\end{align*}
+
+%======================================================================
+\section{Information design}
+%======================================================================
+\todo{NEED TO REVIEW}
+\paragraph{Notation.}
+Sender and Receiver. State $\omega\in\Omega$ with common prior $\mu_0$. Receiver chooses $a\in A$. Payoffs are $u(a,\omega)$ for Receiver and $v(a,\omega)$ for Sender.
+
+Signal $\pi$: a distribution $\pi(\cdot\mid\omega)$ over realizations $s\in S$ for every state.
+Timing: Sender publicly commits to $\pi$. Nature draws $\omega\sim\mu_0$ and $s\sim\pi(\cdot\mid\omega)$. Receiver sees $s$, not $\omega$, and chooses $a$.
+
+Posterior $\mu_s(\omega)=\dfrac{\mu_0(\omega)\,\pi(s\mid\omega)}{P(s)}$, with $P(s)=\sum_{\omega\in\Omega}\mu_0(\omega)\,\pi(s\mid\omega)$.
+
+$\hat a(\mu)\in\arg\max_{a\in A}E_\mu[u(a,\omega)]$: Receiver's action at belief $\mu$, with ties broken in Sender's favor.
+$\hat v(\mu)=E_\mu\big[v(\hat a(\mu),\omega)\big]$: Sender's payoff at belief $\mu$.
+
+$\tau$: the distribution of posteriors that $\pi$ produces. It puts probability $P(s)$ on $\mu_s$.
+$\tau$ is Bayes plausible if $E_\tau[\mu]=\mu_0$.
+$V$: the concave closure of $\hat v$, the upper boundary of the convex hull of its graph.
+
+Straightforward signal: each realization is a recommended action, and Receiver's best action is to follow it. $q(a,\omega)=\mu_0(\omega)\,\pi(a\mid\omega)$.
+
+Cheap talk: no commitment. Sender chooses $s$ after it observes $\omega$.
+
+Many receivers, Bayesian routing game: state $\theta\in\{0,1\}$ with $P(\theta=1)=p$. Each driver gets a private recommendation $r\in\{1,2\}$, drawn independently given $\theta$, with $q_\theta=P(r=2\mid\theta)$. If all drivers follow, the flow on path 2 in state $\theta$ is $q_\theta$.
+
+\paragraph{Properties.}
+\begin{itemize}
+    \item Straightforward signals are without loss of generality. For finite $A$, an optimal signal solves the LP below. Its second constraint is incentive compatibility (IC).
+    \begin{align*}
+        \max_{q\ge 0}\ \sum_{a\in A}\sum_{\omega\in\Omega}q(a,\omega)\,v(a,\omega)
+        \;\;\text{s.t.}\;\;
+        \sum_{a\in A}q(a,\omega)=\mu_0(\omega)\;\;\forall\omega\in\Omega,
+        \qquad
+        \sum_{\omega\in\Omega}q(a,\omega)\,[u(a,\omega)-u(a',\omega)]\ge 0\;\;\forall a,a'\in A.
+    \end{align*}
+    \item Every signal produces a Bayes-plausible $\tau$. Every finitely supported Bayes-plausible $\tau$ is produced by the signal $\pi(s\mid\omega)=\dfrac{\mu_s(\omega)\,\tau(\mu_s)}{\mu_0(\omega)}$.
+    \item \res{Proposition (Kamenica and Gentzkow)} Sender's problem is $\max_\tau E_\tau[\hat v(\mu)]$ s.t. $E_\tau[\mu]=\mu_0$. \res{Proposition} Its value is $V(\mu_0)$.
+    \item Sender benefits from persuasion iff $V(\mu_0)>\hat v(\mu_0)$. If $\hat v$ is concave, Sender does not benefit. If $\hat v$ is convex, full revelation is optimal.
+    \item Any signal weakly improves Receiver's expected payoff relative to no information.
+    \item Cheap-talk equilibrium: a signal $\pi$ with Bayes posteriors $\mu_s$, Receiver playing $\hat a(\mu_s)$, and Sender IC. Sender IC is $s\in\arg\max_{s'\in S}v\big(\hat a(\mu_{s'}),\omega\big)$ for every $\omega\in\Omega$ and every $s\in\operatorname{supp}\pi(\cdot\mid\omega)$.
+    \item Many receivers. A recommendation rule is a Bayes correlated equilibrium if following is optimal for a driver after every recommendation, given its posterior and given that the other drivers follow.
+    \item Bayesian routing example. \res{Proposition} The socially optimal rule $(q_0,q_1)=(0,\tfrac16)$ satisfies the IC after $r=2$ for every $p$, and the IC after $r=1$ iff $p\le\tfrac{6}{11}$.
+\end{itemize}
+
+\paragraph{Problem format.}
+School and company. $\Omega=\{G,M\}$, $\mu_0(G)=\tfrac12$, and $\mu=\mu(G)$. Hiring ($a=1$) gives the company $1$ if $G$ and $-2$ if $M$, and gives the school $1$. Rejecting ($a=0$) gives both $0$.
+The exam is the signal $\pi(+\mid G)=1$, $\pi(+\mid M)=\tfrac12$.
+\begin{align*}
+    \textbf{Threshold}:&\quad \mu\cdot 1+(1-\mu)(-2)=3\mu-2\ge 0\iff\mu\ge\tfrac23,\qquad \hat v(\mu)=1\text{ if }\mu\ge\tfrac23,\ 0\text{ otherwise},\\
+    \textbf{Value of the exam}:&\quad P(+)=\tfrac12\cdot 1+\tfrac12\cdot\tfrac12=\tfrac34,\qquad \mu_+=\frac{\tfrac12\cdot 1}{\tfrac34}=\tfrac23,\qquad \mu_-=0,\qquad E_\tau[\hat v(\mu)]=\tfrac34\cdot 1+\tfrac14\cdot 0=\tfrac34,\\
+    \textbf{Concavification}:&\quad V(\mu)=\min\{\tfrac32\mu,1\},\qquad V(\mu_0)=\tfrac34,\qquad \text{endpoints }\mu_-=0,\ \mu_+=\tfrac23,\\
+    \textbf{Bayes plausibility}:&\quad \tau(\mu_+)\cdot\tfrac23+\tau(\mu_-)\cdot 0=\tfrac12\;\Rightarrow\;\tau(\mu_+)=\tfrac34,\\
+    \textbf{Signal from }\tau:&\quad \pi(+\mid G)=\frac{\mu_+(G)\,\tau(\mu_+)}{\mu_0(G)}=\frac{\tfrac23\cdot\tfrac34}{\tfrac12}=1,\qquad \pi(+\mid M)=\frac{\tfrac13\cdot\tfrac34}{\tfrac12}=\tfrac12,\\
+    \textbf{LP}:&\quad \max_{q\ge 0}\ q(1,G)+q(1,M)\;\;\text{s.t.}\;\;q(1,G)+q(0,G)=\tfrac12,\quad q(1,M)+q(0,M)=\tfrac12,\\
+    &\quad q(1,G)\cdot 1+q(1,M)\cdot(-2)\ge 0,\qquad q(0,G)\cdot(-1)+q(0,M)\cdot 2\ge 0,\\
+    \textbf{Cheap talk}:&\quad -\in\operatorname{supp}\pi(\cdot\mid M)\text{ and }v\big(\hat a(\mu_-),M\big)=0<1=v\big(\hat a(\mu_+),M\big)\text{, so Sender IC fails}.
+\end{align*}
+School's payoff: $0$ with no information, $\tfrac12$ with full revelation, $\tfrac34$ with the optimal signal. Company's payoff: $0$, $\tfrac12$, $0$.
+
+Bayesian routing game. $l_1=\theta$ and $l_2(x)=\tfrac13+2x$, with $x$ the flow on path 2. Cost $C(x,\theta)=(1-x)\,\theta+x\,\big(\tfrac13+2x\big)$. Take $p=\tfrac12$.
+\begin{align*}
+    \textbf{Social optimum}:&\quad \theta=0:\ x=0.\qquad \theta=1:\ \tfrac{d}{dx}C(x,1)=-\tfrac23+4x=0\;\Rightarrow\;x=\tfrac16,\qquad E_\theta[C]=\tfrac12\cdot\tfrac{17}{18}=\tfrac{17}{36},\\
+    \textbf{Full information}:&\quad \theta=0:\ x=0.\qquad \theta=1:\ \tfrac13+2x=1\;\Rightarrow\;x=\tfrac13,\qquad E_\theta[C]=\tfrac12\cdot 1=\tfrac12,\\
+    \textbf{No information}:&\quad \tfrac13+2x=E[\theta]=\tfrac12\;\Rightarrow\;x=\tfrac{1}{12},\qquad E_\theta[C]=\tfrac12,\\
+    \textbf{IC after }r=1:&\quad (1-p)(1-q_0)\big(0-\tfrac13-2q_0\big)+p\,(1-q_1)\big(1-\tfrac13-2q_1\big)\le 0,\\
+    \textbf{IC after }r=2:&\quad (1-p)\,q_0\big(\tfrac13+2q_0-0\big)+p\,q_1\big(\tfrac13+2q_1-1\big)\le 0,\\
+    \textbf{Check }(q_0,q_1)=(0,\tfrac16):&\quad \tfrac12\cdot 1\cdot\big(-\tfrac13\big)+\tfrac12\cdot\tfrac56\cdot\tfrac13=-\tfrac{1}{36}\le 0,\qquad 0+\tfrac12\cdot\tfrac16\cdot\big(-\tfrac13\big)=-\tfrac{1}{36}\le 0,\\
+    \textbf{Platform}:&\quad \min_{(q_0,q_1)\in[0,1]^2}\ (1-p)\,q_0\big(\tfrac13+2q_0\big)+p\,\big[(1-q_1)+q_1\big(\tfrac13+2q_1\big)\big]\;\;\text{s.t. both IC}.
+\end{align*}
+Each IC is the driver's expected latency on the recommended path minus that on the other path, multiplied by $P(r)$.
+
+
+\section{Remaining}
+\todo{Learning, learning from actions}
+\todo{Planning with a model}
 
 \end{document}
